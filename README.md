@@ -1,6 +1,6 @@
 # Decorebator App
 
-A contextual based memorization app for expand your vocabulary
+A contextual based memorization app for expanding your vocabulary
 
 ## Goal
 
