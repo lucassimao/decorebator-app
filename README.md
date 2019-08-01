@@ -11,6 +11,7 @@ I'm personally tired of boring memorization apps, which throw words and expressi
 So I decided to build mine.
 
 ## Tech stack
+
 + Backend
     - Node (v10.15)
     - ExpressJS
@@ -20,3 +21,5 @@ So I decided to build mine.
 + Frontend
     - React
     - jest/cypress
+
+## The branch backend is the current active one, please check it out for more info
