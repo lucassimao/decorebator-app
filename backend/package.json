@@ -1,0 +1,23 @@
+{
+  "name": "decorebator-backend",
+  "version": "0.0.1",
+  "description": "Decorebator App backend",
+  "main": "node src/index.js",
+  "scripts": {
+    "test": "jest",
+    "format": "prettier --write 'src/**/*.js'"
+  },
+  "keywords": ["backend","node","express"],
+  "author": "Lucas Simão",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^6.1.0",
+    "jest": "^24.8.0",
+    "prettier": "^1.18.2"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.6.7"
+  }
+}
