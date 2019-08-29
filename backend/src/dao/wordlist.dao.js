@@ -8,7 +8,7 @@ const Wordlist = new Schema({
   dateCreated: { type: Date, default: Date.now },
   language: String,
   name: String,
-  words: [String]
+  words: [{name:String}]
 });
 
 module.exports = mongoose.model('Wordlist', Wordlist);

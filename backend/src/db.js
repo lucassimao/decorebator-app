@@ -13,12 +13,12 @@ mongoose.connection.on('error', (error) => {
 });
 
 mongoose.connection.on('disconnected', function () {
-    console.log('Mongoose default connection to DB disconnected');
+    // console.log('Mongoose default connection to DB disconnected');
     isConnected = false;
 });
 
 mongoose.connection.once('open', function () {
-    console.log('MongoDB connection is open! ');
+    // console.log('MongoDB connection is open! ');
     isConnected = true;
 });
 

@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Decorebator App backend",
   "scripts": {
-    "test": "jest --detectOpenHandles",
+    "test": "npx jest --detectOpenHandles 'src/'",
     "start": "node src/index.js",
     "format": "prettier --write 'src/**/*.js'"
   },
