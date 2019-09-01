@@ -6,12 +6,13 @@ const mongoose = require('mongoose')
 
 const wordlistRouter = require('./controllers/wordlist.controller')
 const UserDao = require('./dao/user.dao');
+const config = require('./config');
 
 var jwtStrategyOpts = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    secretOrKey: 'super-secret',
+    secretOrKey: config.jwtSecretKey,
     authScheme : 'Bearer',
-    // opts.issuer: 'accounts.examplesoft.com',
+    issuer: config.domain,
     // opts.audience : 'yoursite.net';
 }
 

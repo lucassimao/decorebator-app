@@ -2,6 +2,7 @@
 const bcrypt = require('bcrypt');
 const jwtBuilder = require('jwt-builder');
 const UserDao = require('../dao/user.dao');
+const config = require('../config');
 
 const register = (email, password) => {
 
@@ -33,11 +34,11 @@ const doLogin = (email, password) => {
 
             return jwtBuilder({
                 algorithm: 'HS256',
-                secret: 'super-secret',
+                secret: config.jwtSecretKey,
                 iat: true,
                 nbf: true,
                 exp: 3600,
-                iss: 'https://auth.vandium.io',
+                iss: config.domain,
                 userId: user._id,
                 headers: {
                     header1: 'ok'
