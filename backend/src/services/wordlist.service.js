@@ -16,7 +16,7 @@ const get = id => {
 };
 
 const update = (id, updateObj) => {
-  return WordlistDao.updateOne({ _id: mongoose.Types.ObjectId(id) }, updateObj).exec();
+  return WordlistDao.updateOne({ _id: mongoose.Types.ObjectId(id) }, updateObj);
 };
 
 const remove = id => {
@@ -37,7 +37,7 @@ const deleteWord = async (idWordlist, idWord) => {
  * @param {object} word
  */
 const addWord = (id, word) => {
-  return WordlistDao.findByIdAndUpdate(id, { $push: { words: word } }, { lean: true, new: true }).exec();
+  return WordlistDao.findByIdAndUpdate(id, { $push: { words: word } }, { lean: true, new: true });
 };
 
 module.exports = {
