@@ -126,6 +126,9 @@ describe("Wordlist's restful API test", () => {
     });
 
     it("should return the status 204 if it was able to delete a wordlist", async done => {
+
+        await request(app).delete('/wordlists/inexisting12').set("Authorization", `Bearer ${jwtToken}`).expect(404);
+
         const object = await wordlistService.save({ ...wordlist, words: [{ name: "success" }] });
         expect(await wordlistService.get(object._id)).not.toBeNull();
 
