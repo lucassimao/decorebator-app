@@ -103,6 +103,9 @@ describe("Wordlist's restful API test", () => {
     });
 
     it("should return status 204 if it was able to add a new word to a wordlist after POST to /wordlists/:id/words", async done => {
+
+        await request(app).post('/wordlists/inexisting12/words').set("Authorization", `Bearer ${jwtToken}`).expect(404);
+
         const object = await wordlistService.save({ ...wordlist, words: [{ name: "success" }] });
 
         request(app)
