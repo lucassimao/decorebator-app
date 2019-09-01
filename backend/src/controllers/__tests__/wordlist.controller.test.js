@@ -78,6 +78,9 @@ describe("Wordlist's restful API test", () => {
     });
 
     it("should return the status 204 if it was able to partially update a wordlist after a PATCH request", async done => {
+
+        await request(app).patch('/wordlists/inexisting12').set("Authorization", `Bearer ${jwtToken}`).expect(404);
+
         const object = await wordlistService.save(wordlist);
 
         request(app)

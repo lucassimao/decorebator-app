@@ -48,10 +48,15 @@ router
         }
     })
     .patch('/:id', async (req, res) => {
-        await service.update(req.params.id,req.body);
+        const updateResult = await service.update(req.params.id,req.body);
 
-        res.set('Link', `/wordlists/${req.params.id}`);
-        res.status(204).end()
+        if (updateResult.ok === 1 && updateResult.nModified === 1){
+            res.set('Link', `/wordlists/${req.params.id}`);
+            res.status(204).end()
+        } else {
+            res.status(404).end()
+        }
+
     })
 
 module.exports = router
