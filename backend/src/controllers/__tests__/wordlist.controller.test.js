@@ -146,8 +146,15 @@ describe("Wordlist's restful API test", () => {
     });
 
     it("should return the status 204 if it was able to remove a word from a wordlist", async done => {
+
+        // trying to delete from an inexisting wordlist returns 404 status code
+        await request(app).delete('/wordlists/inexisting12/words/0').set("Authorization", `Bearer ${jwtToken}`).expect(404);
+
         const object = await wordlistService.save({ ...wordlist, words: [{ name: "success" }] });
-        expect(wordlistService.get(object._id)).not.toBeNull();
+        expect(await wordlistService.get(object._id)).not.toBeNull();
+
+        // trying to delete from an inexisting position from an existing wordlist, also returns 404 status code
+        await request(app).delete(`/wordlists/${object._id}/words/10`).set("Authorization", `Bearer ${jwtToken}`).expect(404);
 
         request(app)
             .delete(`/wordlists/${object._id}/words/0`)
