@@ -2,6 +2,7 @@ const db = require("./src/db");
 const app = require("./src/server");
 const config = require("./src/config");
 const express = require("express");
+const AuthService = require('./src/services/auth.service')
 
 const gracefulExit = async () => {
   await db.disconnect();
@@ -39,5 +40,6 @@ async function setupTestEnvironment(path,router,enableSecurity=true){
 module.exports = {
   startService,
   config,
-  setupTestEnvironment
+  setupTestEnvironment,
+  AuthService
 };
