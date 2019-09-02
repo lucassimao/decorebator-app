@@ -24,8 +24,7 @@ const remove = id => {
 };
 
 const deleteWord = async (idWordlist, idWord) => {
-  await WordlistDao.updateOne({ _id: idWordlist }, { $unset: { [`words.${idWord}`]: 1 } });
-  return WordlistDao.updateOne({ _id: idWordlist }, { $pull: { words: null } });
+  return WordlistDao.updateOne({ _id: idWordlist }, { $pull: { words: { _id: idWord } } });
 };
 
 /**
