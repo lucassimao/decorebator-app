@@ -1,11 +1,11 @@
 const request = require("supertest");
-const app = require("../../server");
-const authService = require("../../services/auth.service");
-const wordlistService = require("../../services/wordlist.service");
-const conf = require("../../config");
-const db = require("../../db");
+const common = require('decorebator-common');
 
-const PAGE_SIZE = conf.defaultPageSize;
+const WordlistRouter = require("../../controllers/wordlist.controller");
+const wordlistService = require("../../services/wordlist.service");
+// const conf = require("../../config");
+
+// const PAGE_SIZE = conf.defaultPageSize;
 const wordlist = {
     owner: null,
     description: "List of words found in the Lord of Rings book",
@@ -17,18 +17,22 @@ const wordlist = {
 // testing the Wordlist restful API
 describe("Wordlist's restful API test", () => {
     let jwtToken;
+    let app;
 
     beforeAll(async () => {
-        await db.connect();
-        await authService.register("test@gmail.com", "12345");
-        jwtToken = await authService.doLogin("test@gmail.com", "12345");
+        // const config = common.config;
+        // await mongoose.connect(config.dbUrl, config.dbOptions)
+        app = await common.setupTestEnvironment('/wordlists', WordlistRouter,false);
+        // await authService.register("test@gmail.com", "12345");
+        // jwtToken = await authService.doLogin("test@gmail.com", "12345");
     });
 
-    afterAll(async () => {
-        await authService.removeAccount("test@gmail.com");
-        await db.disconnect();
-    });
+    beforeEach(async () => {
+        await wordlistService.deleteAll();
+    })
 
+
+    /*
     it("should return a 401 status code for any non authenticated request", async () => {
         await request(app).get("/wordlists").expect(401);
         await request(app).post("/wordlists").send(wordlist).expect(401);
@@ -44,9 +48,8 @@ describe("Wordlist's restful API test", () => {
         expect((await wordlistService.get(object._id)).words.length).toBe(1)
 
         await request(app).delete(`/wordlists/${object._id}/words/0`).expect(401);
-
-
     });
+    */
 
     it("A GET request to /wordlits returns an user's newest wordlists", done => {
         request(app)

@@ -4,7 +4,6 @@ const JwtStrategy = require('passport-jwt').Strategy
 const ExtractJwt = require('passport-jwt').ExtractJwt
 const mongoose = require('mongoose')
 
-const wordlistRouter = require('./controllers/wordlist.controller')
 const UserDao = require('./dao/user.dao');
 const config = require('./config');
 
@@ -33,10 +32,5 @@ passport.use(new JwtStrategy(jwtStrategyOpts, async (jwt_payload, done) => {
 const app = express()
 app.use(passport.initialize());
 app.use(passport.authenticate('jwt', { session: false }));
-
-app.get('/', (req, res) => res.status(200).send('ok'))
-app.use('/wordlists', express.json(), wordlistRouter)
-
-
 
 module.exports = app

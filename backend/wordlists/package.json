@@ -1,0 +1,33 @@
+{
+  "name": "decorebator-wordlist-backend",
+  "version": "0.0.1",
+  "description": "Decorebator wordlist microservice",
+  "scripts": {
+    "test": "npx jest --detectOpenHandles 'src/'",
+    "start": "node --preserve-symlinks src/index.js",
+    "format": "prettier --write 'src/**/*.js'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:lucassimao/decorebator-app.git"
+  },
+  "keywords": [
+    "backend",
+    "node",
+    "express"
+  ],
+  "author": "Lucas Simão",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^6.1.0",
+    "eslint-plugin-jest": "^22.15.2",
+    "jest": "^24.8.0",
+    "prettier": "^1.18.2",
+    "supertest": "^4.0.2"
+  },
+  "dependencies": {
+      "express": "^4.17.1",
+      "mongoose": "^5.6.11",
+      "decorebator-common": "file:../common"
+  }
+}
