@@ -1,6 +1,5 @@
 const WordlistDao = require("../dao/wordlist.dao");
 const config = require("../config");
-const mongoose = require("mongoose");
 
 const list = (user, { pageSize = config.defaultPageSize, page = 0 }) => {
   const skip = page > 0 ? (page - 1) * pageSize : 0;
@@ -12,15 +11,15 @@ const save = wordlist => {
 };
 
 const get = id => {
-  return WordlistDao.findOne({ _id: mongoose.Types.ObjectId(id) });
+  return WordlistDao.findOne({ _id: id });
 };
 
 const update = (id, updateObj) => {
-  return WordlistDao.updateOne({ _id: mongoose.Types.ObjectId(id) }, updateObj);
+  return WordlistDao.updateOne({ _id: id }, updateObj);
 };
 
 const remove = id => {
-  return WordlistDao.deleteOne({ _id: mongoose.Types.ObjectId(id) });
+  return WordlistDao.deleteOne({ _id: id });
 };
 
 const deleteWord = async (idWordlist, idWord) => {
