@@ -3,9 +3,7 @@ const common = require('decorebator-common');
 
 const WordlistRouter = require("../../controllers/wordlist.controller");
 const wordlistService = require("../../services/wordlist.service");
-// const conf = require("../../config");
 
-// const PAGE_SIZE = conf.defaultPageSize;
 const wordlist = {
     owner: null,
     description: "List of words found in the Lord of Rings book",
@@ -20,11 +18,7 @@ describe("Wordlist's restful API test", () => {
     let app;
 
     beforeAll(async () => {
-        // const config = common.config;
-        // await mongoose.connect(config.dbUrl, config.dbOptions)
         app = await common.setupTestEnvironment('/wordlists', WordlistRouter,false);
-        // await authService.register("test@gmail.com", "12345");
-        // jwtToken = await authService.doLogin("test@gmail.com", "12345");
     });
 
     beforeEach(async () => {
