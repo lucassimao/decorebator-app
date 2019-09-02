@@ -93,6 +93,31 @@ describe("Wordlist's restful API test", () => {
       });
   });
 
+  it("should create a new wordlist from a simple list of words", done => {
+      
+      request(app)
+        .post("/wordlists")
+        .set("authorization", `Bearer ${jwtToken}`)
+        .field('description', wordlist.description)
+        .field('language', wordlist.language)
+        .field('name', wordlist.name)
+        .attach('words', `${__dirname}/fixtures/1-1000.txt`)
+        .expect(201, {})
+        .expect("link", /\/wordlists\/\S+/)
+        .end( async (error,res) =>{
+            if (error) return done(error);
+
+            const link = res.header['link'];
+            const regex = /\/wordlists\/(\S+)$/;
+            const match = regex.exec(link);
+            const id = match[1];
+
+            const wordlist = await WordlistService.get(id);
+            expect(wordlist.words.length).toBe(1000);
+            done();
+        })
+  });
+
   it("should return the status 204 if it was able to partially update a wordlist after a PATCH request", async done => {
     await request(app)
       .patch("/wordlists/inexisting12")

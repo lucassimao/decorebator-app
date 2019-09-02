@@ -26,8 +26,9 @@
     "supertest": "^4.0.2"
   },
   "dependencies": {
+    "decorebator-common": "file:../common",
     "express": "^4.17.1",
     "mongoose": "^5.6.11",
-    "decorebator-common": "file:../common"
+    "multer": "^1.4.2"
   }
 }
