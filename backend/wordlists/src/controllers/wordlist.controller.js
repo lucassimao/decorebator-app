@@ -14,13 +14,25 @@ router
     const wordlists = await service.list(user, { page });
     res.status(200).send({ wordlists });
   })
+  .post("/:id/words/:wordId/images", async (req, res) => {
+    const wordlist = await service.addImage(req.params.id, req.params.wordId, req.body);
+    if (wordlist) {
+      const word = wordlist.words.find(word => word._id == req.params.wordId);
+      const newImage = word.images[word.images.length - 1];
+
+      res.set("Link", `/wordlists/${req.params.id}/words/${req.params.wordId}/images/${newImage._id}`);
+      res.status(201).send();
+    } else {
+      res.status(404).end();
+    }
+  })
   .post("/:id/words", async (req, res) => {
     const body = req.body;
     const idWordlist = req.params.id;
 
     const updatedWordlist = await service.addWord(idWordlist, body);
     if (updatedWordlist) {
-      res.set("Link", `/wordlists/${idWordlist}/words/${updatedWordlist.words.length - 1}`);
+      res.set("Link", `/wordlists/${idWordlist}/words/${updatedWordlist.words.lengt6th - 1}`);
       res.status(204).end();
     } else {
       res.status(404).end();

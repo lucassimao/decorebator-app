@@ -1,4 +1,5 @@
 const request = require("supertest");
+const fsPromises = require("fs").promises;
 const { AuthService, setupTestEnvironment } = require("decorebator-common");
 
 const WordlistRouter = require("../../controllers/wordlist.controller");
@@ -94,28 +95,27 @@ describe("Wordlist's restful API test", () => {
   });
 
   it("should create a new wordlist from a simple list of words", done => {
-      
-      request(app)
-        .post("/wordlists")
-        .set("authorization", `Bearer ${jwtToken}`)
-        .field('description', wordlist.description)
-        .field('language', wordlist.language)
-        .field('name', wordlist.name)
-        .attach('words', `${__dirname}/fixtures/1-1000.txt`)
-        .expect(201, {})
-        .expect("link", /\/wordlists\/\S+/)
-        .end( async (error,res) =>{
-            if (error) return done(error);
+    request(app)
+      .post("/wordlists")
+      .set("authorization", `Bearer ${jwtToken}`)
+      .field("description", wordlist.description)
+      .field("language", wordlist.language)
+      .field("name", wordlist.name)
+      .attach("words", `${__dirname}/fixtures/1-1000.txt`)
+      .expect(201, {})
+      .expect("link", /\/wordlists\/\S+/)
+      .end(async (error, res) => {
+        if (error) return done(error);
 
-            const link = res.header['link'];
-            const regex = /\/wordlists\/(\S+)$/;
-            const match = regex.exec(link);
-            const id = match[1];
+        const link = res.header["link"];
+        const regex = /\/wordlists\/(\S+)$/;
+        const match = regex.exec(link);
+        const id = match[1];
 
-            const wordlist = await WordlistService.get(id);
-            expect(wordlist.words.length).toBe(1000);
-            done();
-        })
+        const wordlist = await WordlistService.get(id);
+        expect(wordlist.words.length).toBe(1000);
+        done();
+      });
   });
 
   it("should return the status 204 if it was able to partially update a wordlist after a PATCH request", async done => {
@@ -166,6 +166,38 @@ describe("Wordlist's restful API test", () => {
 
         const wordlist = await WordlistService.get(object._id);
         expect(wordlist.words.length).toBe(2);
+        return done();
+      });
+  });
+
+  it("should return status 204 if it was able to PATCH a word inside a wordlist", async done => {
+    const object = await WordlistService.save({ ...wordlist, words: [{ name: "book" }] });
+    expect(object.words[0].image).toBeFalsy();
+
+    let fileHandle, base64Image;
+    try {
+      fileHandle = await fsPromises.open(`${__dirname}/fixtures/book.jpeg`, "r");
+      const buffer = await fileHandle.readFile();
+      base64Image = buffer.toString("base64");
+    } catch (error) {
+      return done(error);
+    } finally {
+      if (fileHandle) fileHandle.close();
+    }
+
+    request(app)
+      .post(`/wordlists/${object._id}/words/${object.words[0]._id}/images`)
+      .set("Authorization", `Bearer ${jwtToken}`)
+      .set("content-type", "application/json")
+      .send({ image: base64Image })
+      .expect("link", new RegExp(`/wordlists/${object._id}/words/${object.words[0]._id}/images/(\\S+)$`))
+      .expect(201, {})
+      .end(async (err, res) => {
+        if (err) done(err);
+
+        const wordlist = await WordlistService.get(object._id);
+        expect(wordlist.words.length).toBe(1);
+        expect(wordlist.words[0].images.length).toBe(1);
         return done();
       });
   });
