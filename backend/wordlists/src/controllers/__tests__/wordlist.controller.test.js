@@ -160,7 +160,7 @@ describe("Wordlist's restful API test", () => {
         name: "winner"
       })
       .expect(204, {})
-      .expect("link", `/wordlists/${object._id}/words/1`)
+      .expect("link", new RegExp(`/wordlists/${object._id}/words/(\\S+)$`))
       .end(async (err, res) => {
         if (err) return done(err);
 
@@ -170,7 +170,7 @@ describe("Wordlist's restful API test", () => {
       });
   });
 
-  it("should return status 204 if it was able to PATCH a word inside a wordlist", async done => {
+  it("should return status 201 if it was able to add a new image to a existing word inside a wordlist", async done => {
     const object = await WordlistService.save({ ...wordlist, words: [{ name: "book" }] });
     expect(object.words[0].image).toBeFalsy();
 

@@ -18,9 +18,9 @@ const update = (id, updateObj) => {
   return WordlistDao.updateOne({ _id: id }, updateObj);
 };
 
-const deleteAll = ()=>{
-    return WordlistDao.deleteMany({});
-}
+const deleteAll = () => {
+  return WordlistDao.deleteMany({});
+};
 
 const remove = id => {
   return WordlistDao.deleteOne({ _id: id });
@@ -29,6 +29,17 @@ const remove = id => {
 const deleteWord = (idWordlist, idWord) => {
   return WordlistDao.updateOne({ _id: idWordlist }, { $pull: { words: { _id: idWord } } });
 };
+
+const addImage = (idWordlist, idWord, image) => {
+  const url = 'sss'; // save image to remote storage
+  
+  return WordlistDao.findOneAndUpdate(
+    { _id: idWordlist, "words._id": idWord },
+    { $push: { "words.$.images": {url} } },
+    { new: true, lean:true }
+  );
+};
+
 
 /**
  * Updates a wordlist, appending a new word to the array of words
@@ -47,8 +58,9 @@ module.exports = {
   save,
   get,
   update,
-  addWord,
   delete: remove,
   deleteAll,
+  addWord,
+  addImage,
   deleteWord
 };

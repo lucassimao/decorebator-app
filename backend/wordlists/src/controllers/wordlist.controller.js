@@ -32,7 +32,9 @@ router
 
     const updatedWordlist = await service.addWord(idWordlist, body);
     if (updatedWordlist) {
-      res.set("Link", `/wordlists/${idWordlist}/words/${updatedWordlist.words.lengt6th - 1}`);
+      const newWord = updatedWordlist.words[updatedWordlist.words.length - 1];
+
+      res.set("Link", `/wordlists/${idWordlist}/words/${newWord._id}`);
       res.status(204).end();
     } else {
       res.status(404).end();
