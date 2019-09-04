@@ -2,7 +2,7 @@ const request = require("supertest");
 const fsPromises = require("fs").promises;
 const { AuthService, setupTestEnvironment } = require("decorebator-common");
 
-const WordlistRouter = require("../../controllers/wordlist.controller");
+const WordlistRouter = require("../../routers/wordlist.router");
 const WordlistService = require("../../services/wordlist.service");
 
 const wordlist = {
