@@ -62,7 +62,7 @@ describe("Tests for the restful api of words ", () => {
     expect((await WordlistService.get(idWordlist)).words[0].name).toBe("test");
   });
 
-  it("should return status 200 if it was able to return the words after a GET", done => {
+  it.only("should return status 200 if it was able to return the words after a GET", done => {
     const idWordlist = wordlist._id;
 
     request(app)
@@ -123,7 +123,7 @@ describe("Tests for the restful api of words ", () => {
       });
   });
 
-  it.only("should return the status 204 if it was able to remove a word from a wordlist", async done => {
+  it("should return the status 204 if it was able to remove a word from a wordlist", async done => {
     // trying to delete from an inexisting wordlist returns 404 status code
     await request(app)
       .delete("/wordlists/000000000000/words/000000000000")

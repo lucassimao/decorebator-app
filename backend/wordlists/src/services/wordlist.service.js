@@ -26,18 +26,6 @@ const remove = id => {
   return WordlistDao.deleteOne({ _id: id });
 };
 
-
-
-const addImage = (idWordlist, idWord, image) => {
-  const url = 'sss'; // save image to remote storage
-  
-  return WordlistDao.findOneAndUpdate(
-    { _id: idWordlist, "words._id": idWord },
-    { $push: { "words.$.images": {url} } },
-    { new: true, lean:true }
-  );
-};
-
 module.exports = {
   list,
   save,
@@ -45,5 +33,4 @@ module.exports = {
   update,
   delete: remove,
   deleteAll,
-  addImage
 };

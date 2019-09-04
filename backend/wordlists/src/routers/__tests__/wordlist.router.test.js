@@ -1,5 +1,4 @@
 const request = require("supertest");
-const fsPromises = require("fs").promises;
 const { AuthService, setupTestEnvironment } = require("decorebator-common");
 
 const rootRouter = require("../../routers");
@@ -137,38 +136,6 @@ describe("Wordlist's restful API test", () => {
       });
   });
 
-
-  it("should return status 201 if it was able to add a new image to a existing word inside a wordlist", async done => {
-    const object = await WordlistService.save({ ...wordlist, words: [{ name: "book" }] });
-    expect(object.words[0].image).toBeFalsy();
-
-    let fileHandle, base64Image;
-    try {
-      fileHandle = await fsPromises.open(`${__dirname}/fixtures/book.jpeg`, "r");
-      const buffer = await fileHandle.readFile();
-      base64Image = buffer.toString("base64");
-    } catch (error) {
-      return done(error);
-    } finally {
-      if (fileHandle) fileHandle.close();
-    }
-
-    request(app)
-      .post(`/wordlists/${object._id}/words/${object.words[0]._id}/images`)
-      .set("Authorization", `Bearer ${jwtToken}`)
-      .set("content-type", "application/json")
-      .send({ image: base64Image })
-      .expect("link", new RegExp(`/wordlists/${object._id}/words/${object.words[0]._id}/images/(\\S{24})$`))
-      .expect(201, {})
-      .end(async (err, res) => {
-        if (err) done(err);
-
-        const wordlist = await WordlistService.get(object._id);
-        expect(wordlist.words.length).toBe(1);
-        expect(wordlist.words[0].images.length).toBe(1);
-        return done();
-      });
-  });
 
   it("should return the status 204 if it was able to delete a wordlist", async done => {
     await request(app)
