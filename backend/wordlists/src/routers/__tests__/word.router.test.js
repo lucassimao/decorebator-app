@@ -1,6 +1,9 @@
 const request = require("supertest");
 const { AuthService, setupTestEnvironment } = require("decorebator-common");
-const wordRouter = require("../../routers/word.router");
+
+const wordlistRouter = require("../../routers/wordlist.router");
+const WordlistService = require("../../services/wordlist.service");
+
 
 const object = {
   owner: null,
@@ -14,7 +17,7 @@ describe("Tests for the restful api of words ", () => {
   let app, jwtToken, wordlist;
 
   beforeAll(async () => {
-    app = await setupTestEnvironment("/wordlists/:idWordlist/words", wordRouter, true);
+    app = await setupTestEnvironment("/wordlists", wordlistRouter, true);
     await AuthService.register("teste@gmail.com", "112358");
     jwtToken = await AuthService.doLogin("teste@gmail.com", "112358");
   });
@@ -59,13 +62,22 @@ describe("Tests for the restful api of words ", () => {
     expect((await WordlistService.get(idWordlist)).words[0].name).toBe("test");
   });
 
-  it("should return status 200 if it was able to return the words after a GET", done => {
+  it.only("should return status 200 if it was able to return the words after a GET", done => {
     const idWordlist = wordlist._id;
 
     request(app)
-      .set("Authorization", `Bearer ${jwtToken}`)
       .get(`/wordlists/${idWordlist}/words`)
-      .expect(200, { words: [{ name: "test" }] }, done);
+      .set("Authorization", `Bearer ${jwtToken}`)
+      .expect(200)
+      .end((error,res)=>{
+          if (error){
+              done(error)
+          }
+          expect('words' in res.body).toBeTruthy();
+          expect(Array.isArray(res.body.words)).toBeTruthy();
+          expect(res.body.words.length).toBe(1);
+          done();
+      })
   });
 
   it("should return status 201 if it was able to add a new word to a wordlist after POST to /wordlists/:id/words", async done => {
