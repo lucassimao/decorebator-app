@@ -1,4 +1,4 @@
 const common = require('decorebator-common')
-const WordlistRouter = require('./routers/wordlist.router');
+const rootRouter = require('./routers');
 
-common.startService('/wordlists',WordlistRouter)
+common.startService('/',rootRouter)

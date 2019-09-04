@@ -1,7 +1,7 @@
 const request = require("supertest");
 const { AuthService, setupTestEnvironment } = require("decorebator-common");
 
-const wordlistRouter = require("../../routers/wordlist.router");
+const rootRouter = require("../../routers");
 const WordlistService = require("../../services/wordlist.service");
 
 
@@ -17,7 +17,7 @@ describe("Tests for the restful api of words ", () => {
   let app, jwtToken, wordlist;
 
   beforeAll(async () => {
-    app = await setupTestEnvironment("/wordlists", wordlistRouter, true);
+    app = await setupTestEnvironment("/", rootRouter, true);
     await AuthService.register("teste@gmail.com", "112358");
     jwtToken = await AuthService.doLogin("teste@gmail.com", "112358");
   });
@@ -62,7 +62,7 @@ describe("Tests for the restful api of words ", () => {
     expect((await WordlistService.get(idWordlist)).words[0].name).toBe("test");
   });
 
-  it.only("should return status 200 if it was able to return the words after a GET", done => {
+  it("should return status 200 if it was able to return the words after a GET", done => {
     const idWordlist = wordlist._id;
 
     request(app)
@@ -118,12 +118,12 @@ describe("Tests for the restful api of words ", () => {
         const wordlist = await WordlistService.get(idWordlist);
         expect(wordlist.words.length).toBe(1);
         expect(wordlist.words[0].name).toBe("victory");
-        expect(wordlist.words[0]._id).toBe(idFirstWord);
+        expect(String(wordlist.words[0]._id)).toBe(String(idFirstWord));
         return done();
       });
   });
 
-  it("should return the status 204 if it was able to remove a word from a wordlist", async done => {
+  it.only("should return the status 204 if it was able to remove a word from a wordlist", async done => {
     // trying to delete from an inexisting wordlist returns 404 status code
     await request(app)
       .delete("/wordlists/000000000000/words/000000000000")
@@ -146,7 +146,7 @@ describe("Tests for the restful api of words ", () => {
       .end(async (err, res) => {
         if (err) return done(err);
 
-        const wordlist = await WordlistService.get(object._id);
+        const wordlist = await WordlistService.get(idWordlist);
         expect(wordlist.words.length).toBe(0);
         return done();
       });

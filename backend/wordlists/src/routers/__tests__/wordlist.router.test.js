@@ -2,7 +2,7 @@ const request = require("supertest");
 const fsPromises = require("fs").promises;
 const { AuthService, setupTestEnvironment } = require("decorebator-common");
 
-const WordlistRouter = require("../../routers/wordlist.router");
+const rootRouter = require("../../routers");
 const WordlistService = require("../../services/wordlist.service");
 
 const wordlist = {
@@ -19,7 +19,7 @@ describe("Wordlist's restful API test", () => {
   let app;
 
   beforeAll(async () => {
-    app = await setupTestEnvironment("/wordlists", WordlistRouter, true);
+    app = await setupTestEnvironment("/", rootRouter, true);
     await AuthService.register("teste@gmail.com", "112358");
     jwtToken = await AuthService.doLogin("teste@gmail.com", "112358");
   });
