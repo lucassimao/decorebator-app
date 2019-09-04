@@ -79,6 +79,7 @@ describe("Wordlist's restful API test", () => {
       .set("Authorization", `Bearer ${jwtToken}`)
       .send(wordlist)
       .expect(201, {})
+      .expect("link", /\/wordlists\/\S{24}$/)
       .end(async (error, res) => {
         if (error) return done(error);
 
@@ -103,7 +104,7 @@ describe("Wordlist's restful API test", () => {
       .field("name", wordlist.name)
       .attach("words", `${__dirname}/fixtures/1-1000.txt`)
       .expect(201, {})
-      .expect("link", /\/wordlists\/\S+/)
+      .expect("link", /\/wordlists\/\S{24}$/)
       .end(async (error, res) => {
         if (error) return done(error);
 
@@ -160,7 +161,7 @@ describe("Wordlist's restful API test", () => {
         name: "winner"
       })
       .expect(204, {})
-      .expect("link", new RegExp(`/wordlists/${object._id}/words/(\\S+)$`))
+      .expect("link", new RegExp(`/wordlists/${object._id}/words/(\\S{24})$`))
       .end(async (err, res) => {
         if (err) return done(err);
 
@@ -190,7 +191,7 @@ describe("Wordlist's restful API test", () => {
       .set("Authorization", `Bearer ${jwtToken}`)
       .set("content-type", "application/json")
       .send({ image: base64Image })
-      .expect("link", new RegExp(`/wordlists/${object._id}/words/${object.words[0]._id}/images/(\\S+)$`))
+      .expect("link", new RegExp(`/wordlists/${object._id}/words/${object.words[0]._id}/images/(\\S{24})$`))
       .expect(201, {})
       .end(async (err, res) => {
         if (err) done(err);
