@@ -53,19 +53,10 @@ describe("Wordlist's restful API test", () => {
     await request(app)
       .delete(`/wordlists/${object._id}`)
       .expect(401);
-
-    await request(app)
-      .post(`/wordlists/${object._id}/words`)
-      .send({ name: "new word" })
-      .expect(401);
-    expect((await WordlistService.get(object._id)).words.length).toBe(1);
-
-    await request(app)
-      .delete(`/wordlists/${object._id}/words/0`)
-      .expect(401);
   });
 
-  it("A GET request to /wordlits returns an user's newest wordlists", done => {
+  // TODO test wordlists pagination
+  it("A GET request to /wordlists returns an user's newest wordlists", done => {
     request(app)
       .get("/wordlists")
       .set("Authorization", `Bearer ${jwtToken}`)
@@ -146,30 +137,6 @@ describe("Wordlist's restful API test", () => {
       });
   });
 
-  it("should return status 204 if it was able to add a new word to a wordlist after POST to /wordlists/:id/words", async done => {
-    await request(app)
-      .post("/wordlists/inexisting12/words")
-      .set("Authorization", `Bearer ${jwtToken}`)
-      .expect(404);
-
-    const object = await WordlistService.save({ ...wordlist, words: [{ name: "success" }] });
-
-    request(app)
-      .post(`/wordlists/${object._id}/words`)
-      .set("Authorization", `Bearer ${jwtToken}`)
-      .send({
-        name: "winner"
-      })
-      .expect(204, {})
-      .expect("link", new RegExp(`/wordlists/${object._id}/words/(\\S{24})$`))
-      .end(async (err, res) => {
-        if (err) return done(err);
-
-        const wordlist = await WordlistService.get(object._id);
-        expect(wordlist.words.length).toBe(2);
-        return done();
-      });
-  });
 
   it("should return status 201 if it was able to add a new image to a existing word inside a wordlist", async done => {
     const object = await WordlistService.save({ ...wordlist, words: [{ name: "book" }] });
@@ -225,33 +192,5 @@ describe("Wordlist's restful API test", () => {
       });
   });
 
-  it("should return the status 204 if it was able to remove a word from a wordlist", async done => {
-    // trying to delete from an inexisting wordlist returns 404 status code
-    await request(app)
-      .delete("/wordlists/inexisting12/words/000000000000")
-      .set("Authorization", `Bearer ${jwtToken}`)
-      .expect(404);
 
-    const object = await WordlistService.save({ ...wordlist, words: [{ name: "success" }] });
-    expect(await WordlistService.get(object._id)).not.toBeNull();
-
-    // trying to delete from an inexisting position from an existing wordlist, also returns 404 status code
-    await request(app)
-      .delete(`/wordlists/${object._id}/words/aaaaaaaaaaaa`)
-      .set("Authorization", `Bearer ${jwtToken}`)
-      .expect(404);
-
-    const firstWordId = object.words[0]._id;
-    request(app)
-      .delete(`/wordlists/${object._id}/words/${firstWordId}`)
-      .set("Authorization", `Bearer ${jwtToken}`)
-      .expect(204, {})
-      .end(async (err, res) => {
-        if (err) return done(err);
-
-        const wordlist = await WordlistService.get(object._id);
-        expect(wordlist.words.length).toBe(0);
-        return done();
-      });
-  });
 });
