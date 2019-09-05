@@ -13,7 +13,7 @@ So I decided to build mine.
 ## Tech stack
 
 + Backend
-    - Node (v10.15)
+    - Node (v12.10)
     - ExpressJS
     - mongoose
     - jest
