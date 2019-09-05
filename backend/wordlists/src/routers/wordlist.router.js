@@ -14,7 +14,7 @@ router
     const wordlists = await service.list(user, { page });
     res.status(200).send({ wordlists });
   })
-  .post("/", upload.single("words"), async (req, res) => {
+  .post("/", express.json(), upload.single("words"), async (req, res) => {
     let wordlist = req.body;
 
     if (req.is("multipart/form-data")) {
@@ -48,7 +48,7 @@ router
       res.status(404).end();
     }
   })
-  .patch("/:id", async (req, res) => {
+  .patch("/:id", express.json(), async (req, res) => {
     const updateResult = await service.update(req.params.id, req.body);
 
     if (updateResult.ok === 1 && updateResult.nModified === 1) {

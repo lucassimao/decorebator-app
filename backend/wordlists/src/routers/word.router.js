@@ -1,7 +1,7 @@
-const Router = require("express").Router;
+const express = require("express");
 const wordService = require("../services/word.service");
 
-const router = Router({ mergeParams: true });
+const router = express.Router({ mergeParams: true });
 
 router
   .all("*", (req, res, next) => {
@@ -16,7 +16,7 @@ router
       res.sendStatus(404);
     }
   })
-  .post("/", async (req, res) => {
+  .post("/", express.json(), async (req, res) => {
     const object = await wordService.addWord(req.params.idWordlist, req.body);
 
     if (object) {
@@ -26,7 +26,7 @@ router
       res.status(404).end();
     }
   })
-  .patch("/:idWord", async (req, res) => {
+  .patch("/:idWord", express.json(), async (req, res) => {
     const { nModified, ok } = await wordService.patchWord(req.params.idWordlist, req.params.idWord, req.body);
     if (nModified === 1 && ok === 1) {
       res.sendStatus(204);
@@ -37,10 +37,10 @@ router
   .delete("/:idWord", async (req, res) => {
     const { nModified, ok } = await wordService.delete(req.params.idWordlist, req.params.idWord);
     if (nModified === 1 && ok === 1) {
-        res.sendStatus(204);
-      } else {
-        res.sendStatus(404);
-      }
+      res.sendStatus(204);
+    } else {
+      res.sendStatus(404);
+    }
   });
 
 module.exports = router;

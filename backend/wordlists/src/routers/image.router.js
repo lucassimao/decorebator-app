@@ -1,7 +1,7 @@
-const Router = require("express").Router;
+const express = require("express");
 const service = require("../services/image.service");
 
-const router = Router({ mergeParams: true });
+const router = express.Router({ mergeParams: true });
 
 router
   .all("*", (req, res, next) => {
@@ -9,7 +9,7 @@ router
     if (!req.params.idWord) throw "idWord is expected";
     next();
   })
-  .post("/", async (req, res) => {
+  .post("/", express.json(), async (req, res) => {
     const wordlist = await service.addImage(req.params.idWordlist, req.params.idWord, req.body);
 
     if (wordlist) {
