@@ -7,7 +7,7 @@ const Wordlist = new Schema({
   dateCreated: { type: Date, default: Date.now },
   language: String,
   name: String,
-  words: [{ name: String, images: [{ url: String }] }]
+  words: [{ name: String, images: [{ url: String, description: String }] }]
 });
 
 module.exports = mongoose.model("Wordlist", Wordlist);

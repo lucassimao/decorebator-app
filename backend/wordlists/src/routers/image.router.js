@@ -22,6 +22,20 @@ router
       res.status(404).end();
     }
   })
+  .patch("/:idImage", express.json(), async (req, res) => {
+    const { nModified, ok } = await service.patchImage(
+      req.params.idWordlist,
+      req.params.idWord,
+      req.params.idImage,
+      req.body
+    );
+
+    if (nModified === 1 && ok === 1) {
+      res.sendStatus(204);
+    } else {
+      res.sendStatus(404);
+    }
+  })
   .delete("/:idImage", async (req, res) => {
     const { nModified, ok } = await service.deleteImage(
       req.params.idWordlist,
