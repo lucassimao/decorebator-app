@@ -39,23 +39,13 @@ describe("Tests for the restful api of image's words ", () => {
   it("should return 201 after POST to /wordlists/:idWordlist/word/:idWord/images ", async done => {
     const idWordlist = wordlist._id;
     const idFirstWord = wordlist.words[0]._id;
-
-    let fileHandle, base64Image;
-    try {
-      fileHandle = await fsPromises.open(`${__dirname}/fixtures/book.jpeg`, "r");
-      const buffer = await fileHandle.readFile();
-      base64Image = buffer.toString("base64");
-    } catch (error) {
-      return done(error);
-    } finally {
-      if (fileHandle) fileHandle.close();
-    }
+    const base64Image = loadAsBase64(`${__dirname}/fixtures/book.jpeg`);
 
     request(app)
       .post(`/wordlists/${idWordlist}/words/${idFirstWord}/images`)
       .set("authorization", `Bearer ${jwtToken}`)
       .set("content-type", "application/json")
-      .send({ image: base64Image })
+      .send({ base64Image, description: "Image description" })
       .expect(201, {})
       .expect("link", new RegExp(`/wordlists/${idWordlist}/words/${idFirstWord}/images/(\\S{24})$`))
       .end(async (err, res) => {
@@ -64,6 +54,7 @@ describe("Tests for the restful api of image's words ", () => {
         const object = await WordlistService.get(idWordlist);
         expect(object.words.length).toBe(1);
         expect(object.words[0].images.length).toBe(1);
+        expect(object.words[0].images[0].description).toBe("Image description");
         return done();
       });
   });
@@ -71,23 +62,7 @@ describe("Tests for the restful api of image's words ", () => {
   it("Should return a 204 code after a DELETE", async done => {
     const idWordlist = wordlist._id;
     const idFirstWord = wordlist.words[0]._id;
-    let newImageId;
-
-    let fileHandle, base64Image;
-    try {
-      fileHandle = await fsPromises.open(`${__dirname}/fixtures/book.jpeg`, "r");
-      const buffer = await fileHandle.readFile();
-      base64Image = buffer.toString("base64");
-
-      const { words } = await imageService.addImage(idWordlist, idFirstWord, { image: base64Image });
-
-      const word = words.find(w => String(w._id) == String(idFirstWord));
-      newImageId = word.images[word.images.length - 1]._id;
-    } catch (error) {
-      return done(error);
-    } finally {
-      if (fileHandle) fileHandle.close();
-    }
+    const newImageId = await addImage(idWordlist, idFirstWord, `${__dirname}/fixtures/book.jpeg`, "dddd");
 
     request(app)
       .delete(`/wordlists/${idWordlist}/words/${idFirstWord}/images/${newImageId}`)
@@ -100,4 +75,56 @@ describe("Tests for the restful api of image's words ", () => {
         done();
       });
   });
+
+  it("it should return 204 after a PATCH request", async done => {
+    const idWordlist = wordlist._id;
+    const idFirstWord = wordlist.words[0]._id;
+    const newImageId = await addImage(
+      idWordlist,
+      idFirstWord,
+      `${__dirname}/fixtures/book.jpeg`,
+      "wrong description"
+    );
+
+    request(app)
+      .patch(`/wordlists/${idWordlist}/words/${idFirstWord}/images/${newImageId}`)
+      .send({ description: "right description" })
+      .set("authorization", `Bearer ${jwtToken}`)
+      .expect(204, {})
+      .end(async (err, res) => {
+        if (err) return done(err);
+
+        const object = await WordlistService.get(idWordlist);
+        expect(object.words.length).toBe(1);
+        expect(object.words[0].images.length).toBe(1);
+        expect(object.words[0].images[0].description).toBe("right description");
+
+        return done();
+      });
+  });
 });
+
+async function addImage(idWordlist, idFirstWord, filename, description) {
+  const base64Image = loadAsBase64(filename);
+
+  const { words } = await imageService.addImage(idWordlist, idFirstWord, {
+    image: base64Image,
+    description
+  });
+
+  const word = words.find(w => String(w._id) == String(idFirstWord));
+  const newImageId = word.images[word.images.length - 1]._id;
+  return newImageId;
+}
+
+async function loadAsBase64(filename) {
+  let fileHandle, base64Image;
+  try {
+    fileHandle = await fsPromises.open(filename, "r");
+    const buffer = await fileHandle.readFile();
+    base64Image = buffer.toString("base64");
+    return base64Image;
+  } finally {
+    if (fileHandle) fileHandle.close();
+  }
+}
