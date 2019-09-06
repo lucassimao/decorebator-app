@@ -62,7 +62,7 @@ describe("Tests for the restful api of words ", () => {
     expect((await WordlistService.get(idWordlist)).words[0].name).toBe("test");
   });
 
-  it.only("should return status 200 if it was able to return the words after a GET", done => {
+  it("should return status 200 if it was able to return the words after a GET", done => {
     const idWordlist = wordlist._id;
 
     request(app)
