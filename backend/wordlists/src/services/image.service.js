@@ -1,7 +1,8 @@
 const WordlistDao = require("../dao/wordlist.dao");
+const filestorageService = require('./filestorage.service');
 
-const addImage = (idWordlist, idWord, { base64Image, description }) => {
-  const url = "http:// ..."; // save image to remote storage
+const addImage = async (idWordlist, idWord, { fileName, base64Image, description }) => {
+  const url = await filestorageService.store(fileName,base64Image); 
 
   return WordlistDao.findOneAndUpdate(
     { _id: idWordlist, "words._id": idWord },
