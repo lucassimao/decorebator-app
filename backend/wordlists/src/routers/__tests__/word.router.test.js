@@ -58,7 +58,7 @@ describe("Tests for the restful api of words ", () => {
       .delete(`/wordlists/${idWordlist}/words/${idFirstWord}`)
       .expect(401);
 
-    expect((await WordlistService.get(idWordlist)).words.length).toBe(1);
+    expect((await WordlistService.get(idWordlist)).words).toHaveLength(1);
     expect((await WordlistService.get(idWordlist)).words[0].name).toBe("test");
   });
 
@@ -75,7 +75,7 @@ describe("Tests for the restful api of words ", () => {
           }
           expect('words' in res.body).toBeTruthy();
           expect(Array.isArray(res.body.words)).toBeTruthy();
-          expect(res.body.words.length).toBe(1);
+          expect(res.body.words).toHaveLength(1);
           done();
       })
   });
@@ -95,7 +95,7 @@ describe("Tests for the restful api of words ", () => {
         if (err) return done(err);
 
         const wordlist = await WordlistService.get(idWordlist);
-        expect(wordlist.words.length).toBe(2);
+        expect(wordlist.words).toHaveLength(2);
         expect(wordlist.words[1].name).toBe("winner");
 
         return done();
@@ -116,7 +116,7 @@ describe("Tests for the restful api of words ", () => {
         if (err) done(err);
 
         const wordlist = await WordlistService.get(idWordlist);
-        expect(wordlist.words.length).toBe(1);
+        expect(wordlist.words).toHaveLength(1);
         expect(wordlist.words[0].name).toBe("victory");
         expect(String(wordlist.words[0]._id)).toBe(String(idFirstWord));
         return done();
@@ -147,7 +147,7 @@ describe("Tests for the restful api of words ", () => {
         if (err) return done(err);
 
         const wordlist = await WordlistService.get(idWordlist);
-        expect(wordlist.words.length).toBe(0);
+        expect(wordlist.words).toHaveLength(0);
         return done();
       });
   });

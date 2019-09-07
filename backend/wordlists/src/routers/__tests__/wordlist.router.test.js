@@ -104,7 +104,7 @@ describe("Wordlist's restful API test", () => {
         const id = match[1];
 
         const wordlist = await WordlistService.get(id);
-        expect(wordlist.words.length).toBe(1000);
+        expect(wordlist.words).toHaveLength(1000);
         done();
       });
   });

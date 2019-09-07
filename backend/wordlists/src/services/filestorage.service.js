@@ -4,17 +4,16 @@ const path = require("path");
 const shortid = require("shortid");
 const fsPromises = require('fs').promises;
 const AWS = require('aws-sdk');
-
 const config = require("decorebator-common").config;
 
 
 /**
  * persists a file. In production environment, sends the data to amazon S3, otherwise stores in the local system's temp dir 
  * 
- * @param {Oject} user The user storing the file
+ * @param {object} user The user storing the file
  * @param {mongoose.Types.ObjectId} user._id The user id 
- * @param {fileName} fileName The original filename sent by the user
- * @param {base64EncodedFile} base64EncodedFile The binary data encoded as base64 format
+ * @param {string} fileName The original filename sent by the user
+ * @param {string} base64EncodedFile The binary data encoded as base64 format
  * 
  * @returns {string} link to the file
  */

@@ -24,7 +24,7 @@ router
       if (/text\/plain/.test(mimetype)) {
         const text = buffer.toString("utf8");
         wordlist.words = text.split("\n").map(line => {
-          name: line.trim();
+          return { name: line.trim() }
         });
       }
     }

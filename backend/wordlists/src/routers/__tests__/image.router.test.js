@@ -15,11 +15,11 @@ const object = {
 };
 
 describe("Tests for the restful api of image's words ", () => {
-  let app, jwtToken, wordlist;
+  let app, jwtToken, wordlist,user;
 
   beforeAll(async () => {
     app = await setupTestEnvironment("/", rootRouter, true);
-    await AuthService.register("teste@gmail.com", "112358");
+    user = await AuthService.register("teste@gmail.com", "112358");
     jwtToken = await AuthService.doLogin("teste@gmail.com", "112358");
   });
 
@@ -39,21 +39,22 @@ describe("Tests for the restful api of image's words ", () => {
   it("should return 201 after POST to /wordlists/:idWordlist/word/:idWord/images ", async done => {
     const idWordlist = wordlist._id;
     const idFirstWord = wordlist.words[0]._id;
-    const base64Image = loadAsBase64(`${__dirname}/fixtures/book.jpeg`);
+    const base64Image = await loadAsBase64(`${__dirname}/fixtures/book.jpeg`);
+
 
     request(app)
       .post(`/wordlists/${idWordlist}/words/${idFirstWord}/images`)
       .set("authorization", `Bearer ${jwtToken}`)
       .set("content-type", "application/json")
-      .send({ base64Image, description: "Image description" })
+      .send({ base64Image, description: "Image description", fileName: "book.jpeg" })
       .expect(201, {})
       .expect("link", new RegExp(`/wordlists/${idWordlist}/words/${idFirstWord}/images/(\\S{24})$`))
-      .end(async (err, res) => {
+      .end(async (err, ) => {
         if (err) return done(err);
 
         const object = await WordlistService.get(idWordlist);
-        expect(object.words.length).toBe(1);
-        expect(object.words[0].images.length).toBe(1);
+        expect(object.words).toHaveLength(1);
+        expect(object.words[0].images).toHaveLength(1);
         expect(object.words[0].images[0].description).toBe("Image description");
         return done();
       });
@@ -62,7 +63,7 @@ describe("Tests for the restful api of image's words ", () => {
   it("Should return a 204 code after a DELETE", async done => {
     const idWordlist = wordlist._id;
     const idFirstWord = wordlist.words[0]._id;
-    const newImageId = await addImage(idWordlist, idFirstWord, `${__dirname}/fixtures/book.jpeg`, "dddd");
+    const newImageId = await addImage(idWordlist, idFirstWord,user, `${__dirname}/fixtures/book.jpeg`, "book image");
 
     request(app)
       .delete(`/wordlists/${idWordlist}/words/${idFirstWord}/images/${newImageId}`)
@@ -71,7 +72,7 @@ describe("Tests for the restful api of image's words ", () => {
       .end(async (error, res) => {
         if (error) return done(error);
 
-        expect((await WordlistService.get(idWordlist)).words[0].images.length).toBe(0);
+        expect((await WordlistService.get(idWordlist)).words[0].images).toHaveLength(0);
         done();
       });
   });
@@ -81,7 +82,7 @@ describe("Tests for the restful api of image's words ", () => {
     const idFirstWord = wordlist.words[0]._id;
     const newImageId = await addImage(
       idWordlist,
-      idFirstWord,
+      idFirstWord, user,
       `${__dirname}/fixtures/book.jpeg`,
       "wrong description"
     );
@@ -95,8 +96,8 @@ describe("Tests for the restful api of image's words ", () => {
         if (err) return done(err);
 
         const object = await WordlistService.get(idWordlist);
-        expect(object.words.length).toBe(1);
-        expect(object.words[0].images.length).toBe(1);
+        expect(object.words).toHaveLength(1);
+        expect(object.words[0].images).toHaveLength(1);
         expect(object.words[0].images[0].description).toBe("right description");
 
         return done();
@@ -104,12 +105,13 @@ describe("Tests for the restful api of image's words ", () => {
   });
 });
 
-async function addImage(idWordlist, idFirstWord, filename, description) {
-  const base64Image = loadAsBase64(filename);
+async function addImage(idWordlist, idFirstWord,user, fileName, description) {
+  const base64Image = await loadAsBase64(fileName);
 
-  const { words } = await imageService.addImage(idWordlist, idFirstWord, {
-    image: base64Image,
-    description
+  const { words } = await imageService.addImage(idWordlist, idFirstWord,user, {
+    base64Image,
+    description,
+    fileName
   });
 
   const word = words.find(w => String(w._id) == String(idFirstWord));

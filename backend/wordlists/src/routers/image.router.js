@@ -10,7 +10,7 @@ router
     next();
   })
   .post("/", express.json(), async (req, res) => {
-    const wordlist = await service.addImage(req.params.idWordlist, req.params.idWord, req.body);
+    const wordlist = await service.addImage(req.params.idWordlist, req.params.idWord,req.user, req.body);
 
     if (wordlist) {
       const word = wordlist.words.find(word => word._id == req.params.idWord);
