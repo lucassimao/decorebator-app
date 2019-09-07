@@ -1,6 +1,6 @@
 {
   "name": "decorebator-common",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Decorebator App common backend",
   "scripts": {
     "test": "npx jest --detectOpenHandles 'src/'",
