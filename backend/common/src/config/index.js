@@ -9,7 +9,8 @@ const baseConfig = {
     isTest: env == 'test',
     defaultPageSize: 10,
     domain: 'https://decorebator.com',
-    jwtSecretKey: process.env.JWT_SECRET_KEY || '112358132134'
+    jwtSecretKey: process.env.JWT_SECRET_KEY || '112358132134',
+    dbOptions: { useNewUrlParser: true, auto_reconnect: true }
 }
 
 let envConfig = {}
@@ -24,5 +25,6 @@ switch (env) {
     case 'production':
         envConfig = require('./production')
 }
+
 
 module.exports = Object.assign(baseConfig, envConfig)
