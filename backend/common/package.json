@@ -19,7 +19,7 @@
   "license": "ISC",
   "devDependencies": {
     "eslint": "^6.1.0",
-    "eslint-plugin-jest": "^22.15.2",
+    "eslint-plugin-jest": "^22.17.0",
     "jest": "^24.8.0",
     "prettier": "^1.18.2"
   },

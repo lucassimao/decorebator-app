@@ -1,4 +1,4 @@
-DEV_SERVER_PORT = 3000;
+const DEV_SERVER_PORT = 3000;
 
 module.exports = {
     dbUrl: 'mongodb://localhost:27017/decorebator',
