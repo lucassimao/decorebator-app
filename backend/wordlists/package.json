@@ -27,6 +27,7 @@
     "supertest": "^4.0.2"
   },
   "dependencies": {
+    "aws-sdk": "^2.524.0",
     "decorebator-common": "file:../common",
     "express": "^4.17.1",
     "image-type": "^4.1.0",
