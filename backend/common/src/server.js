@@ -34,6 +34,8 @@ const app = express()
 app.use(passport.initialize());
 app.use(passport.authenticate('jwt', { session: false }));
 app.use(compression());
+app.use(helmet());
+
 
 
 module.exports = app
