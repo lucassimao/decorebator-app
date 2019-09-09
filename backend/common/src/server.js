@@ -4,6 +4,7 @@ const JwtStrategy = require('passport-jwt').Strategy
 const ExtractJwt = require('passport-jwt').ExtractJwt
 const mongoose = require('mongoose')
 const compression = require('compression')
+const helmet = require('helmet');
 
 const UserDao = require('./dao/user.dao');
 const config = require('./config');
