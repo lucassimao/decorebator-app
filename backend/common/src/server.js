@@ -34,7 +34,8 @@ passport.use(new JwtStrategy(jwtStrategyOpts, async (jwt_payload, done) => {
 const app = express()
 app.use(passport.initialize());
 app.use(passport.authenticate('jwt', { session: false }));
-app.use(compression());
+if (config.httpOptions.enableCompression)
+    app.use(compression());
 app.use(helmet());
 
 

@@ -10,7 +10,10 @@ const baseConfig = {
     defaultPageSize: 10,
     domain: 'https://decorebator.com',
     jwtSecretKey: process.env.JWT_SECRET_KEY || '112358132134',
-    dbOptions: { useNewUrlParser: true, auto_reconnect: true }
+    dbOptions: { useNewUrlParser: true, auto_reconnect: true },
+    httpOptions : {
+        enableCompression : (process.env.ENABLE_COMPRESSION == 'true')
+    }
 }
 
 let envConfig = {}
