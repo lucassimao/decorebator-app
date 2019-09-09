@@ -3,27 +3,27 @@ const WordlistDao = require("../dao/wordlist.dao");
 
 const list = (user, { pageSize = config.defaultPageSize, page = 0 }) => {
   const skip = page > 0 ? (page - 1) * pageSize : 0;
-  return WordlistDao.find({ user }, null, { limit: pageSize, skip });
+  return WordlistDao.find({ owner : user._id }, null, { limit: pageSize, skip });
 };
 
-const save = wordlist => {
-  return WordlistDao.create(wordlist);
+const save = (wordlist,user) => {
+  return WordlistDao.create({ ... wordlist, owner: user._id});
 };
 
-const get = id => {
-  return WordlistDao.findOne({ _id: id });
+const get = (id,user) => {
+  return WordlistDao.findOne({ _id: id, owner: user._id });
 };
 
-const update = (id, updateObj) => {
-  return WordlistDao.updateOne({ _id: id }, updateObj);
+const update = (id, user, updateObj) => {
+  return WordlistDao.updateOne({ _id: id, owner: user._id  }, updateObj);
 };
 
 const deleteAll = () => {
   return WordlistDao.deleteMany({});
 };
 
-const remove = id => {
-  return WordlistDao.deleteOne({ _id: id });
+const remove = (user,id) => {
+  return WordlistDao.deleteOne({ _id: id, owner: user._id  });
 };
 
 module.exports = {

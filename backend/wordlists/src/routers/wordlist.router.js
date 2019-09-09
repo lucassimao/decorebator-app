@@ -29,7 +29,7 @@ router
       }
     }
 
-    wordlist = await service.save(wordlist);
+    wordlist = await service.save(wordlist,req.user);
 
     if (wordlist._id) {
       res.set("Link", `/wordlists/${wordlist._id}`);
@@ -40,7 +40,7 @@ router
     }
   })
   .delete("/:id", async (req, res) => {
-    const dbResponse = await service.delete(req.params.id);
+    const dbResponse = await service.delete(req.user,req.params.id);
 
     if (dbResponse.ok === 1 && dbResponse.deletedCount === 1) {
       res.status(204).end();
@@ -49,7 +49,7 @@ router
     }
   })
   .patch("/:id", express.json(), async (req, res) => {
-    const updateResult = await service.update(req.params.id, req.body);
+    const updateResult = await service.update(req.params.id,req.user, req.body);
 
     if (updateResult.ok === 1 && updateResult.nModified === 1) {
       res.set("Link", `/wordlists/${req.params.id}`);

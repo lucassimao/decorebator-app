@@ -12,23 +12,40 @@ const wordlist = {
   words: []
 };
 
-// testing the Wordlist restful API
 describe("Wordlist's restful API test", () => {
-  let jwtToken;
-  let app;
+  let jwtToken, app, userId;
 
   beforeAll(async () => {
     app = await setupTestEnvironment("/", rootRouter, true);
-    await AuthService.register("teste@gmail.com", "112358");
+    const user = await AuthService.register("teste@gmail.com", "112358");
+
+    userId = user._id;
     jwtToken = await AuthService.doLogin("teste@gmail.com", "112358");
+
+    // registering 10 wordlists for a different user
+    const { _id } = await AuthService.register("another@gmail.com", "123");
+
+    const promises = [];
+    for (let i = 0; i < 10; ++i)
+      promises.push(
+        WordlistService.save(
+          {
+            owner: _id,
+            description: `wordlist ${i}`,
+            name: `wordlist ${i}`,
+            language: "en",
+            words: [{ name: "word 1" }]
+          },
+          { _id }
+        )
+      );
+
+    await Promise.all(promises);
   });
 
   afterAll(async () => {
     await AuthService.removeAccount("teste@gmail.com");
-  });
-
-  beforeEach(async () => {
-    await WordlistService.deleteAll();
+    await AuthService.removeAccount("another@gmail.com");
   });
 
   it("should return a 401 status code for any non authenticated request", async () => {
@@ -40,7 +57,7 @@ describe("Wordlist's restful API test", () => {
       .send(wordlist)
       .expect(401);
 
-    const object = await WordlistService.save({ ...wordlist, words: [{ name: "name 1" }] });
+    const object = await WordlistService.save({ ...wordlist, words: [{ name: "name 1" }] }, { _id: userId });
 
     await request(app)
       .get(`/wordlists/${object._id}`)
@@ -52,10 +69,12 @@ describe("Wordlist's restful API test", () => {
     await request(app)
       .delete(`/wordlists/${object._id}`)
       .expect(401);
+
+      await WordlistService.delete(userId,object._id)
   });
 
   // TODO test wordlists pagination
-  it("A GET request to /wordlists returns an user's newest wordlists", done => {
+  it("A GET request to /wordlists returns an user's newest wordlists", async done => {
     request(app)
       .get("/wordlists")
       .set("Authorization", `Bearer ${jwtToken}`)
@@ -78,8 +97,9 @@ describe("Wordlist's restful API test", () => {
         const match = regex.exec(link);
         const id = match[1];
 
-        const obj = await WordlistService.get(id);
+        const obj = await WordlistService.get(id, { _id: userId });
         expect(obj.name).toBe("Words - 1");
+        expect(String(obj.owner)).toBe(String(userId));
 
         return done();
       });
@@ -103,8 +123,10 @@ describe("Wordlist's restful API test", () => {
         const match = regex.exec(link);
         const id = match[1];
 
-        const wordlist = await WordlistService.get(id);
+        const wordlist = await WordlistService.get(id, { _id: userId });
         expect(wordlist.words).toHaveLength(1000);
+        expect(String(wordlist.owner)).toBe(String(userId));
+
         done();
       });
   });
@@ -115,7 +137,7 @@ describe("Wordlist's restful API test", () => {
       .set("Authorization", `Bearer ${jwtToken}`)
       .expect(404);
 
-    const object = await WordlistService.save(wordlist);
+    const object = await WordlistService.save({ ...wordlist }, { _id: userId });
 
     request(app)
       .patch(`/wordlists/${object._id}`)
@@ -129,13 +151,13 @@ describe("Wordlist's restful API test", () => {
           return done(error);
         }
 
-        const wordlist = await WordlistService.get(object._id);
+        const wordlist = await WordlistService.get(object._id, { _id: userId });
         expect(wordlist.name).toBe("My wordlist");
+        expect(String(wordlist.owner)).toBe(String(userId));
 
         return done();
       });
   });
-
 
   it("should return the status 204 if it was able to delete a wordlist", async done => {
     await request(app)
@@ -143,8 +165,7 @@ describe("Wordlist's restful API test", () => {
       .set("Authorization", `Bearer ${jwtToken}`)
       .expect(404);
 
-    const object = await WordlistService.save({ ...wordlist, words: [{ name: "success" }] });
-    expect(await WordlistService.get(object._id)).not.toBeNull();
+    const object = await WordlistService.save({ ...wordlist, words: [{ name: "success" }] }, { _id: userId });
 
     request(app)
       .delete(`/wordlists/${object._id}`)
@@ -153,11 +174,9 @@ describe("Wordlist's restful API test", () => {
       .end(async (err, res) => {
         if (err) return done(err);
 
-        const wordlist = await WordlistService.get(object._id);
+        const wordlist = await WordlistService.get(object._id, { _id: userId });
         expect(wordlist).toBeNull();
         return done();
       });
   });
-
-
 });

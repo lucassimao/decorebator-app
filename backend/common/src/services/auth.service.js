@@ -44,6 +44,6 @@ const doLogin = (email, password) => {
     });
 };
 
-const removeAccount = email => UserDao.deleteOne({ email });
+const removeAccount = email => UserDao.deleteMany({ email });
 
 module.exports = { register, doLogin, removeAccount };
