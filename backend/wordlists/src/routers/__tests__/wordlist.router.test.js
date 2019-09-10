@@ -46,6 +46,7 @@ describe("Wordlist's restful API test", () => {
   afterAll(async () => {
     await AuthService.removeAccount("teste@gmail.com");
     await AuthService.removeAccount("another@gmail.com");
+    await WordlistService.deleteAll();
   });
 
   it("should return a 401 status code for any non authenticated request", async () => {
@@ -70,7 +71,11 @@ describe("Wordlist's restful API test", () => {
       .delete(`/wordlists/${object._id}`)
       .expect(401);
 
-    await WordlistService.delete(userId, object._id);
+    // cleanup
+    await request(app)
+      .delete(`/wordlists/${object._id}`)
+      .set("Authorization", `Bearer ${jwtToken}`)
+      .expect(204, {});
   });
 
   // TODO test wordlists pagination

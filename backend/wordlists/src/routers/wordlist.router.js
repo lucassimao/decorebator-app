@@ -11,7 +11,7 @@ router
     const user = req.user;
     const { page = 0 } = req.query;
 
-    const wordlists = await service.list(user, { page });
+    const wordlists = await service.list({ page },user);
     res.status(200).send({ wordlists });
   })
   .get("/:id", async (req, res) => {
@@ -47,7 +47,7 @@ router
     }
   })
   .delete("/:id", async (req, res) => {
-    const dbResponse = await service.delete(req.user,req.params.id);
+    const dbResponse = await service.delete(req.params.id,req.user);
 
     if (dbResponse.ok === 1 && dbResponse.deletedCount === 1) {
       res.status(204).end();
@@ -56,7 +56,7 @@ router
     }
   })
   .patch("/:id", express.json(), async (req, res) => {
-    const updateResult = await service.update(req.params.id,req.user, req.body);
+    const updateResult = await service.update(req.params.id, req.body,req.user);
 
     if (updateResult.ok === 1 && updateResult.nModified === 1) {
       res.set("Link", `/wordlists/${req.params.id}`);
