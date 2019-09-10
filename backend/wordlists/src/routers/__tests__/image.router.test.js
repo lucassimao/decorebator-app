@@ -8,7 +8,7 @@ const imageService = require("../../services/image.service");
 
 const object = {
   owner: null,
-  description: "List of words found in the Lord of Rings book",
+  description: "List of words found in my book",
   name: "Words - 1",
   language: "en",
   words: [{ name: "test" }]

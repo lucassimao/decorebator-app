@@ -6,7 +6,7 @@ const WordlistService = require("../../services/wordlist.service");
 
 const object = {
   owner: null,
-  description: "List of words found in the Lord of Rings book",
+  description: "List of words in the NY article",
   name: "Words - 1",
   language: "en",
   words: [{ name: "test" }]
