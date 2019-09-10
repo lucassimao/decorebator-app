@@ -24,7 +24,7 @@ describe("Tests for the restful api of image's words ", () => {
   });
 
   beforeEach(async () => {
-    wordlist = await WordlistService.save(object);
+    wordlist = await WordlistService.save(object,user);
   });
 
   afterEach(async () => {
@@ -52,7 +52,7 @@ describe("Tests for the restful api of image's words ", () => {
       .end(async (err, ) => {
         if (err) return done(err);
 
-        const object = await WordlistService.get(idWordlist);
+        const object = await WordlistService.get(idWordlist,user);
         expect(object.words).toHaveLength(1);
         expect(object.words[0].images).toHaveLength(1);
         expect(object.words[0].images[0].description).toBe("Image description");
@@ -72,7 +72,7 @@ describe("Tests for the restful api of image's words ", () => {
       .end(async (error, res) => {
         if (error) return done(error);
 
-        expect((await WordlistService.get(idWordlist)).words[0].images).toHaveLength(0);
+        expect((await WordlistService.get(idWordlist,user)).words[0].images).toHaveLength(0);
         done();
       });
   });
@@ -95,7 +95,7 @@ describe("Tests for the restful api of image's words ", () => {
       .end(async (err, res) => {
         if (err) return done(err);
 
-        const object = await WordlistService.get(idWordlist);
+        const object = await WordlistService.get(idWordlist,user);
         expect(object.words).toHaveLength(1);
         expect(object.words[0].images).toHaveLength(1);
         expect(object.words[0].images[0].description).toBe("right description");

@@ -4,7 +4,6 @@ const { AuthService, setupTestEnvironment } = require("decorebator-common");
 const rootRouter = require("../../routers");
 const WordlistService = require("../../services/wordlist.service");
 
-
 const object = {
   owner: null,
   description: "List of words found in the Lord of Rings book",
@@ -14,16 +13,16 @@ const object = {
 };
 
 describe("Tests for the restful api of words ", () => {
-  let app, jwtToken, wordlist;
+  let app, jwtToken, wordlist, user;
 
   beforeAll(async () => {
     app = await setupTestEnvironment("/", rootRouter, true);
-    await AuthService.register("teste@gmail.com", "112358");
+    user = await AuthService.register("teste@gmail.com", "112358");
     jwtToken = await AuthService.doLogin("teste@gmail.com", "112358");
   });
 
   beforeEach(async () => {
-    wordlist = await WordlistService.save(object);
+    wordlist = await WordlistService.save(object, user);
   });
 
   afterEach(async () => {
@@ -35,7 +34,7 @@ describe("Tests for the restful api of words ", () => {
     await WordlistService.deleteAll();
   });
 
-  it("should return a 401 status code for any non authenticated request", async () => {
+  it("should return a 401 status code for any non authenticated request", async (done) => {
     const idWordlist = wordlist._id;
     const idFirstWord = wordlist.words[0]._id;
 
@@ -58,8 +57,21 @@ describe("Tests for the restful api of words ", () => {
       .delete(`/wordlists/${idWordlist}/words/${idFirstWord}`)
       .expect(401);
 
-    expect((await WordlistService.get(idWordlist)).words).toHaveLength(1);
-    expect((await WordlistService.get(idWordlist)).words[0].name).toBe("test");
+    request(app)
+      .get(`/wordlists/${idWordlist}`)
+      .set("Authorization", `Bearer ${jwtToken}`)
+      .expect(200)
+      .end((error, res) => {
+        if (error) {
+          return done(error);
+        }
+        expect("words" in res.body).toBeTruthy();
+        expect(Array.isArray(res.body.words)).toBeTruthy();
+        expect(res.body.words).toHaveLength(1);
+        expect(res.body.words[0].name).toBe("test");
+
+        return done();
+      });
   });
 
   it("should return status 200 if it was able to return the words after a GET", done => {
@@ -69,15 +81,15 @@ describe("Tests for the restful api of words ", () => {
       .get(`/wordlists/${idWordlist}/words`)
       .set("Authorization", `Bearer ${jwtToken}`)
       .expect(200)
-      .end((error,res)=>{
-          if (error){
-              done(error)
-          }
-          expect('words' in res.body).toBeTruthy();
-          expect(Array.isArray(res.body.words)).toBeTruthy();
-          expect(res.body.words).toHaveLength(1);
-          done();
-      })
+      .end((error, res) => {
+        if (error) {
+          done(error);
+        }
+        expect("words" in res.body).toBeTruthy();
+        expect(Array.isArray(res.body.words)).toBeTruthy();
+        expect(res.body.words).toHaveLength(1);
+        done();
+      });
   });
 
   it("should return status 201 if it was able to add a new word to a wordlist after POST to /wordlists/:id/words", async done => {
@@ -94,7 +106,7 @@ describe("Tests for the restful api of words ", () => {
       .end(async (err, res) => {
         if (err) return done(err);
 
-        const wordlist = await WordlistService.get(idWordlist);
+        const wordlist = await WordlistService.get(idWordlist,user);
         expect(wordlist.words).toHaveLength(2);
         expect(wordlist.words[1].name).toBe("winner");
 
@@ -115,7 +127,7 @@ describe("Tests for the restful api of words ", () => {
       .end(async (err, res) => {
         if (err) done(err);
 
-        const wordlist = await WordlistService.get(idWordlist);
+        const wordlist = await WordlistService.get(idWordlist,user);
         expect(wordlist.words).toHaveLength(1);
         expect(wordlist.words[0].name).toBe("victory");
         expect(String(wordlist.words[0]._id)).toBe(String(idFirstWord));
@@ -146,7 +158,7 @@ describe("Tests for the restful api of words ", () => {
       .end(async (err, res) => {
         if (err) return done(err);
 
-        const wordlist = await WordlistService.get(idWordlist);
+        const wordlist = await WordlistService.get(idWordlist,user);
         expect(wordlist.words).toHaveLength(0);
         return done();
       });

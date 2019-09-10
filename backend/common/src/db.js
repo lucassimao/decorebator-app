@@ -5,6 +5,7 @@ const process = require('process')
 let isConnected = false;
 
 mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
 
 mongoose.connection.on('error', (error) => {
     console.log('There was a problem establishing db connection');

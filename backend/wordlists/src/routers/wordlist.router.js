@@ -14,6 +14,13 @@ router
     const wordlists = await service.list(user, { page });
     res.status(200).send({ wordlists });
   })
+  .get("/:id", async (req, res) => {
+    const wordlist = await service.get(req.params.id,req.user);
+    if (wordlist)
+        res.status(200).send(wordlist);
+    else
+        res.sendStatus(404);
+  })  
   .post("/", express.json(), upload.single("words"), async (req, res) => {
     let wordlist = req.body;
 
