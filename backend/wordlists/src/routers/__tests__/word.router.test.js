@@ -27,6 +27,7 @@ describe("Tests for the restful api of words ", () => {
 
   afterEach(async () => {
     await WordlistService.deleteAll();
+    await AuthService.removeAccount("another@gmail.com");
   });
 
   afterAll(async () => {
@@ -34,7 +35,7 @@ describe("Tests for the restful api of words ", () => {
     await WordlistService.deleteAll();
   });
 
-  it("should return a 401 status code for any non authenticated request", async (done) => {
+  it("should return a 401 status code for any non authenticated request", async done => {
     const idWordlist = wordlist._id;
     const idFirstWord = wordlist.words[0]._id;
 
@@ -74,6 +75,51 @@ describe("Tests for the restful api of words ", () => {
       });
   });
 
+  it("should return status 404 after trying to maniuplate a word from a wordlist of a different user", async done => {
+    const anotherUser = await AuthService.register("another@gmail.com", "123456");
+    const anotherUserToken = await AuthService.doLogin("another@gmail.com", "123456");
+
+    const response = await request(app)
+      .post("/wordlists")
+      .set("Authorization", `Bearer ${anotherUserToken}`)
+      .send(object)
+      .expect(201);
+
+    const link = response.headers["link"];
+    const regex = /\/wordlists\/(\S{24})$/;
+    const id = regex.exec(link)[1];
+    const wordlist = await WordlistService.get(id, anotherUser);
+    const firstWordId = String(wordlist.words[0]._id);
+
+
+    // shoudn't read a word from a wordlist of a different user
+    await request(app)
+      .get(`${link}/words/${firstWordId}`)
+      .set("Authorization", `Bearer ${jwtToken}`)
+      .expect(404);   
+
+    // shoudn't add a new word
+    await request(app)
+      .post(`${link}/words`)
+      .set("Authorization", `Bearer ${jwtToken}`)
+      .send({ name: "new word" })
+      .expect(404);
+
+
+    // shoudn't patch a word from a wordlist of a different user
+    await request(app)
+      .patch(`${link}/words/${firstWordId}`)
+      .set("Authorization", `Bearer ${jwtToken}`)
+      .send({ name: "updated word" })
+      .expect(404);
+
+    // shoudn't delete a word from a wordlist of a different user
+    request(app)
+      .delete(`${link}/words/${firstWordId}`)
+      .set("Authorization", `Bearer ${jwtToken}`)
+      .expect(404,done);      
+  });
+
   it("should return status 200 if it was able to return the words after a GET", done => {
     const idWordlist = wordlist._id;
 
@@ -106,7 +152,7 @@ describe("Tests for the restful api of words ", () => {
       .end(async (err, res) => {
         if (err) return done(err);
 
-        const wordlist = await WordlistService.get(idWordlist,user);
+        const wordlist = await WordlistService.get(idWordlist, user);
         expect(wordlist.words).toHaveLength(2);
         expect(wordlist.words[1].name).toBe("winner");
 
@@ -127,7 +173,7 @@ describe("Tests for the restful api of words ", () => {
       .end(async (err, res) => {
         if (err) done(err);
 
-        const wordlist = await WordlistService.get(idWordlist,user);
+        const wordlist = await WordlistService.get(idWordlist, user);
         expect(wordlist.words).toHaveLength(1);
         expect(wordlist.words[0].name).toBe("victory");
         expect(String(wordlist.words[0]._id)).toBe(String(idFirstWord));
@@ -158,7 +204,7 @@ describe("Tests for the restful api of words ", () => {
       .end(async (err, res) => {
         if (err) return done(err);
 
-        const wordlist = await WordlistService.get(idWordlist,user);
+        const wordlist = await WordlistService.get(idWordlist, user);
         expect(wordlist.words).toHaveLength(0);
         return done();
       });

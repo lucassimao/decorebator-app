@@ -1,36 +1,27 @@
 const WordlistDao = require("../dao/wordlist.dao");
 
-const get = idWordlist => {
-  return WordlistDao.findOne({ _id: idWordlist }, "words", { lean: true });
+const get = (idWordlist,idWord,user) => {
+  return WordlistDao.getWord(idWordlist,idWord,user);
 };
 
-const addWord = (idWordlist, newWordObject) => {
-  return WordlistDao.findByIdAndUpdate(
-    idWordlist,
-    { $push: { words: newWordObject } },
-    { lean: true, new: true, select: "words" }
-  );
+const getAll = (idWordlist,user) => {
+    return WordlistDao.getAllWords(idWordlist,user);
+  };
+
+const addWord = (idWordlist, newWordObject, user) => {
+  return WordlistDao.addWord(idWordlist, newWordObject, user);
 };
 
-const patchWord = (idWordlist, idWord, updateObject) => {
-    const updateCommand = Object.keys(updateObject).reduce((command,property) => {
-        command[`words.$.${property}`] = updateObject[property];
-        return command;
-    },{})
-
-  return WordlistDao.updateOne(
-    { _id: idWordlist, "words._id": idWord },
-    { $set: updateCommand }
-  );
+const patchWord = (idWordlist, idWord, updateObject, user) => {
+  return WordlistDao.patchWord(idWordlist, idWord, updateObject, user);
 };
 
-const deleteWord = (idWordlist, idWord) => {
-    return WordlistDao.updateOne({ _id: idWordlist }, { $pull: { words: { _id: idWord } } });
-}
-
+const deleteWord = (idWordlist, idWord, user) => {
+  return WordlistDao.deleteWord(idWordlist, idWord, user);
+};
 
 module.exports = {
-  get,
+  get,getAll,
   addWord,
   patchWord,
   delete: deleteWord

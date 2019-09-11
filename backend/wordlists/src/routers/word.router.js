@@ -9,7 +9,15 @@ router
     else throw "idWordlist is expected";
   })
   .get("/", async (req, res) => {
-    const object = await wordService.get(req.params.idWordlist);
+    const object = await wordService.getAll(req.params.idWordlist,req.user);
+    if (object) {
+      res.status(200).send(object);
+    } else {
+      res.sendStatus(404);
+    }
+  })  
+  .get("/:idWord", async (req, res) => {
+    const object = await wordService.get(req.params.idWordlist,req.params.idWord,req.user);
     if (object) {
       res.status(200).send(object);
     } else {
@@ -17,7 +25,7 @@ router
     }
   })
   .post("/", express.json(), async (req, res) => {
-    const object = await wordService.addWord(req.params.idWordlist, req.body);
+    const object = await wordService.addWord(req.params.idWordlist, req.body,req.user);
 
     if (object) {
       res.set("Link", `/${req.baseUrl}/${object._id}`);
@@ -27,7 +35,8 @@ router
     }
   })
   .patch("/:idWord", express.json(), async (req, res) => {
-    const { nModified, ok } = await wordService.patchWord(req.params.idWordlist, req.params.idWord, req.body);
+    const { nModified, ok } = await wordService.patchWord(req.params.idWordlist, req.params.idWord, req.body,req.user);
+
     if (nModified === 1 && ok === 1) {
       res.sendStatus(204);
     } else {
@@ -35,7 +44,7 @@ router
     }
   })
   .delete("/:idWord", async (req, res) => {
-    const { nModified, ok } = await wordService.delete(req.params.idWordlist, req.params.idWord);
+    const { nModified, ok } = await wordService.delete(req.params.idWordlist, req.params.idWord,req.user);
     if (nModified === 1 && ok === 1) {
       res.sendStatus(204);
     } else {
