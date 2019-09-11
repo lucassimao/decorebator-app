@@ -83,7 +83,7 @@ describe("Tests for the restful api of words ", () => {
       .expect(200)
       .end((error, res) => {
         if (error) {
-          done(error);
+          return done(error);
         }
         expect("words" in res.body).toBeTruthy();
         expect(Array.isArray(res.body.words)).toBeTruthy();
