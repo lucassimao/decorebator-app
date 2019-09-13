@@ -37,7 +37,15 @@ Wordlist.static("getWord", function(idWordlist, idWord, user) {
 });
 
 Wordlist.static("getAllWords", function(idWordlist, user) {
-    return this.findOne({ _id: idWordlist, owner: user._id });
-  });
+  return this.findOne({ _id: idWordlist, owner: user._id });
+});
+
+Wordlist.static("addImage", function(idWordlist, idWord, { url, description },user) {
+  return this.findOneAndUpdate(
+    { _id: idWordlist, "words._id": idWord, owner: user._id },
+    { $push: { "words.$.images": { url, description } } },
+    { new: true, lean: true, select: "words.images words._id" }
+  );
+});
 
 module.exports = mongoose.model("Wordlist", Wordlist);

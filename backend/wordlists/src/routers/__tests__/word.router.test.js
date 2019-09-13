@@ -75,7 +75,7 @@ describe("Tests for the restful api of words ", () => {
       });
   });
 
-  it("should return status 404 after trying to maniuplate a word from a wordlist of a different user", async done => {
+  it("should return status 404 after trying to manipulate a word from a wordlist of a different user", async done => {
     const anotherUser = await AuthService.register("another@gmail.com", "123456");
     const anotherUserToken = await AuthService.doLogin("another@gmail.com", "123456");
 
@@ -104,7 +104,6 @@ describe("Tests for the restful api of words ", () => {
       .set("Authorization", `Bearer ${jwtToken}`)
       .send({ name: "new word" })
       .expect(404);
-
 
     // shoudn't patch a word from a wordlist of a different user
     await request(app)
