@@ -4,12 +4,15 @@ const service = require("../services/image.service");
 const router = express.Router({ mergeParams: true });
 
 router
-  .all("*", (req, res, next) => {
-    if (!req.params.idWordlist) throw "idWordlist is expected";
-    if (!req.params.idWord) throw "idWord is expected";
+  .all("*", async (req, res, next) => {
+    const { idWordlist, idWord } = req.params;
+
+    if (!idWordlist) throw "idWordlist is expected";
+    if (!idWord) throw "idWord is expected";
+
     next();
   })
-  .post("/", express.json(), async (req, res) => {
+  .post("/", express.json(), async (req, res, next) => {
     const wordlist = await service.addImage(req.params.idWordlist, req.params.idWord, req.body, req.user);
 
     if (wordlist) {
@@ -17,12 +20,12 @@ router
       const newImage = word.images[word.images.length - 1];
 
       res.set("Link", `${req.baseUrl}/${newImage._id}`);
-      res.status(201).send();
+      res.sendStatus(201);
     } else {
-      res.status(403).end();
+      next();
     }
   })
-  .patch("/:idImage", express.json(), async (req, res) => {
+  .patch("/:idImage", express.json(), async (req, res, next) => {
     const { nModified, ok } = await service.patchImage(
       req.params.idWordlist,
       req.params.idWord,
@@ -34,10 +37,10 @@ router
     if (nModified === 1 && ok === 1) {
       res.sendStatus(204);
     } else {
-      res.sendStatus(403);
+      next();
     }
   })
-  .delete("/:idImage", async (req, res) => {
+  .delete("/:idImage", async (req, res, next) => {
     const object = ({ nModified, ok } = await service.deleteImage(
       req.params.idWordlist,
       req.params.idWord,
@@ -48,7 +51,7 @@ router
     if (nModified === 1 && ok === 1) {
       res.sendStatus(204);
     } else {
-      res.sendStatus(403);
+      next();
     }
   });
 

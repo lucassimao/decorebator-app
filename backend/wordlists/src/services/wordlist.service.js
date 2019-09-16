@@ -39,7 +39,11 @@ const save = (wordlist, user) => {
  * @returns {Promise} A promise, which resolves to the persisted object, if found
  */
 const get = (id, user) => {
-  return WordlistDao.findOne({ _id: id, owner: user._id });
+  const query = { _id: id };
+  if (user) {
+    query.owner = user._id;
+  }
+  return WordlistDao.findOne(query);
 };
 
 /**
@@ -77,12 +81,24 @@ const remove = (id, user) => {
   return WordlistDao.deleteOne({ _id: id, owner: user._id });
 };
 
+/**
+ * checks if a wordlist with such _id exists
+ *
+ * @param {string|mongoose.Types.ObjectId} idWordlist
+ *
+ * @returns {Promise} A promise, which resolves to a boolean value
+ */
+const exists = (idWordlist, user) => {
+  return WordlistDao.exists({ _id: idWordlist });
+};
+
 const api = {
   list,
   save,
   get,
   update,
-  delete: remove
+  delete: remove,
+  exists
 };
 
 if (config.isTest) api.deleteAll = deleteAll;

@@ -19,8 +19,8 @@ describe("Tests for the restful api of image's words ", () => {
 
   beforeAll(async () => {
     app = await setupTestEnvironment("/", rootRouter, true);
-    user = await AuthService.register("teste@gmail.com", "112358");
-    jwtToken = await AuthService.doLogin("teste@gmail.com", "112358");
+    user = await AuthService.register("image.router@hotmail.com", "112358");
+    jwtToken = await AuthService.doLogin("image.router@hotmail.com", "112358");
   });
 
   beforeEach(async () => {
@@ -29,17 +29,17 @@ describe("Tests for the restful api of image's words ", () => {
 
   afterEach(async () => {
     await WordlistService.deleteAll();
-    await AuthService.removeAccount("another@gmail.com");
+    await AuthService.removeAccount("image.router.another@hotmail.com");
   });
 
   afterAll(async () => {
-    await AuthService.removeAccount("teste@gmail.com");
+    await AuthService.removeAccount("image.router@hotmail.com");
     await WordlistService.deleteAll();
   });
 
   it("should return status 403 after trying to manipulate images from a wordlist of a different user", async done => {
-    const anotherUser = await AuthService.register("another@gmail.com", "123456");
-    const anotherUserToken = await AuthService.doLogin("another@gmail.com", "123456");
+    const anotherUser = await AuthService.register("image.router.another@hotmail.com", "123456");
+    const anotherUserToken = await AuthService.doLogin("image.router.another@hotmail.com", "123456");
     const base64Image = await loadAsBase64(`${__dirname}/fixtures/book.jpeg`);
 
     const response = await request(app)
@@ -63,7 +63,7 @@ describe("Tests for the restful api of image's words ", () => {
 
     const imgLink = imgPostResponse.headers["link"];
 
-    // shoudn't add a new image
+    // shoudn't add a new image with the wrong token
     await request(app)
       .post(`${link}/words/${firstWordId}/images`)
       .set("Authorization", `Bearer ${jwtToken}`)
@@ -75,7 +75,7 @@ describe("Tests for the restful api of image's words ", () => {
       .patch(imgLink)
       .send({ description: "hacked image description" })
       .set("Authorization", `Bearer ${jwtToken}`)
-      .expect(403, done);
+      .expect(403);
 
     // shoudn't delete a image from a wordlist of a different user
     request(app)
@@ -107,7 +107,27 @@ describe("Tests for the restful api of image's words ", () => {
       });
   });
 
-  it("Should return a 204 code after a DELETE", async done => {
+  it("should return 404 after POST new image to an inexisting wordlist", done => {
+    request(app)
+      .post("/wordlists/000000000000/words/111111111111/images")
+      .set("authorization", `Bearer ${jwtToken}`)
+      .set("content-type", "application/json")
+      .send({ base64Image: "", description: "Image description", fileName: "book.jpeg" })
+      .expect(404, "wordlist not found", done);
+  });
+
+  it("should return 404 after POST new image to an inexisting word", done => {
+    const idWordlist = wordlist._id;
+
+    request(app)
+      .post(`/wordlists/${idWordlist}/words/111111111111/images`)
+      .set("authorization", `Bearer ${jwtToken}`)
+      .set("content-type", "application/json")
+      .send({ base64Image: "", description: "Image description", fileName: "book.jpeg" })
+      .expect(404, "word not found", done);
+  });
+
+  it("Should return a 204 after a successfull DELETE", async done => {
     const idWordlist = wordlist._id;
     const idFirstWord = wordlist.words[0]._id;
     const newImageId = await addImage(
@@ -126,11 +146,40 @@ describe("Tests for the restful api of image's words ", () => {
         if (error) return done(error);
 
         expect((await WordlistService.get(idWordlist, user)).words[0].images).toHaveLength(0);
-        done();
+        return done();
       });
   });
 
-  it("it should return 204 after a PATCH request", async done => {
+  it("should return 404 after trying DELETE an image in an inexisting wordlist", done => {
+    request(app)
+      .delete("/wordlists/000000000000/words/111111111111/images/222222222222")
+      .set("authorization", `Bearer ${jwtToken}`)
+      .set("content-type", "application/json")
+      .expect(404, "wordlist not found", done);
+  });
+
+  it("should return 404 after trying DELETE an image in an inexisting word", done => {
+    const idWordlist = wordlist._id;
+
+    request(app)
+      .delete(`/wordlists/${idWordlist}/words/111111111111/images/222222222222`)
+      .set("authorization", `Bearer ${jwtToken}`)
+      .set("content-type", "application/json")
+      .expect(404, "word not found", done);
+  });
+
+  it("should return 404 after trying DELETE an inexisting image", done => {
+    const idWordlist = wordlist._id;
+    const idFirstWord = wordlist.words[0]._id;
+
+    request(app)
+      .delete(`/wordlists/${idWordlist}/words/${idFirstWord}/images/222222222222`)
+      .set("authorization", `Bearer ${jwtToken}`)
+      .set("content-type", "application/json")
+      .expect(404, "image not found", done);
+  });
+
+  it("it should return 204 after a successfull PATCH request", async done => {
     const idWordlist = wordlist._id;
     const idFirstWord = wordlist.words[0]._id;
     const newImageId = await addImage(
@@ -156,6 +205,38 @@ describe("Tests for the restful api of image's words ", () => {
 
         return done();
       });
+  });
+
+  it("should return 404 after trying PATCH an inexisting wordlist", done => {
+    request(app)
+      .patch("/wordlists/000000000000/words/111111111111/images/222222222222")
+      .set("authorization", `Bearer ${jwtToken}`)
+      .set("content-type", "application/json")
+      .send({ description: "new description" })
+      .expect(404, "wordlist not found", done);
+  });
+
+  it("should return 404 after trying PATCH an image in an inexisting word", done => {
+    const idWordlist = wordlist._id;
+
+    request(app)
+      .patch(`/wordlists/${idWordlist}/words/111111111111/images/222222222222`)
+      .set("authorization", `Bearer ${jwtToken}`)
+      .set("content-type", "application/json")
+      .send({ description: "new description" })
+      .expect(404, "word not found", done);
+  });
+
+  it("it should return 404 after trying to PATCH a inexisting image", async done => {
+    const idWordlist = wordlist._id;
+    const idFirstWord = wordlist.words[0]._id;
+
+    request(app)
+      .patch(`/wordlists/${idWordlist}/words/${idFirstWord}/images/000000000000`)
+      .set("authorization", `Bearer ${jwtToken}`)
+      .set("content-type", "application/json")
+      .send({ description: "new description" })
+      .expect(404, "image not found", done);
   });
 });
 
