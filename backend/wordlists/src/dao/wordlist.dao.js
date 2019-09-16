@@ -40,11 +40,31 @@ Wordlist.static("getAllWords", function(idWordlist, user) {
   return this.findOne({ _id: idWordlist, owner: user._id });
 });
 
-Wordlist.static("addImage", function(idWordlist, idWord, { url, description },user) {
+Wordlist.static("addImage", function(idWordlist, idWord, { url, description }, user) {
   return this.findOneAndUpdate(
     { _id: idWordlist, "words._id": idWord, owner: user._id },
     { $push: { "words.$.images": { url, description } } },
     { new: true, lean: true, select: "words.images words._id" }
+  );
+});
+
+Wordlist.static("deleteImage", function(idWordlist, idWord, idImage, user) {
+  return this.updateOne(
+    { _id: idWordlist, "words._id": idWord, owner: user._id },
+    { $pull: { "words.$.images": { _id: idImage } } }
+  );
+});
+
+Wordlist.static("patchImage", function(idWordlist, idWord, idImage, updateObject, user) {
+  const updateCommand = Object.keys(updateObject).reduce((command, property) => {
+    command[`words.$[w].images.$[i].${property}`] = updateObject[property];
+    return command;
+  }, {});
+
+  return this.updateOne(
+    { _id: idWordlist, owner: user._id },
+    { $set: updateCommand },
+    { arrayFilters: [{ "w._id": idWord }, { "i._id": idImage }] }
   );
 });
 

@@ -37,7 +37,7 @@ describe("Tests for the restful api of image's words ", () => {
     await WordlistService.deleteAll();
   });
 
-  it.only("should return status 404 after trying to manipulate images from a wordlist of a different user", async done => {
+  it("should return status 403 after trying to manipulate images from a wordlist of a different user", async done => {
     const anotherUser = await AuthService.register("another@gmail.com", "123456");
     const anotherUserToken = await AuthService.doLogin("another@gmail.com", "123456");
     const base64Image = await loadAsBase64(`${__dirname}/fixtures/book.jpeg`);
@@ -61,28 +61,27 @@ describe("Tests for the restful api of image's words ", () => {
       .send({ base64Image, description: "Image description", fileName: "book.jpeg" })
       .expect(201);
 
-    const imgLink = imgPostResponse.headers['link'];
-
+    const imgLink = imgPostResponse.headers["link"];
 
     // shoudn't add a new image
     await request(app)
       .post(`${link}/words/${firstWordId}/images`)
       .set("Authorization", `Bearer ${jwtToken}`)
       .send({ base64Image, description: "Image description", fileName: "book.jpeg" })
-      .expect(404);
+      .expect(403);
 
-    // shoudn't patch a word from a wordlist of a different user
-    await request(app)
-      .patch(`${link}/words/${firstWordId}`)
-      .set("Authorization", `Bearer ${jwtToken}`)
-      .send({ name: "updated word" })
-      .expect(404);
-
-    // shoudn't delete a word from a wordlist of a different user
+    // shoudn't patch a image from a wordlist of a different user
     request(app)
-      .delete(`${link}/words/${firstWordId}`)
+      .patch(imgLink)
+      .send({ description: "hacked image description" })
       .set("Authorization", `Bearer ${jwtToken}`)
-      .expect(404, done);
+      .expect(403, done);
+
+    // shoudn't delete a image from a wordlist of a different user
+    request(app)
+      .delete(imgLink)
+      .set("Authorization", `Bearer ${jwtToken}`)
+      .expect(403, done);
   });
 
   it("should return 201 after POST to /wordlists/:idWordlist/word/:idWord/images ", async done => {
@@ -163,11 +162,16 @@ describe("Tests for the restful api of image's words ", () => {
 async function addImage(idWordlist, idFirstWord, user, fileName, description) {
   const base64Image = await loadAsBase64(fileName);
 
-  const { words } = await imageService.addImage(idWordlist, idFirstWord, user, {
-    base64Image,
-    description,
-    fileName
-  });
+  const { words } = await imageService.addImage(
+    idWordlist,
+    idFirstWord,
+    {
+      base64Image,
+      description,
+      fileName
+    },
+    user
+  );
 
   const word = words.find(w => String(w._id) == String(idFirstWord));
   const newImageId = word.images[word.images.length - 1]._id;
