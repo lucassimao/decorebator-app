@@ -70,23 +70,10 @@ const deleteWord = (idWordlist, idWord, user) => {
   return WordlistDao.deleteWord(idWordlist, idWord, user);
 };
 
-/**
- * checks if a word exists inside a wordlist with such _id exists
- *
- * @param {string|mongoose.Types.ObjectId} idWordlist
- * @param {string|mongoose.Types.ObjectId} idWord
- *
- * @returns {Promise} A promise, which resolves to a boolean value
- */
-const exists = (idWordlist, idWord, user) => {
-  return WordlistDao.exists({ _id: idWordlist, "words._id": idWord });
-};
-
 module.exports = {
   get,
   getAll,
   addWord,
   patchWord,
-  delete: deleteWord,
-  exists
+  delete: deleteWord
 };

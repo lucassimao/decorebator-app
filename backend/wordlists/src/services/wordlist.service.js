@@ -60,15 +60,6 @@ const update = (id, updateObj, user) => {
 };
 
 /**
- * Remove all existing wordlists. Only available on testing environment
- *
- * @returns {Promise} A promise, which resolves to an operation info object from MongoDB
- */
-const deleteAll = () => {
-  return WordlistDao.deleteMany({});
-};
-
-/**
  * removes an existing wordlist
  *
  * @param {string|mongoose.Types.ObjectId} id The id of the object to be updated
@@ -81,26 +72,13 @@ const remove = (id, user) => {
   return WordlistDao.deleteOne({ _id: id, owner: user._id });
 };
 
-/**
- * checks if a wordlist with such _id exists
- *
- * @param {string|mongoose.Types.ObjectId} idWordlist
- *
- * @returns {Promise} A promise, which resolves to a boolean value
- */
-const exists = (idWordlist, user) => {
-  return WordlistDao.exists({ _id: idWordlist });
-};
-
 const api = {
   list,
   save,
   get,
   update,
-  delete: remove,
-  exists
+  delete: remove
 };
 
-if (config.isTest) api.deleteAll = deleteAll;
 
 module.exports = api;
