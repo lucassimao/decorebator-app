@@ -4,10 +4,6 @@ const wordService = require("../services/word.service");
 const router = express.Router({ mergeParams: true });
 
 router
-  .all("*", (req, res, next) => {
-    if (req.params.idWordlist) next();
-    else throw "idWordlist is expected";
-  })
   .get("/", async (req, res, next) => {
     const object = await wordService.getAll(req.params.idWordlist, req.user);
     if (object) {

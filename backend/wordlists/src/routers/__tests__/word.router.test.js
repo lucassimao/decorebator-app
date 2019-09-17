@@ -26,13 +26,11 @@ describe("Tests for the restful api of words ", () => {
   });
 
   afterEach(async () => {
-    // await WordlistService.deleteAll();
     await AuthService.removeAccount("another@gmail.com");
   });
 
   afterAll(async () => {
     await AuthService.removeAccount("teste@gmail.com");
-    // await WordlistService.deleteAll();
   });
 
   it("should return a 401 status code for any non authenticated request", async done => {

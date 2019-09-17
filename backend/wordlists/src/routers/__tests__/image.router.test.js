@@ -28,13 +28,11 @@ describe("Tests for the restful api of image's words ", () => {
   });
 
   afterEach(async () => {
-    // await WordlistService.deleteAll();
     await AuthService.removeAccount("image.router.another@hotmail.com");
   });
 
   afterAll(async () => {
     await AuthService.removeAccount("image.router@hotmail.com");
-    // await WordlistService.deleteAll();
   });
 
   it("should return status 403 after trying to manipulate images from a wordlist of a different user", async done => {

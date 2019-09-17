@@ -4,14 +4,6 @@ const service = require("../services/image.service");
 const router = express.Router({ mergeParams: true });
 
 router
-  .all("*", async (req, res, next) => {
-    const { idWordlist, idWord } = req.params;
-
-    if (!idWordlist) throw "idWordlist is expected";
-    if (!idWord) throw "idWord is expected";
-
-    next();
-  })
   .post("/", express.json(), async (req, res, next) => {
     const wordlist = await service.addImage(req.params.idWordlist, req.params.idWord, req.body, req.user);
 

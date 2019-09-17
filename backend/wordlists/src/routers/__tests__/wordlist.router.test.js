@@ -46,7 +46,6 @@ describe("Wordlist's restful API test", () => {
   afterAll(async () => {
     await AuthService.removeAccount("wordlist1@gmail.com");
     await AuthService.removeAccount("wordlist2@gmail.com");
-    // await WordlistService.deleteAll();
   });
 
   it("should return a 401 status code for any non authenticated request", async () => {
