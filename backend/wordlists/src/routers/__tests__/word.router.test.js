@@ -17,8 +17,8 @@ describe("Tests for the restful api of words ", () => {
 
   beforeAll(async () => {
     app = await setupTestEnvironment("/", rootRouter, true);
-    user = await AuthService.register("teste@gmail.com", "112358");
-    jwtToken = await AuthService.doLogin("teste@gmail.com", "112358");
+    user = await AuthService.register("word1@gmail.com", "112358");
+    jwtToken = await AuthService.doLogin("word1@gmail.com", "112358");
   });
 
   beforeEach(async () => {
@@ -26,11 +26,11 @@ describe("Tests for the restful api of words ", () => {
   });
 
   afterEach(async () => {
-    await AuthService.removeAccount("another@gmail.com");
+    await AuthService.removeAccount("word2@gmail.com");
   });
 
   afterAll(async () => {
-    await AuthService.removeAccount("teste@gmail.com");
+    await AuthService.removeAccount("word1@gmail.com");
   });
 
   it("should return a 401 status code for any non authenticated request", async done => {
@@ -74,8 +74,8 @@ describe("Tests for the restful api of words ", () => {
   });
 
   it("should return status 403 after trying to manipulate a word from a wordlist of a different user", async done => {
-    const anotherUser = await AuthService.register("another@gmail.com", "123456");
-    const anotherUserToken = await AuthService.doLogin("another@gmail.com", "123456");
+    const anotherUser = await AuthService.register("word2@gmail.com", "123456");
+    const anotherUserToken = await AuthService.doLogin("word2@gmail.com", "123456");
 
     const response = await request(app)
       .post("/wordlists")
