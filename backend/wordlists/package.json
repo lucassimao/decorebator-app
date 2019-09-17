@@ -1,6 +1,6 @@
 {
   "name": "decorebator-wordlist-backend",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Decorebator wordlist microservice",
   "scripts": {
     "test": "npx jest --detectOpenHandles 'src/'",
