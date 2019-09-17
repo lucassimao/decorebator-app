@@ -8,47 +8,53 @@ router
     if (req.params.idWordlist) next();
     else throw "idWordlist is expected";
   })
-  .get("/", async (req, res) => {
-    const object = await wordService.getAll(req.params.idWordlist,req.user);
+  .get("/", async (req, res, next) => {
+    const object = await wordService.getAll(req.params.idWordlist, req.user);
     if (object) {
       res.status(200).send(object);
     } else {
-      res.sendStatus(404);
-    }
-  })  
-  .get("/:idWord", async (req, res) => {
-    const object = await wordService.get(req.params.idWordlist,req.params.idWord,req.user);
-    if (object) {
-      res.status(200).send(object);
-    } else {
-      res.sendStatus(404);
+      next();
     }
   })
-  .post("/", express.json(), async (req, res) => {
-    const object = await wordService.addWord(req.params.idWordlist, req.body,req.user);
+  .get("/:idWord", async (req, res, next) => {
+    const object = await wordService.get(req.params.idWordlist, req.params.idWord, req.user);
+    if (object) {
+      res.status(200).send(object);
+    } else {
+      next();
+    }
+  })
+  .post("/", express.json(), async (req, res, next) => {
+    const object = await wordService.addWord(req.params.idWordlist, req.body, req.user);
 
     if (object) {
       res.set("Link", `/${req.baseUrl}/${object._id}`);
       res.status(201).end();
     } else {
-      res.status(404).end();
+      next();
+
     }
   })
-  .patch("/:idWord", express.json(), async (req, res) => {
-    const { nModified, ok } = await wordService.patchWord(req.params.idWordlist, req.params.idWord, req.body,req.user);
+  .patch("/:idWord", express.json(), async (req, res, next) => {
+    const { nModified, ok } = await wordService.patchWord(
+      req.params.idWordlist,
+      req.params.idWord,
+      req.body,
+      req.user
+    );
 
     if (nModified === 1 && ok === 1) {
       res.sendStatus(204);
     } else {
-      res.sendStatus(404);
+      next();
     }
   })
-  .delete("/:idWord", async (req, res) => {
-    const { nModified, ok } = await wordService.delete(req.params.idWordlist, req.params.idWord,req.user);
+  .delete("/:idWord", async (req, res, next) => {
+    const { nModified, ok } = await wordService.delete(req.params.idWordlist, req.params.idWord, req.user);
     if (nModified === 1 && ok === 1) {
       res.sendStatus(204);
     } else {
-      res.sendStatus(404);
+      next();
     }
   });
 

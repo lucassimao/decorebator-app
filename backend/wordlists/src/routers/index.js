@@ -13,7 +13,9 @@ const root = Router();
  *
  */
 const resolveStatus = async (req, res) => {
-  const { idWord, idWordlist } = req.params;
+
+  const regex = /\/wordlists\/(\w+)(\/words\/(\w+)(\/images\/(\w+))?)?/;
+  const [, idWordlist, , idWord, , idImage] = regex.exec(req.baseUrl + req.url);
   const wordlist = await wordlistService.get(idWordlist);
 
   if (!wordlist) {
@@ -33,9 +35,8 @@ const resolveStatus = async (req, res) => {
       return;
     }
 
-    if (req.url != "/") {
-      const imageId = req.url.substring(1);
-      const image = word.images.find(img => String(img._id) == imageId);
+    if (idImage) {
+      const image = word.images.find(img => String(img._id) == idImage);
       if (!image) {
         res.status(404).send("image not found");
         return;
@@ -45,8 +46,9 @@ const resolveStatus = async (req, res) => {
 };
 
 root
-  .use("/wordlists/:idWordlist/words/:idWord/images", imageRouter, resolveStatus)
-  .use("/wordlists/:idWordlist/words", wordRouter, resolveStatus)
-  .use("/wordlists", wordlistRouter);
+  .use("/wordlists/:idWordlist/words/:idWord/images", imageRouter)
+  .use("/wordlists/:idWordlist/words", wordRouter)
+  .use("/wordlists", wordlistRouter)
+  .use(resolveStatus);
 
 module.exports = root;

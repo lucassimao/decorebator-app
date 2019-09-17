@@ -20,13 +20,13 @@ describe("Wordlist's restful API test", () => {
 
   beforeAll(async () => {
     app = await setupTestEnvironment("/", rootRouter, true);
-    const user = await AuthService.register("teste@gmail.com", "112358");
+    const user = await AuthService.register("wordlist1@gmail.com", "112358");
 
     userId = user._id;
-    jwtToken = await AuthService.doLogin("teste@gmail.com", "112358");
+    jwtToken = await AuthService.doLogin("wordlist1@gmail.com", "112358");
 
     // registering 10 wordlists for a different user, in order to test multi tenancy
-    const { _id } = await AuthService.register("another@gmail.com", "123");
+    const { _id } = await AuthService.register("wordlist2@gmail.com", "123");
 
     for (let i = 0; i < 10; ++i) {
       const object = await WordlistService.save(
@@ -44,9 +44,9 @@ describe("Wordlist's restful API test", () => {
   });
 
   afterAll(async () => {
-    await AuthService.removeAccount("teste@gmail.com");
-    await AuthService.removeAccount("another@gmail.com");
-    await WordlistService.deleteAll();
+    await AuthService.removeAccount("wordlist1@gmail.com");
+    await AuthService.removeAccount("wordlist2@gmail.com");
+    // await WordlistService.deleteAll();
   });
 
   it("should return a 401 status code for any non authenticated request", async () => {
@@ -86,6 +86,15 @@ describe("Wordlist's restful API test", () => {
       .expect("Content-Type", /json/)
       .expect(200, { wordlists: [] }, done);
   });
+
+  it("should return status 403 trying to access a existing wordlist of a different user", done => {
+    const { _id } = wordlistsFromAnotherUser[0];
+
+    request(app)
+      .get(`/wordlists/${_id}`)
+      .set("Authorization", `Bearer ${jwtToken}`)
+      .expect(403, done);
+  });  
 
   it("should return status 201 if it was able to create a new wordlist after a POST request", async done => {
     const postResponse = await request(app)
@@ -146,7 +155,7 @@ describe("Wordlist's restful API test", () => {
       .expect(404, done);
   });
 
-  it("should return status 404 after trying to PATCH a wordlist of another user", done => {
+  it("should return status 403 after trying to PATCH a wordlist of another user", done => {
     const wordlistFromAnotherUser = wordlistsFromAnotherUser[0];
     // ensuring wordlist is form another user
     expect(String(wordlistFromAnotherUser.owner)).not.toBe(String(userId));
@@ -156,7 +165,7 @@ describe("Wordlist's restful API test", () => {
     request(app)
       .patch(`/wordlists/${_id}`)
       .set("Authorization", `Bearer ${jwtToken}`)
-      .expect(404, done);
+      .expect(403, done);
   });
 
   it("should return the status 204 if it was able to partially update a wordlist after a PATCH request", async done => {
@@ -198,6 +207,15 @@ describe("Wordlist's restful API test", () => {
       .delete("/wordlists/000000000000")
       .set("Authorization", `Bearer ${jwtToken}`)
       .expect(404, done);
+  });
+
+  it("should return status 403 after a DELETE to a wordlist of a different user", done => {
+    const { _id } = wordlistsFromAnotherUser[0];
+
+    request(app)
+      .delete(`/wordlists/${_id}`)
+      .set("Authorization", `Bearer ${jwtToken}`)
+      .expect(403, done);
   });
 
   it("should return the status 204 if it was able to delete a wordlist", async done => {

@@ -26,13 +26,13 @@ describe("Tests for the restful api of words ", () => {
   });
 
   afterEach(async () => {
-    await WordlistService.deleteAll();
+    // await WordlistService.deleteAll();
     await AuthService.removeAccount("another@gmail.com");
   });
 
   afterAll(async () => {
     await AuthService.removeAccount("teste@gmail.com");
-    await WordlistService.deleteAll();
+    // await WordlistService.deleteAll();
   });
 
   it("should return a 401 status code for any non authenticated request", async done => {
@@ -75,7 +75,7 @@ describe("Tests for the restful api of words ", () => {
       });
   });
 
-  it("should return status 404 after trying to manipulate a word from a wordlist of a different user", async done => {
+  it("should return status 403 after trying to manipulate a word from a wordlist of a different user", async done => {
     const anotherUser = await AuthService.register("another@gmail.com", "123456");
     const anotherUserToken = await AuthService.doLogin("another@gmail.com", "123456");
 
@@ -96,27 +96,27 @@ describe("Tests for the restful api of words ", () => {
     await request(app)
       .get(`${link}/words/${firstWordId}`)
       .set("Authorization", `Bearer ${jwtToken}`)
-      .expect(404);   
+      .expect(403);   
 
     // shoudn't add a new word
     await request(app)
       .post(`${link}/words`)
       .set("Authorization", `Bearer ${jwtToken}`)
       .send({ name: "new word" })
-      .expect(404);
+      .expect(403);
 
     // shoudn't patch a word from a wordlist of a different user
     await request(app)
       .patch(`${link}/words/${firstWordId}`)
       .set("Authorization", `Bearer ${jwtToken}`)
       .send({ name: "updated word" })
-      .expect(404);
+      .expect(403);
 
     // shoudn't delete a word from a wordlist of a different user
     request(app)
       .delete(`${link}/words/${firstWordId}`)
       .set("Authorization", `Bearer ${jwtToken}`)
-      .expect(404,done);      
+      .expect(403,done);      
   });
 
   it("should return status 200 if it was able to return the words after a GET", done => {

@@ -11,16 +11,17 @@ router
     const user = req.user;
     const { page = 0 } = req.query;
 
-    const wordlists = await service.list({ page },user);
+    const wordlists = await service.list({ page }, user);
     res.status(200).send({ wordlists });
   })
-  .get("/:id", async (req, res) => {
-    const wordlist = await service.get(req.params.id,req.user);
-    if (wordlist)
-        res.status(200).send(wordlist);
-    else
-        res.sendStatus(404);
-  })  
+  .get("/:id", async (req, res, next) => {
+    const wordlist = await service.get(req.params.id, req.user);
+    if (wordlist) {
+      res.status(200).send(wordlist);
+    } else {
+      next();
+    }
+  })
   .post("/", express.json(), upload.single("words"), async (req, res) => {
     let wordlist = req.body;
 
@@ -31,12 +32,12 @@ router
       if (/text\/plain/.test(mimetype)) {
         const text = buffer.toString("utf8");
         wordlist.words = text.split("\n").map(line => {
-          return { name: line.trim() }
+          return { name: line.trim() };
         });
       }
     }
 
-    wordlist = await service.save(wordlist,req.user);
+    wordlist = await service.save(wordlist, req.user);
 
     if (wordlist._id) {
       res.set("Link", `/wordlists/${wordlist._id}`);
@@ -46,23 +47,23 @@ router
       res.status(415).end();
     }
   })
-  .delete("/:id", async (req, res) => {
-    const dbResponse = await service.delete(req.params.id,req.user);
+  .delete("/:id", async (req, res, next) => {
+    const dbResponse = await service.delete(req.params.id, req.user);
 
     if (dbResponse.ok === 1 && dbResponse.deletedCount === 1) {
       res.status(204).end();
     } else {
-      res.status(404).end();
+      next();
     }
   })
-  .patch("/:id", express.json(), async (req, res) => {
-    const updateResult = await service.update(req.params.id, req.body,req.user);
+  .patch("/:id", express.json(), async (req, res, next) => {
+    const updateResult = await service.update(req.params.id, req.body, req.user);
 
     if (updateResult.ok === 1 && updateResult.nModified === 1) {
       res.set("Link", `/wordlists/${req.params.id}`);
       res.status(204).end();
     } else {
-      res.status(404).end();
+      next();
     }
   });
 
