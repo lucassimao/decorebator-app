@@ -3,15 +3,24 @@ const jwtBuilder = require("jwt-builder");
 const UserDao = require("../dao/user.dao");
 const config = require("../config");
 
-// all methods return promises
 
-const register = (email, password) => {
+
+/**
+ *
+ * @param {String} name User full name
+ * @param {String} country User country
+ * @param {String} email User email. It'll be used as his login
+ * @param {String} password User password. The plain password won't be stored, It'll be hashed
+ *
+ * @returns {Promise} Promise to be resolved to the new user registered on the database
+ */
+const register = (name, country, email, password) => {
   return new Promise((resolve, reject) => {
     bcrypt.hash(password, 10, function(err, hash) {
       if (err) reject(err);
       else resolve(hash);
     });
-  }).then(encrypted_password => UserDao.create({ email, encrypted_password }));
+  }).then(encrypted_password => UserDao.create({ name, country, email, encrypted_password }));
 };
 
 const doLogin = (email, password) => {
