@@ -43,6 +43,21 @@ describe("Signup endpoint tests", () => {
       .expect(400, "User already exists", done);
   });
 
+  it("should deny registering with a invalid email", done => {
+    const user = {
+      login: "my login",
+      name: "Lucas Simão",
+      password: "123456789",
+      country: "BR"
+    };
+
+    request(app)
+      .post("/signup")
+      .set("content-type", "application/json")
+      .send(user)
+      .expect(400, "A valid email must be used as your account login", done);
+  });
+
   it("should forbid unknown countries", done => {
     const user = {
       login: "signup.test@gmail.com",

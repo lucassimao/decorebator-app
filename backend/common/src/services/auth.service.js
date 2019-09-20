@@ -3,8 +3,6 @@ const jwtBuilder = require("jwt-builder");
 const UserDao = require("../dao/user.dao");
 const config = require("../config");
 
-
-
 /**
  *
  * @param {String} name User full name
@@ -15,6 +13,10 @@ const config = require("../config");
  * @returns {Promise} Promise to be resolved to the new user registered on the database
  */
 const register = (name, country, email, password) => {
+  if (isStringEmpty(password)) {
+    return Promise.reject("A password must be provided");
+  }
+
   return new Promise((resolve, reject) => {
     bcrypt.hash(password, 10, function(err, hash) {
       if (err) reject(err);
@@ -24,9 +26,16 @@ const register = (name, country, email, password) => {
 };
 
 const doLogin = (email, password) => {
+  if (isStringEmpty(email) || isStringEmpty(password)) {
+    return Promise.reject("Login and password must be provided");
+  }
+
   return UserDao.findOne({ email }, "encrypted_password")
     .exec()
     .then(user => {
+      if (!user) {
+        throw "user not found";
+      }
       const doesMatch = bcrypt.compareSync(password, user.encrypted_password);
       if (doesMatch) {
         return user;
@@ -43,15 +52,15 @@ const doLogin = (email, password) => {
         exp: 3600,
         iss: config.domain,
         userId: user._id,
-        headers: {
-          header1: "ok"
-        },
         claims: {
-          claim1: "ok"
+          role: "user"
         }
       });
     });
 };
+
+// TODO use validator library
+const isStringEmpty = string => !string || string.trim().length == 0;
 
 const removeAccount = email => UserDao.deleteMany({ email });
 
