@@ -25,6 +25,13 @@ const register = (name, country, email, password) => {
   }).then(encrypted_password => UserDao.create({ name, country, email, encrypted_password }));
 };
 
+/**
+ *
+ * @param {String} email User email, used as username
+ * @param {String} password User password
+ *
+ * @returns {Promise} Promise to be resolved to the jwt token that will allow the user send authenticated requests
+ */
 const doLogin = (email, password) => {
   if (isStringEmpty(email) || isStringEmpty(password)) {
     return Promise.reject("Login and password must be provided");
