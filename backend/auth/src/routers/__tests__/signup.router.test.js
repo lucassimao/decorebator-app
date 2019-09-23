@@ -1,8 +1,8 @@
 const request = require("supertest");
 const express = require("express");
-const AuthService = require("../../services/auth.service");
+const authService = require("../../services/auth.service");
 const rootRooter = require("../../routers");
-const { db } = require("decorebator-common");
+const db = require("../../db");
 
 describe("Signup endpoint tests", () => {
   let app;
@@ -18,15 +18,20 @@ describe("Signup endpoint tests", () => {
   });
 
   beforeEach(async () => {
-    await AuthService.removeAccount("signup.test@gmail.com");
-    await AuthService.removeAccount("signup.test2@gmail.com");
+    await authService.removeAccount("signup.test@gmail.com");
+    await authService.removeAccount("signup.test2@gmail.com");
   });
 
   it("Should be able to register a new user", done => {
     request(app)
       .post("/signup")
       .set("content-type", "application/json")
-      .send({ login: "signup.test@gmail.com", name: "Lucas Simão", password: "123456789", country: "BR" })
+      .send({
+        login: "signup.test@gmail.com",
+        name: "Lucas Simão",
+        password: "123456789",
+        country: "BR"
+      })
       .expect(200, done);
   });
 

@@ -4,8 +4,9 @@
   "description": "Decorebator authentication endpoint",
   "main": "index.js",
   "scripts": {
-    "start": "node --preserve-symlinks src/index.js",
+    "start": "node src/index.js",
     "test": "jest --detectOpenHandles 'src/'",
+    "format": "prettier --write 'src/**/*.js'",
     "jest-watch": "jest --watch --detectOpenHandles 'src/'"
   },
   "repository": {
@@ -20,7 +21,6 @@
   "homepage": "https://github.com/lucassimao/decorebator-app#readme",
   "dependencies": {
     "bcrypt": "^3.0.6",
-    "@decorebator/common": "file:../common",
     "express": "^4.17.1",
     "jwt-builder": "^1.1.0",
     "mongoose": "^5.7.1",

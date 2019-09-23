@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwtBuilder = require("jwt-builder");
 const UserDao = require("../dao/user.dao");
-const {config} = require("decorebator-common");
+const config = require("../config");
 
 /**
  *
@@ -22,7 +22,9 @@ const register = (name, country, email, password) => {
       if (err) reject(err);
       else resolve(hash);
     });
-  }).then(encrypted_password => UserDao.create({ name, country, email, encrypted_password }));
+  }).then(encrypted_password =>
+    UserDao.create({ name, country, email, encrypted_password })
+  );
 };
 
 /**

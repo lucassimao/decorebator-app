@@ -1,6 +1,6 @@
 const authService = require("../auth.service");
 const UserDao = require("../../dao/user.dao");
-const { db } = require("decorebator-common");
+const db = require("../../db");
 
 describe("Auth service tests", () => {
   beforeAll(async () => {
@@ -42,7 +42,7 @@ describe("Auth service tests", () => {
     let count = await UserDao.countDocuments().exec();
     expect(count).toBe(0);
 
-    await authService.register("USER1","US","test@gmail.com", "12345");
+    await authService.register("USER1", "US", "test@gmail.com", "12345");
 
     count = await UserDao.countDocuments().exec();
     expect(count).toBe(1);

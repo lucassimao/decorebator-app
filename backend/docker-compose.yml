@@ -1,17 +1,37 @@
 version: '3'
 services:
-  wordlists:
+  auth:
+    depends_on: 
+      - verdaccio
+      - db
     build:
-      context: .
-      dockerfile: wordlists/Dockerfile
-      args: 
-        NODE_ENV: production
+      context: auth/
+      args:
         JWT_SECRET_KEY: 12345
         MONGO_DB_URL: mongodb://db:27017/decorebator
-        HTTP_PORT: 3000
-    ports:
-    - "3000:3000"
-    links: 
-      - db
+        NPM_REPOSITORY: http://verdaccio:4873       
+    ports: 
+      - "3000:3000" 
+  # wordlists:
+  #   build:
+  #     context: .
+  #     dockerfile: wordlists/Dockerfile
+  #     args: 
+  #       NODE_ENV: production
+  #       JWT_SECRET_KEY: 12345
+  #       MONGO_DB_URL: mongodb://db:27017/decorebator
+  #       HTTP_PORT: 3000
+  #   ports:
+  #   - "3000:3000"
+  verdaccio:
+    image: verdaccio/verdaccio:4.0
+    volumes: 
+        - verdaccio_conf:/verdaccio/conf
+        - verdaccio_storage:/verdaccio/storage
+        - verdaccio_plugins:/verdaccio/plugins
   db:
-    image: mongo:latest 
+    image: mongo:4.2 
+volumes: 
+  verdaccio_conf:
+  verdaccio_storage:
+  verdaccio_plugins:

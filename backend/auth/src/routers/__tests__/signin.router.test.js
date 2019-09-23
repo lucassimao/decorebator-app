@@ -1,8 +1,8 @@
 const express = require("express");
 const request = require("supertest");
 const rootRooter = require("../../routers");
-const AuthService = require("../../services/auth.service");
-const { db } = require("decorebator-common");
+const authService = require("../../services/auth.service");
+const db = require("../../db");
 
 describe("Login endpoint tests", () => {
   let app;
@@ -18,14 +18,19 @@ describe("Login endpoint tests", () => {
   });
 
   beforeEach(async () => {
-    await AuthService.removeAccount("sigin.test@gmail.com");
+    await authService.removeAccount("sigin.test@gmail.com");
   });
 
   it("A registered user should be able to login", async done => {
     await request(app)
       .post("/signup")
       .set("content-type", "application/json")
-      .send({ login: "sigin.test@gmail.com", name: "Lucas Simão", password: "123456789", country: "BR" })
+      .send({
+        login: "sigin.test@gmail.com",
+        name: "Lucas Simão",
+        password: "123456789",
+        country: "BR"
+      })
       .expect(200);
 
     request(app)
@@ -33,14 +38,23 @@ describe("Login endpoint tests", () => {
       .set("content-type", "application/json")
       .send({ login: "sigin.test@gmail.com", password: "123456789" })
       .expect(200)
-      .expect("authorization", /^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/, done);
+      .expect(
+        "authorization",
+        /^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/,
+        done
+      );
   });
 
   it("The password and login field are required in order to login", async done => {
     await request(app)
       .post("/signup")
       .set("content-type", "application/json")
-      .send({ login: "sigin.test@gmail.com", name: "Lucas Simão", password: "123456789", country: "BR" })
+      .send({
+        login: "sigin.test@gmail.com",
+        name: "Lucas Simão",
+        password: "123456789",
+        country: "BR"
+      })
       .expect(200);
 
     await request(app)
@@ -57,7 +71,7 @@ describe("Login endpoint tests", () => {
   });
 
   it("A inexisting user shouldn't be able to login", async done => {
-    await AuthService.removeAccount("inexisting@gmail.com");
+    await authService.removeAccount("inexisting@gmail.com");
 
     request(app)
       .post("/signin")
