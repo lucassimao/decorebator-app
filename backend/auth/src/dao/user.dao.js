@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const validator = require('validator');
 var fs = require("fs");
 
-var countriesCode = JSON.parse(fs.readFileSync(__dirname + "/../countries.json", "utf8")).map(
+var countriesCode = JSON.parse(fs.readFileSync(__dirname + "/../resources/countries.json", "utf8")).map(
   country => country["alpha-2"]
 );
 

@@ -1,5 +1,5 @@
 const express = require("express");
-const { AuthService } = require("decorebator-common");
+const AuthService = require("../services/auth.service");
 
 const router = express.Router();
 
@@ -15,12 +15,13 @@ router.post("/signup", express.json(), async (req, res, next) => {
         break;
       case "ValidationError":
         res.status(400);
-        
-        if ("country" in error.errors) res.send("Invalid country")
-        else if ("email" in error.errors) res.send(error.errors.email.message)
+
+        if ("country" in error.errors) res.send("Invalid country");
+        else if ("email" in error.errors) res.send(error.errors.email.message);
         else res.send(error.message);
         break;
       default:
+        console.error(error);
         next(error);
     }
   }

@@ -1,12 +1,20 @@
+const express = require("express");
 const request = require("supertest");
-const { AuthService, setupTestEnvironment } = require("decorebator-common");
 const rootRooter = require("../../routers");
+const AuthService = require("../../services/auth.service");
+const { db } = require("decorebator-common");
 
 describe("Login endpoint tests", () => {
   let app;
 
   beforeAll(async () => {
-    app = await setupTestEnvironment("/", rootRooter, false);
+    await db.connect();
+    app = express();
+    app.use("/", rootRooter);
+  });
+
+  afterAll(async () => {
+    await db.disconnect();
   });
 
   beforeEach(async () => {

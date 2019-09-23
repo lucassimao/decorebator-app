@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwtBuilder = require("jwt-builder");
 const UserDao = require("../dao/user.dao");
-const config = require("../config");
+const {config} = require("decorebator-common");
 
 /**
  *
@@ -30,7 +30,7 @@ const register = (name, country, email, password) => {
  * @param {String} email User email, used as username
  * @param {String} password User password
  *
- * @returns {Promise} Promise to be resolved to the jwt token that will allow the user send authenticated requests
+ * @returns {Promise} Promise to be resolved to the jwt token that will allow the user to send authenticated requests
  */
 const doLogin = (email, password) => {
   if (isStringEmpty(email) || isStringEmpty(password)) {

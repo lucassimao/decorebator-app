@@ -1,5 +1,5 @@
 const express = require("express");
-const { AuthService } = require("decorebator-common");
+const AuthService = require("../services/auth.service");
 
 const router = express.Router();
 
