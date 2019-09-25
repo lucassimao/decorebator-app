@@ -2,25 +2,28 @@ const express = require("express");
 const wordService = require("../services/word.service");
 
 const router = express.Router({ mergeParams: true });
+const wrapAsync = asyncMiddleware => {
+  return (req, res, next) => asyncMiddleware(req, res, next).catch(next);
+};
 
 router
-  .get("/", async (req, res, next) => {
+  .get("/", wrapAsync(async (req, res, next) => {
     const object = await wordService.getAll(req.params.idWordlist, req.user);
     if (object) {
       res.status(200).send(object);
     } else {
       next();
     }
-  })
-  .get("/:idWord", async (req, res, next) => {
+  }))
+  .get("/:idWord", wrapAsync(async (req, res, next) => {
     const object = await wordService.get(req.params.idWordlist, req.params.idWord, req.user);
     if (object) {
       res.status(200).send(object);
     } else {
       next();
     }
-  })
-  .post("/", express.json(), async (req, res, next) => {
+  }))
+  .post("/", express.json(), wrapAsync(async (req, res, next) => {
     const object = await wordService.addWord(req.params.idWordlist, req.body, req.user);
 
     if (object) {
@@ -28,10 +31,9 @@ router
       res.status(201).end();
     } else {
       next();
-
     }
-  })
-  .patch("/:idWord", express.json(), async (req, res, next) => {
+  }))
+  .patch("/:idWord", express.json(), wrapAsync(async (req, res, next) => {
     const { nModified, ok } = await wordService.patchWord(
       req.params.idWordlist,
       req.params.idWord,
@@ -44,14 +46,14 @@ router
     } else {
       next();
     }
-  })
-  .delete("/:idWord", async (req, res, next) => {
+  }))
+  .delete("/:idWord", wrapAsync(async (req, res, next) => {
     const { nModified, ok } = await wordService.delete(req.params.idWordlist, req.params.idWord, req.user);
     if (nModified === 1 && ok === 1) {
       res.sendStatus(204);
     } else {
       next();
     }
-  });
+  }));
 
 module.exports = router;
