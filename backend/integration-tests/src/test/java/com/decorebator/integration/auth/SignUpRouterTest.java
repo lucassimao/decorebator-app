@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.equalTo;
 import java.io.File;
 
 import com.decorebator.beans.UserRegistration;
+import com.decorebator.integration.TestUtils;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -24,7 +25,6 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 
 /**
- * SignUpRouterTest
  * 
  * Integration tests for /signup microservice
  */
@@ -46,12 +46,9 @@ public class SignUpRouterTest {
     @Before
     public void clearMongoDb() {
         String mongodbHost = environment.getServiceHost("db", 27017);
-        String uri = String.format("mongodb://%s:27017",mongodbHost);
-        MongoClient mongoClient = MongoClients.create(uri);
-        MongoDatabase db = mongoClient.getDatabase("decorebator");
-        MongoCollection<Document> collection = db.getCollection("users");
-        collection.deleteMany(new BsonDocument());
-        mongoClient.close();
+        int mongodbPort = environment.getServicePort("db", 27017);
+        
+        TestUtils.clearMongoDb(mongodbHost,mongodbPort);
     }
 
     @Test

@@ -17,7 +17,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import io.restassured.http.ContentType;
 
 /**
- * Unit test for /signin route
+ * Integration tests for /signin route
  */
 public class SignInRouterTest 
 {
