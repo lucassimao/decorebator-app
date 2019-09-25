@@ -4,7 +4,7 @@ const path = require("path");
 const shortid = require("shortid");
 const fsPromises = require("fs").promises;
 const AWS = require("aws-sdk");
-const config = require("decorebator-common").config;
+const config = require("../config");
 
 const s3 = new AWS.S3({ apiVersion: "2006-03-01" });
 

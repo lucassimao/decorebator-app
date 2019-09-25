@@ -8,6 +8,7 @@ const helmet = require("helmet");
 
 const UserDao = require("./dao/user.dao");
 const config = require("./config");
+const routers = require("./routers");
 
 var jwtStrategyOpts = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -30,17 +31,12 @@ const jwtStrategy = new JwtStrategy(jwtStrategyOpts, async (jwt_payload, done) =
   }
 });
 
-function setup(enableSecurity = true) {
-  const app = express();
-  if (enableSecurity) {
-    passport.use(jwtStrategy);
-    app.use(passport.initialize());
-    app.use(passport.authenticate("jwt", { session: false }));
-  }
-  if (config.httpOptions.enableCompression) app.use(compression());
-  app.use(helmet());
+const app = express();
+passport.use(jwtStrategy);
+app.use(passport.initialize());
+app.use(passport.authenticate("jwt", { session: false }));
+if (config.httpOptions.enableCompression) app.use(compression());
+app.use(helmet());
+app.use("/", routers);
 
-  return app;
-}
-
-module.exports = setup;
+module.exports = app;

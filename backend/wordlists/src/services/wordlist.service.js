@@ -1,4 +1,4 @@
-const config = require("decorebator-common").config;
+const config = require("../config");
 const WordlistDao = require("../dao/wordlist.dao");
 
 /**
