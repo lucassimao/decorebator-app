@@ -11,8 +11,11 @@ import com.decorebator.beans.UserRegistration;
 import com.github.dockerjava.api.DockerClient;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
+import org.bson.BsonDocument;
+import org.bson.Document;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -39,15 +42,18 @@ public class SignUpRouterTest {
     @BeforeClass
     public static void setup() {
         String host = environment.getServiceHost("auth", 3000);
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
         RestAssured.baseURI = "http://" + host + ":3000";
     }
 
     @Before
     public void clearMongoDb() {
         String mongodbHost = environment.getServiceHost("db", 27017);
-        String uri = "mongodb://" + mongodbHost + ":27017";
+        String uri = String.format("mongodb://%s:27017",mongodbHost);
         MongoClient mongoClient = MongoClients.create(uri);
-        mongoClient.getDatabase("decorebator").drop();
+        MongoDatabase db = mongoClient.getDatabase("decorebator");
+        MongoCollection<Document> collection = db.getCollection("users");
+        collection.deleteMany(new BsonDocument());
         mongoClient.close();
     }
 
@@ -65,7 +71,7 @@ public class SignUpRouterTest {
     }
 
     @Test
-    public void shouldDenyRegistrationOfDuplicatedUsers() {
+    public void shouldDenyRegistrationWithSameEmail() {
         var userRegistration  = new UserRegistration("sigup.test@gmail.com", "Lucas Simão","123456789","BR" );
         var userRegistration2  = new UserRegistration("sigup.test@gmail.com", "any name","sssss","BR" );
 
@@ -77,6 +83,7 @@ public class SignUpRouterTest {
         .then()
             .statusCode(200);
 
+
         given()
             .contentType(ContentType.JSON)
             .body(userRegistration2)
@@ -84,7 +91,7 @@ public class SignUpRouterTest {
             .post("/signup")
         .then()
             .statusCode(400)
-            .body(equalTo("User already exists"));        
+            .body(equalTo("User already exists"));
     }
 
     @Test
