@@ -1,14 +1,11 @@
 package com.decorebator.integration.auth;
 
 import static io.restassured.RestAssured.*;
-import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.equalTo;
 
 import java.io.File;
 
-import com.decorebator.beans.UserLogin;
 import com.decorebator.beans.UserRegistration;
-import com.github.dockerjava.api.DockerClient;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -43,7 +40,7 @@ public class SignUpRouterTest {
     public static void setup() {
         String host = environment.getServiceHost("auth", 3000);
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
-        RestAssured.baseURI = "http://" + host + ":3000";
+        RestAssured.baseURI = String.format("http://%s:3000",host);
     }
 
     @Before
