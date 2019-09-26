@@ -8,12 +8,12 @@ ENV NODE_ENV production
 ENV JWT_SECRET_KEY $JWT_SECRET_KEY
 ENV HTTP_PORT 3000
 
-COPY src /srv/auth/src
-COPY package.json /srv/auth
-COPY package-lock.json /srv/auth
-
+COPY package.json /srv/auth/
+COPY package-lock.json /srv/auth/
 WORKDIR /srv/auth
+
 RUN npm install
+COPY src /srv/auth/src
 
 EXPOSE ${HTTP_PORT}
 CMD npm start 

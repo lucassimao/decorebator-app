@@ -8,12 +8,11 @@ ENV MONGO_DB_URL ${MONGO_DB_URL}
 ENV NODE_ENV production
 ENV HTTP_PORT 3000
 
-COPY src /srv/wordlists/src
 COPY package* /srv/wordlists/
-
 WORKDIR /srv/wordlists/src
 RUN npm install
 
+COPY src /srv/wordlists/src
 EXPOSE 3000
 CMD [ "npm", "start" ]
 

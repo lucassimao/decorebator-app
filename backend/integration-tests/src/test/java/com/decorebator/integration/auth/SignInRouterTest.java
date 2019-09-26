@@ -9,11 +9,13 @@ import java.io.File;
 import com.decorebator.beans.UserLogin;
 import com.decorebator.beans.UserRegistration;
 
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
+import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 
 /**
@@ -28,18 +30,28 @@ public class SignInRouterTest
     public static DockerComposeContainer environment = new DockerComposeContainer(new File(yml))
             .withLocalCompose(true)
             .withExposedService("auth", 3000,Wait.forListeningPort());
+
             
+    @BeforeClass
+    public static void setup() {
+        var host = environment.getServiceHost("auth", 3000);
+        var port = environment.getServicePort("auth", 3000);
+
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+        RestAssured.baseURI = String.format("http://%s:%d",host,port);
+    }
+
     @Test
     public void userShouldBeAbleToSignIn()
     {
         var userRegistration  = new UserRegistration("sigin.test@gmail.com", "Lucas Simão","123456789","BR" );
         var userLogin  = new UserLogin("sigin.test@gmail.com","123456789" );
-        
+
         given()
             .contentType(ContentType.JSON)
             .body(userRegistration)
         .when()
-            .post("http://localhost:3000/signup")
+            .post("/signup")
         .then()
             .statusCode(200);
 
@@ -47,7 +59,7 @@ public class SignInRouterTest
             .contentType(ContentType.JSON)
             .body(userLogin)
         .when()
-            .post("http://localhost:3000/signin")
+            .post("/signin")
         .then()
             .statusCode(200)
             .header("authorization", matchesPattern("^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$"));
@@ -56,11 +68,12 @@ public class SignInRouterTest
     @Test
     public void inexistingUserShouldNotBeAbleToLogin() {
         var userLogin  = new UserLogin("inexisting@gmail.com","123456789" );
+
         given()
             .contentType(ContentType.JSON)
             .body(userLogin)
         .when()
-            .post("http://localhost:3000/signin")
+            .post("/signin")
         .then()
             .statusCode(400)
             .body(equalTo("Wrong password or username"));        

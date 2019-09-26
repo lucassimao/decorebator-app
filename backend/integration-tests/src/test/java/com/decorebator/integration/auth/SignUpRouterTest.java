@@ -38,9 +38,11 @@ public class SignUpRouterTest {
 
     @BeforeClass
     public static void setup() {
-        String host = environment.getServiceHost("auth", 3000);
+        var host = environment.getServiceHost("auth", 3000);
+        var port = environment.getServicePort("auth", 3000);
+
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
-        RestAssured.baseURI = String.format("http://%s:3000",host);
+        RestAssured.baseURI = String.format("http://%s:%d",host,port);
     }
 
     @Before

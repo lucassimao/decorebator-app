@@ -12,7 +12,7 @@ const WordlistDao = require("../dao/wordlist.dao");
  * @returns {Promise} A promise, which resolves to an array of wordlists
  */
 const list = ({ pageSize = config.defaultPageSize, page = 0 }, user) => {
-  const skip = page > 0 ? (page - 1) * pageSize : 0;
+  const skip = page > 0 ? page * pageSize : 0;
   return WordlistDao.find({ owner: user._id }, null, { limit: pageSize, skip });
 };
 

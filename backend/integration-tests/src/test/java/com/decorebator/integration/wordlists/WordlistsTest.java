@@ -53,25 +53,6 @@ public class WordlistsTest {
         TestUtils.clearMongoDb(mongodbHost,mongodbPort);
     }
 
-    @Test
-    public void shouldReturnStatus401ForNoAuthenticatedRequests() throws MalformedURLException {
-        var wordlist = new Wordlist(null, "foo wordlist", "test", "pt-br", Collections.emptyList());
-
-        when().get("/").then().statusCode(401);
-        given()
-            .body(wordlist)
-            .contentType(ContentType.JSON)
-        .when()
-            .post("/")
-        .then()
-            .statusCode(401);
-
-        URL signinEndpoint = new URL("http",environment.getServiceHost("auth", 3000),environment.getServicePort("auth", 3000),"/signin");
-        URL signupEndpoint = new URL("http",environment.getServiceHost("auth", 3000),environment.getServicePort("auth", 3000),"/signup");
-        URL wordlistsEndpoint = new URL("http",environment.getServiceHost("wordlists", 3000),environment.getServicePort("wordlists", 3000),"/wordlists");
-
-        var link = TestUtils.createRandomWordlist(signupEndpoint,signinEndpoint,wordlistsEndpoint);
-
-    }
+  
 
 }
