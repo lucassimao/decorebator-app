@@ -1,21 +1,14 @@
 package com.decorebator.integration.wordlists;
 
-import static io.restassured.RestAssured.*;
-import static org.hamcrest.Matchers.*;
-import static org.hamcrest.collection.IsArray.*;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.is;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
 
-import com.decorebator.beans.UserLogin;
-import com.decorebator.beans.UserRegistration;
-import com.decorebator.beans.Wordlist;
 import com.decorebator.integration.TestUtils;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;

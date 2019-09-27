@@ -1,22 +1,16 @@
 package com.decorebator.integration.wordlists;
 
-import static io.restassured.RestAssured.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
+import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.when;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 
-import com.decorebator.beans.UserLogin;
-import com.decorebator.beans.UserRegistration;
 import com.decorebator.beans.Wordlist;
 import com.decorebator.integration.TestUtils;
 
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.core.IsNot;
-import org.hamcrest.core.IsNull;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -102,17 +96,38 @@ public class AccessControlTest {
     }
 
     @Test
-    public void userShouldOnlyBeAbleToSeHisOwnWordlists() {
-        String resourceUri = TestUtils.createRandomWordlist(signUpEndpoint, signInEndpoint, wordlistEndpoint);
+    public void userShouldOnlyBeAbleToSeeHisOwnWordlists() {
+        var resourceUri = TestUtils.createRandomWordlist(signUpEndpoint, signInEndpoint, wordlistEndpoint);
+        var resourceId = resourceUri.substring("/wordlists".length());
+
         var registration = TestUtils.createRandomUser(signUpEndpoint);
         var authorization = TestUtils.signIn(registration.getLogin(), registration.getPassword(), signInEndpoint);
 
+        // trying to GET a wordlist of another user
         given()
             .header("authorization","bearer " + authorization)
         .when()
-            .get(resourceUri)
+            .get(resourceId)
         .then()
-            .statusCode(403);        
+            .statusCode(403);   
+            
+        // trying to PATCH a wordlist of another user
+        given()
+            .header("authorization","bearer " + authorization)
+            .body("{\"name\":\"hacked wordlist\"}")
+        .when()
+            .get(resourceId)
+        .then()
+            .statusCode(403);  
+
+
+       // trying to DELETE a wordlist of another user
+        given()
+            .header("authorization","bearer " + authorization)
+        .when()
+            .delete(resourceId)
+        .then()
+            .statusCode(403);              
 
     }
 

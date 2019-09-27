@@ -1,9 +1,6 @@
 const express = require("express");
 const service = require("../services/wordlist.service");
-const multer = require("multer");
 
-// 1 MB
-var upload = multer({ limits: { fileSize: 1 * 1024 * 1024, files: 1 } });
 const router = express.Router();
 
 const wrapAsync = asyncMiddleware => {
@@ -25,6 +22,7 @@ router
     "/:id",
     wrapAsync(async (req, res, next) => {
       const wordlist = await service.get(req.params.id, req.user);
+      
       if (wordlist) {
         res.status(200).send(wordlist);
       } else {
@@ -35,30 +33,15 @@ router
   .post(
     "/",
     express.json(),
-    upload.single("words"),
     wrapAsync(async (req, res) => {
       let wordlist = req.body;
-
-      if (req.is("multipart/form-data")) {
-        const { mimetype, buffer } = req.file;
-        wordlist = req.body;
-
-        if (/text\/plain/.test(mimetype)) {
-          const text = buffer.toString("utf8");
-          wordlist.words = text.split("\n").map(line => {
-            return { name: line.trim() };
-          });
-        }
-      }
-
       wordlist = await service.save(wordlist, req.user);
 
-      if (wordlist._id) {
+      if (wordlist) {
         res.set("Link", `/wordlists/${wordlist._id}`);
         res.status(201).end();
       } else {
-        // Unsupported Media Type
-        res.status(415).end();
+        next();
       }
     })
   )
