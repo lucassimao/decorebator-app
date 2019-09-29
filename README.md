@@ -21,8 +21,5 @@ So I decided to build mine.
 + Frontend
     - React
     - jest/cypress
-+ Tools
-    + Verdaccio
-    + Git
 
 ## The branch 'auth' is the current active one, please check it out for more info
