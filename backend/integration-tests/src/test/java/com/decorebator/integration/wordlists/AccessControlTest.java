@@ -83,14 +83,18 @@ public class AccessControlTest {
     @Test
     public void unauthenticatedUserShouldNotBeAbleToChangeExistingWordlists() throws MalformedURLException {
         String resourceUri = TestUtils.createRandomWordlist(signUpEndpoint, signInEndpoint, wordlistEndpoint);
+        String resourceId = resourceUri.substring("/wordlists".length());
 
-        when().delete(resourceUri).then().statusCode(401);
-        when().get(resourceUri).then().statusCode(401);
+
+        when().delete(resourceId).then().statusCode(401);
+
+        when().get(resourceId).then().statusCode(401);
+
         given()
             .contentType(ContentType.JSON)
             .body("{\"name\":\"hacked wordlist\"}")
         .when()
-            .patch(resourceUri)
+            .patch(resourceId)
         .then()
             .statusCode(401);
     }
