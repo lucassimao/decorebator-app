@@ -1,7 +1,9 @@
 package com.decorebator.integration.wordlists;
 
-import static io.restassured.RestAssured.*;
-import static org.hamcrest.Matchers.*;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.matchesRegex;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -9,13 +11,10 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 
-import com.decorebator.beans.UserLogin;
-import com.decorebator.beans.UserRegistration;
 import com.decorebator.beans.Word;
 import com.decorebator.beans.Wordlist;
 import com.decorebator.integration.TestUtils;
 
-import org.bson.types.ObjectId;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -26,7 +25,6 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.ExtractableResponse;
-import io.restassured.response.Response;
 
 /**
  * WordlistsTest
@@ -116,7 +114,8 @@ public class WordlistsTest {
             .get(resourceId)
         .then()
             .statusCode(200)
-            .body("words.size()",is(3));
+            .body("words.size()",is(3))
+            .body("words.name",hasItems("word","straightforward","tight"));
 
     }
 
