@@ -1,17 +1,26 @@
 version: '3'
 services:
-  wordlists:
+  auth:
+    depends_on: 
+      - db
     build:
-      context: .
-      dockerfile: wordlists/Dockerfile
-      args: 
-        NODE_ENV: production
+      context: auth/
+      args:
         JWT_SECRET_KEY: 12345
         MONGO_DB_URL: mongodb://db:27017/decorebator
-        HTTP_PORT: 3000
-    ports:
-    - "3000:3000"
-    links: 
+    # ports: 
+      # - "3002:3000" 
+  wordlists:
+    depends_on: 
       - db
+    build:
+      context: wordlists/
+      args: 
+        JWT_SECRET_KEY: 12345
+        MONGO_DB_URL: mongodb://db:27017/decorebator
+    # ports:
+    # - "3001:3000"
   db:
-    image: mongo:latest 
+    image: mongo:4.2 
+    # ports:
+      # - "27017:27017"

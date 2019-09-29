@@ -4,7 +4,9 @@
   "description": "Decorebator authentication endpoint",
   "main": "index.js",
   "scripts": {
+    "start": "node src/index.js",
     "test": "jest --detectOpenHandles 'src/'",
+    "format": "prettier --write 'src/**/*.js'",
     "jest-watch": "jest --watch --detectOpenHandles 'src/'"
   },
   "repository": {
@@ -18,9 +20,12 @@
   },
   "homepage": "https://github.com/lucassimao/decorebator-app#readme",
   "dependencies": {
-    "decorebator-common": "file:../common",
+    "bcrypt": "^3.0.6",
     "express": "^4.17.1",
+    "jwt-builder": "^1.1.0",
     "mongoose": "^5.7.1",
+    "passport": "^0.4.0",
+    "passport-jwt": "^4.0.0",
     "validator": "^11.1.0"
   },
   "devDependencies": {

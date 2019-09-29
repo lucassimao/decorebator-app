@@ -5,7 +5,7 @@
   "scripts": {
     "test": "npx jest --detectOpenHandles 'src/'",
     "jest-watch": "jest --watch --detectOpenHandles 'src/'",
-    "start": "node --preserve-symlinks src/index.js",
+    "start": "node src/index.js",
     "format": "prettier --write 'src/**/*.js'"
   },
   "repository": {
@@ -28,11 +28,13 @@
   },
   "dependencies": {
     "aws-sdk": "^2.524.0",
-    "decorebator-common": "file:../common",
+    "compression": "^1.7.4",
     "express": "^4.17.1",
+    "helmet": "^3.21.1",
     "image-type": "^4.1.0",
     "mongoose": "^5.6.11",
-    "multer": "^1.4.2",
+    "passport": "^0.4.0",
+    "passport-jwt": "^4.0.0",
     "shortid": "^2.2.15"
   }
 }
