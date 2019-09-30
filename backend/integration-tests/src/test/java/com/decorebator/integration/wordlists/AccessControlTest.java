@@ -26,10 +26,8 @@ import io.restassured.http.ContentType;
  */
 public class AccessControlTest {
 
-    private static final String yml = "../docker-compose.yml";
-
     @ClassRule
-    public static DockerComposeContainer environment = new DockerComposeContainer(new File(yml)).withLocalCompose(true)
+    public static DockerComposeContainer environment = new DockerComposeContainer(new File(TestUtils.DOCKER_COMPOSER_YML)).withLocalCompose(true)
             .withExposedService("wordlists", 3000, Wait.forListeningPort())
             .withExposedService("auth", 3000, Wait.forListeningPort())
             .withExposedService("db", 27017, Wait.forListeningPort());

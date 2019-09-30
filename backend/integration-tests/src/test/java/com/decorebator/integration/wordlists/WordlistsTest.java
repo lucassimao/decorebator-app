@@ -35,10 +35,8 @@ public class WordlistsTest {
 
     private static final String WORDLIST_RESOURCE_REGEX = "/wordlists\\/\\S{24}$";
 
-    private static final String yml = "../docker-compose.yml";
-
     @ClassRule
-    public static DockerComposeContainer environment = new DockerComposeContainer(new File(yml)).withLocalCompose(true)
+    public static DockerComposeContainer environment = new DockerComposeContainer(new File(TestUtils.DOCKER_COMPOSER_YML)).withLocalCompose(true)
             .withExposedService("wordlists", 3000, Wait.forListeningPort())
             .withExposedService("auth", 3000, Wait.forListeningPort())
             .withExposedService("db", 27017, Wait.forListeningPort());

@@ -26,6 +26,8 @@ import static io.restassured.RestAssured.*;
  */
 public class TestUtils {
 
+    public final static String DOCKER_COMPOSER_YML = "../docker-compose.yml";
+
     public static void clearMongoDb(String mongodbHost,int mongodbPort) {
         String uri = String.format("mongodb://%s:%d",mongodbHost,mongodbPort);
         MongoClient mongoClient = MongoClients.create(uri);

@@ -1,7 +1,6 @@
 package com.decorebator.integration.words;
 
 import static io.restassured.RestAssured.given;
-import static io.restassured.RestAssured.when;
 import static org.junit.Assert.assertThat;
 import static io.restassured.RestAssured.get;
 import static io.restassured.RestAssured.delete;
@@ -33,10 +32,8 @@ import io.restassured.response.ExtractableResponse;
  */
 public class AccessControlTest {
 
-    private static final String yml = "../docker-compose.yml";
-
     @ClassRule
-    public static DockerComposeContainer environment = new DockerComposeContainer(new File(yml)).withLocalCompose(true)
+    public static DockerComposeContainer environment = new DockerComposeContainer(new File(TestUtils.DOCKER_COMPOSER_YML)).withLocalCompose(true)
             .withExposedService("wordlists", 3000, Wait.forListeningPort())
             .withExposedService("auth", 3000, Wait.forListeningPort());
 
