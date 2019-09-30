@@ -92,10 +92,17 @@ public class AccessControlTest {
     @Test
     public void unauthenticatedUserShouldNotManipulateWords() {
 
+        // trying to read all words
+        get(wordlistUri + "/words")
+        .then()
+            .statusCode(401);
+
+        // trying to read a single word
         get(wordlistUri + "/words/" + _1stWordUri)
         .then()
             .statusCode(401);
 
+        // trying to add a new word
         given()
             .body(new Word("hacked"))
             .contentType(ContentType.JSON)
@@ -104,6 +111,7 @@ public class AccessControlTest {
         .then()
             .statusCode(401);
 
+        // trying to patch a single word
         given()
             .body(new Word("hacked"))
             .contentType(ContentType.JSON)
@@ -112,6 +120,7 @@ public class AccessControlTest {
         .then()
             .statusCode(401);            
 
+        // trying to delete a word
         delete(wordlistUri + "/words/" + _1stWordUri)
         .then()
             .statusCode(401);            
