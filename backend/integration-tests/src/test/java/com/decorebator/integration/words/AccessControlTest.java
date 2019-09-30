@@ -6,21 +6,18 @@ import static io.restassured.RestAssured.get;
 import static io.restassured.RestAssured.delete;
 import static org.hamcrest.Matchers.*;
 
-import java.io.File;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 
 import com.decorebator.beans.Word;
 import com.decorebator.beans.Wordlist;
+import com.decorebator.integration.EnvironmentRule;
 import com.decorebator.integration.TestUtils;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
-import org.testcontainers.containers.DockerComposeContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -33,31 +30,16 @@ import io.restassured.response.ExtractableResponse;
 public class AccessControlTest {
 
     @ClassRule
-    public static DockerComposeContainer environment = new DockerComposeContainer(new File(TestUtils.DOCKER_COMPOSER_YML)).withLocalCompose(true)
-            .withExposedService("wordlists", 3000, Wait.forListeningPort())
-            .withExposedService("auth", 3000, Wait.forListeningPort());
-
-    private static String authHost, wordlistHost ;
-    private static URL signInEndpoint, signUpEndpoint, wordlistEndpoint;
-    private static int authPort, wordlistPort;
-    private static String wordlistUri, _1stWordUri;
+    public static EnvironmentRule environmentRule = new EnvironmentRule(false);
+	private static String wordlistUri, _1stWordUri;
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
-        authHost = environment.getServiceHost("auth", 3000);
-        authPort = environment.getServicePort("auth", 3000);
-        signInEndpoint = new URL("http",authHost,authPort,"/signin");
-        signUpEndpoint = new URL("http",authHost,authPort,"/signup");
-
-        wordlistHost = environment.getServiceHost("wordlists", 3000);
-        wordlistPort = environment.getServicePort("wordlists", 3000);
-        wordlistEndpoint = new URL("http",wordlistHost,wordlistPort,"");
-
-        RestAssured.baseURI = wordlistEndpoint.toString();
+        RestAssured.baseURI = environmentRule.getWordlistHostAndPort();
 
         // registering a new user and his single wordlist
-        var registration = TestUtils.createRandomUser(signUpEndpoint);
-        var authorization = TestUtils.signIn(registration.getLogin(), registration.getPassword(), signInEndpoint);
+        var registration = TestUtils.createRandomUser(environmentRule.getSignUpEndpoint());
+        var authorization = TestUtils.signIn(registration.getLogin(), registration.getPassword(), environmentRule.getSignInEndpoint());
         
         var words = List.of(new Word("scrambled"),new Word("behind the ball 8"),new Word("flake"));
         var wordlist = new Wordlist(null,"wordlist test","name of the wordlist","en", words);
@@ -127,8 +109,8 @@ public class AccessControlTest {
     @Test
     public void authenticatedUserShouldOnlyManipulateHisOwnWords() {
         // registering a new user
-        var registration = TestUtils.createRandomUser(signUpEndpoint);
-        var authorization = TestUtils.signIn(registration.getLogin(), registration.getPassword(), signInEndpoint);
+        var registration = TestUtils.createRandomUser(environmentRule.getSignUpEndpoint());
+        var authorization = TestUtils.signIn(registration.getLogin(), registration.getPassword(), environmentRule.getSignInEndpoint());
 
         // shouldn't read others wordlists' words
         given()
