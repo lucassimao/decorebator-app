@@ -127,4 +127,56 @@ public class AccessControlTest {
     }    
 
 
+    @Test
+    public void authenticatedUserShouldOnlyManipulateHisOwnWords() {
+        // registering a new user
+        var registration = TestUtils.createRandomUser(signUpEndpoint);
+        var authorization = TestUtils.signIn(registration.getLogin(), registration.getPassword(), signInEndpoint);
+
+        // shouldn't read others wordlists' words
+        given()
+            .header("authorization", "bearer " + authorization)
+        .when()
+            .get(wordlistUri + "/words")
+        .then()
+            .statusCode(403);
+            
+        // shoudn't read others wordlists' words
+        given()
+            .header("authorization", "bearer " + authorization)
+        .when()        
+            .get(wordlistUri + "/words/" + _1stWordUri)
+        .then()
+            .statusCode(403);
+
+        // shoudn't add words to others wordlists
+        given()
+            .body(new Word("hacked"))
+            .contentType(ContentType.JSON)
+            .header("authorization", "bearer " + authorization)
+        .when()
+            .post(wordlistUri + "/words")
+        .then()
+            .statusCode(403);
+
+        // shoudn't patch others wordlists' words
+        given()
+            .body(new Word("hacked"))
+            .contentType(ContentType.JSON)
+            .header("authorization", "bearer " + authorization)
+        .when()
+            .patch(wordlistUri + "/words/" + _1stWordUri)
+        .then()
+            .statusCode(403);            
+
+        // shoudn't delete others wordlists' words
+        given()
+            .header("authorization", "bearer " + authorization)
+        .when()         
+            .delete(wordlistUri + "/words/" + _1stWordUri)
+        .then()
+            .statusCode(403);          
+    }
+
+
 }

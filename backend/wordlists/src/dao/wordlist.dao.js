@@ -37,7 +37,7 @@ Wordlist.static("getWord", function(idWordlist, idWord, user) {
 });
 
 Wordlist.static("getAllWords", function(idWordlist, user) {
-  return this.findOne({ _id: idWordlist, owner: user._id });
+  return this.findOne({ _id: idWordlist, owner: user._id },"words");
 });
 
 Wordlist.static("addImage", function(idWordlist, idWord, { url, description }, user) {
