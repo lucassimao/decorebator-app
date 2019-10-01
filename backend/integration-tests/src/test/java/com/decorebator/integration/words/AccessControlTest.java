@@ -31,7 +31,7 @@ public class AccessControlTest {
 
     @ClassRule
     public static EnvironmentRule environmentRule = new EnvironmentRule(false);
-	private static String wordlistUri, _1stWordUri;
+	private static String wordlistUri, _1stWordId;
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
@@ -55,7 +55,7 @@ public class AccessControlTest {
             .extract();
 
         wordlistUri = response.header("link");
-        _1stWordUri = given()
+        _1stWordId = given()
                         .header("authorization", "bearer " + authorization)
                       .when()
                         .get(wordlistUri)
@@ -65,7 +65,7 @@ public class AccessControlTest {
                         .body()
                         .path("words[0]._id");
 
-        assertThat(_1stWordUri, CoreMatchers.not(emptyOrNullString()));
+        assertThat(_1stWordId, CoreMatchers.not(emptyOrNullString()));
     }
 
     @Test
@@ -77,7 +77,7 @@ public class AccessControlTest {
             .statusCode(401);
 
         // trying to read a single word
-        get(wordlistUri + "/words/" + _1stWordUri)
+        get(wordlistUri + "/words/" + _1stWordId)
         .then()
             .statusCode(401);
 
@@ -95,12 +95,12 @@ public class AccessControlTest {
             .body(new Word("hacked"))
             .contentType(ContentType.JSON)
         .when()
-            .patch(wordlistUri + "/words/" + _1stWordUri)
+            .patch(wordlistUri + "/words/" + _1stWordId)
         .then()
             .statusCode(401);            
 
         // trying to delete a word
-        delete(wordlistUri + "/words/" + _1stWordUri)
+        delete(wordlistUri + "/words/" + _1stWordId)
         .then()
             .statusCode(401);            
     }    
@@ -124,7 +124,7 @@ public class AccessControlTest {
         given()
             .header("authorization", "bearer " + authorization)
         .when()        
-            .get(wordlistUri + "/words/" + _1stWordUri)
+            .get(wordlistUri + "/words/" + _1stWordId)
         .then()
             .statusCode(403);
 
@@ -144,7 +144,7 @@ public class AccessControlTest {
             .contentType(ContentType.JSON)
             .header("authorization", "bearer " + authorization)
         .when()
-            .patch(wordlistUri + "/words/" + _1stWordUri)
+            .patch(wordlistUri + "/words/" + _1stWordId)
         .then()
             .statusCode(403);            
 
@@ -152,7 +152,7 @@ public class AccessControlTest {
         given()
             .header("authorization", "bearer " + authorization)
         .when()         
-            .delete(wordlistUri + "/words/" + _1stWordUri)
+            .delete(wordlistUri + "/words/" + _1stWordId)
         .then()
             .statusCode(403);          
     }
