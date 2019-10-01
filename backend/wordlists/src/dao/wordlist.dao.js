@@ -33,7 +33,7 @@ Wordlist.static("deleteWord", function(idWordlist, idWord, user) {
 });
 
 Wordlist.static("getWord", function(idWordlist, idWord, user) {
-  return this.findOne({ _id: idWordlist, owner: user._id, "words._id": idWord });
+  return this.findOne({ _id: idWordlist, owner: user._id, "words._id": idWord },"words.$")
 });
 
 Wordlist.static("getAllWords", function(idWordlist, user) {

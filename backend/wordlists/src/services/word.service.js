@@ -8,10 +8,17 @@ const WordlistDao = require("../dao/wordlist.dao");
  * @param {object} user The authenticated user
  * @param {mongoose.Types.ObjectId} user._id The user id
  *
- * @returns {Promise} A promise, which resolves to a word object
+ * @returns {Promise} A promise, which resolves to a word object or null, if the word wasn't found
  */
-const get = (idWordlist, idWord, user) => {
-  return WordlistDao.getWord(idWordlist, idWord, user);
+const get = async (idWordlist, idWord, user) => {
+  const result = await WordlistDao.getWord(idWordlist, idWord, user);
+
+  if (result && result.words){
+      return result.words[0]
+  } else {
+      return null;
+  }
+  
 };
 
 /**

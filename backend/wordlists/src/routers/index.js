@@ -42,6 +42,8 @@ const resolveStatus = async (req, res) => {
         return;
       }
     }
+  } else {
+      res.sendStatus(404);
   }
 };
 

@@ -57,7 +57,7 @@ public class EnvironmentRule extends ExternalResource {
 
     @Override
     public Statement apply(Statement base, Description description) {
-        if (this.clearDbBetweenMethods){
+        if (this.clearDbBetweenMethods && this.env != null){
             String mongodbHost = env.getServiceHost("db", 27017);
             int mongodbPort = env.getServicePort("db", 27017);
             TestUtils.clearMongoDb(mongodbHost,mongodbPort);
