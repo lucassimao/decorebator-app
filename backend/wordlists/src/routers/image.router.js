@@ -3,13 +3,16 @@ const service = require("../services/image.service");
 
 const router = express.Router({ mergeParams: true });
 const wrapAsync = asyncMiddleware => {
-  return (req, res, next) => asyncMiddleware(req, res, next).catch(next);
+  return (req, res, next) =>
+    asyncMiddleware(req, res, next).catch(e => {
+      next(e);
+    });
 };
 
 router
   .post(
     "/",
-    express.json(),
+    express.json({limit: '2MB'}),
     wrapAsync(async (req, res, next) => {
       const wordlist = await service.addImage(req.params.idWordlist, req.params.idWord, req.body, req.user);
 
@@ -26,7 +29,7 @@ router
   )
   .patch(
     "/:idImage",
-    express.json(),
+    express.json({limit: '2MB'}),
     wrapAsync(async (req, res, next) => {
       const { nModified, ok } = await service.patchImage(
         req.params.idWordlist,

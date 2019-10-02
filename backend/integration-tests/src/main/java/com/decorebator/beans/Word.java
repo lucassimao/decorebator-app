@@ -1,14 +1,12 @@
 package com.decorebator.beans;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class Word {
 
     private String name;
-
-
-    public Word() {
-    }
 
     public Word(String name) {
         this.name = name;

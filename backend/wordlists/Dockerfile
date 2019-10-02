@@ -14,5 +14,7 @@ RUN npm install
 
 COPY src /srv/wordlists/src
 EXPOSE 3000
-CMD [ "npm", "start" ]
+
+# EXPOSE 9229
+CMD ["npm", "start" ]
 

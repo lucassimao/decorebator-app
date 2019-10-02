@@ -18,8 +18,10 @@ services:
       args: 
         JWT_SECRET_KEY: 12345
         MONGO_DB_URL: mongodb://db:27017/decorebator
-    # ports:
-    # - "3001:3000"
+    ports:
+    - "9229:9229"
+    volumes: 
+      - $HOME/.aws/:/root/.aws/:ro
   db:
     image: mongo:4.2 
     # ports:

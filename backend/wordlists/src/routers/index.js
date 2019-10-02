@@ -13,7 +13,7 @@ const root = Router();
  *
  */
 const resolveStatus = async (req, res) => {
-
+    
   const regex = /\/wordlists\/(\w+)(\/words\/(\w+)(\/images\/(\w+))?)?/;
   const [, idWordlist, , idWord, , idImage] = regex.exec(req.baseUrl + req.url);
   const wordlist = await wordlistService.get(idWordlist);
@@ -42,9 +42,9 @@ const resolveStatus = async (req, res) => {
         return;
       }
     }
-  } else {
-      res.sendStatus(404);
   }
+
+  res.sendStatus(404);
 };
 
 root
