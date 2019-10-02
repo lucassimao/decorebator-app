@@ -1,10 +1,12 @@
 const express = require("express");
 const service = require("../services/image.service");
+const { logger } = require("../config");
 
 const router = express.Router({ mergeParams: true });
 const wrapAsync = asyncMiddleware => {
   return (req, res, next) =>
     asyncMiddleware(req, res, next).catch(e => {
+      logger.error(e);
       next(e);
     });
 };
@@ -12,7 +14,7 @@ const wrapAsync = asyncMiddleware => {
 router
   .post(
     "/",
-    express.json({limit: '2MB'}),
+    express.json({ limit: "2MB" }),
     wrapAsync(async (req, res, next) => {
       const wordlist = await service.addImage(req.params.idWordlist, req.params.idWord, req.body, req.user);
 
@@ -29,7 +31,7 @@ router
   )
   .patch(
     "/:idImage",
-    express.json({limit: '2MB'}),
+    express.json({ limit: "2MB" }),
     wrapAsync(async (req, res, next) => {
       const { nModified, ok } = await service.patchImage(
         req.params.idWordlist,

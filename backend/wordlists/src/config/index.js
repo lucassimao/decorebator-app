@@ -1,10 +1,31 @@
+const winston = require("winston");
+require("winston-daily-rotate-file");
+
 const env = process.env.NODE_ENV || "development";
 
 if (env == "production" && !process.env.JWT_SECRET_KEY)
   throw "Jwt secret key must be provided as an environment variable in production";
 
+var dailyRotateFileTransport = new winston.transports.DailyRotateFile({
+  filename: "decorebator-wordlists-%DATE%.log",
+  datePattern: "YYYY-MM-DD-HH",
+  zippedArchive: true,
+  maxSize: "20m",
+  maxFiles: "10d"
+});
+
+const logger = winston.createLogger({
+  level: "info",
+  format: winston.format.json(),
+  transports: [
+    dailyRotateFileTransport,
+    new winston.transports.Console({ format: winston.format.simple(), level: "error" })
+  ]
+});
+
 const baseConfig = {
   env,
+  logger,
   isDev: env == "development",
   isTest: env == "test",
   defaultPageSize: 10,
