@@ -1,19 +1,16 @@
 package com.decorebator.integration.auth;
 
-import static io.restassured.RestAssured.*;
-import static org.hamcrest.Matchers.matchesPattern;
+import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
-
-import java.io.File;
+import static org.hamcrest.Matchers.matchesPattern;
 
 import com.decorebator.beans.UserLogin;
 import com.decorebator.beans.UserRegistration;
+import com.decorebator.integration.EnvironmentRule;
 
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
-import org.testcontainers.containers.DockerComposeContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -24,21 +21,14 @@ import io.restassured.http.ContentType;
 public class SignInRouterTest 
 {
 
-    private static final String yml = "../docker-compose.yml";
 
     @ClassRule
-    public static DockerComposeContainer environment = new DockerComposeContainer(new File(yml))
-            .withLocalCompose(true)
-            .withExposedService("auth", 3000,Wait.forListeningPort());
+    public static EnvironmentRule environmentRule = new EnvironmentRule(false);
 
             
     @BeforeClass
     public static void setup() {
-        var host = environment.getServiceHost("auth", 3000);
-        var port = environment.getServicePort("auth", 3000);
-
-        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
-        RestAssured.baseURI = String.format("http://%s:%d",host,port);
+        RestAssured.baseURI = environmentRule.getAuthHostAndPort();
     }
 
     @Test

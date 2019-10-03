@@ -11,15 +11,20 @@ router.post("/signup", express.json(), async (req, res, next) => {
   } catch (error) {
     switch (error.name) {
       case "MongoError":
-        if (error.code === 11000 && "email" in error.keyPattern)
+        if (error.code === 11000 && "email" in error.keyPattern) {
           res.status(400).send("User already exists");
+        }
         break;
       case "ValidationError":
         res.status(400);
 
-        if ("country" in error.errors) res.send("Invalid country");
-        else if ("email" in error.errors) res.send(error.errors.email.message);
-        else res.send(error.message);
+        if ("country" in error.errors) {
+          res.send("Invalid country");
+        } else if ("email" in error.errors) {
+          res.send(error.errors.email.message);
+        } else {
+          res.send(error.message);
+        }
         break;
       default:
         console.error(error);
