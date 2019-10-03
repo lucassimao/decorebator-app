@@ -1,9 +1,7 @@
 package com.decorebator.integration.wordlists;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.matchesRegex;
+import static org.hamcrest.Matchers.*;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -13,6 +11,7 @@ import java.util.List;
 
 import com.decorebator.beans.Word;
 import com.decorebator.beans.Wordlist;
+import com.decorebator.integration.EnvironmentRule;
 import com.decorebator.integration.TestUtils;
 
 import org.junit.Before;
@@ -35,40 +34,41 @@ public class WordlistsTest {
 
     private static final String WORDLIST_RESOURCE_REGEX = "/wordlists\\/\\S{24}$";
 
+
     @ClassRule
-    public static DockerComposeContainer environment = new DockerComposeContainer(new File(TestUtils.DOCKER_COMPOSER_YML)).withLocalCompose(true)
-            .withExposedService("wordlists", 3000, Wait.forListeningPort())
-            .withExposedService("auth", 3000, Wait.forListeningPort())
-            .withExposedService("db", 27017, Wait.forListeningPort());
-
-
-    private static String authHost, wordlistHost ;
-    private static URL signInEndpoint, signUpEndpoint, wordlistEndpoint;
-    private static int authPort, wordlistPort;
-
+    public static EnvironmentRule environment = new EnvironmentRule(true);
+    private static URL signUpEndpoint;
+    private static URL signInEndpoint;    
+        
     @BeforeClass
     public static void setup() throws MalformedURLException {
-        authHost = environment.getServiceHost("auth", 3000);
-        authPort = environment.getServicePort("auth", 3000);
-        signInEndpoint = new URL("http",authHost,authPort,"/signin");
-        signUpEndpoint = new URL("http",authHost,authPort,"/signup");
-
-        wordlistHost = environment.getServiceHost("wordlists", 3000);
-        wordlistPort = environment.getServicePort("wordlists", 3000);
-        wordlistEndpoint = new URL("http",wordlistHost,wordlistPort,"/wordlists");
-
-        RestAssured.baseURI = wordlistEndpoint.toString();
-    }            
-
-    @Before
-    public void clearMongoDb() {
-        String mongodbHost = environment.getServiceHost("db", 27017);
-        int mongodbPort = environment.getServicePort("db", 27017);
-        TestUtils.clearMongoDb(mongodbHost,mongodbPort);
+        RestAssured.baseURI = environment.getWordlistEndpoint().toString();
+        signUpEndpoint = environment.getSignUpEndpoint();
+        signInEndpoint = environment.getSignInEndpoint();
     }
+	    
 
     @Test
-    public void registeredUserShouldBeAbleToCreateEmptyWordlist() {
+    public void shouldNotBeAbleToCreateWordlistFromEmptyBody() {
+        var registration = TestUtils.createRandomUser(signUpEndpoint);
+        var authorization = TestUtils.signIn(registration.getLogin(), registration.getPassword(), signInEndpoint);
+        
+        given()
+            .contentType(ContentType.JSON)
+            .header("authorization", "bearer " + authorization)
+        .when()
+            .post("/")
+        .then()
+            .statusCode(400)
+            .contentType(ContentType.JSON)
+            .body("name.name",is("ValidatorError"))
+            .body("description.name",is("ValidatorError"))
+            .body("language.name",is("ValidatorError"));
+
+    }    
+
+    @Test
+    public void registeredUserShouldBeAbleToCreateWordlistWithoutWords() {
         var registration = TestUtils.createRandomUser(signUpEndpoint);
         var authorization = TestUtils.signIn(registration.getLogin(), registration.getPassword(), signInEndpoint);
         var wordlist = new Wordlist(null,"wordlist test","name of the wordlist","pt-br", Collections.emptyList());

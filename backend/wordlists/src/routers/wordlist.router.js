@@ -1,10 +1,15 @@
 const express = require("express");
 const service = require("../services/wordlist.service");
+const { logger } = require("../config");
 
 const router = express.Router();
 
 const wrapAsync = asyncMiddleware => {
-  return (req, res, next) => asyncMiddleware(req, res, next).catch(next);
+  return (req, res, next) =>
+    asyncMiddleware(req, res, next).catch(error => {
+      logger.error(error);
+      next(error);
+    });
 };
 
 router
@@ -22,7 +27,7 @@ router
     "/:id",
     wrapAsync(async (req, res, next) => {
       const wordlist = await service.get(req.params.id, req.user);
-      
+
       if (wordlist) {
         res.status(200).send(wordlist);
       } else {
@@ -34,14 +39,22 @@ router
     "/",
     express.json(),
     wrapAsync(async (req, res) => {
-      let wordlist = req.body;
-      wordlist = await service.save(wordlist, req.user);
-
-      if (wordlist) {
-        res.set("Link", `/wordlists/${wordlist._id}`);
-        res.status(201).end();
-      } else {
-        next();
+      try {
+        let wordlist = req.body;
+        wordlist = await service.save(wordlist, req.user);
+        if (wordlist) {
+          res.set("Link", `/wordlists/${wordlist._id}`);
+          res.status(201).end();
+        } else {
+          next();
+        }
+      } catch (error) {
+        if (error.name == "ValidationError") {
+          logger.error(error);
+          res.status(400).send(error.errors);
+        } else {
+          throw error;
+        }
       }
     })
   )

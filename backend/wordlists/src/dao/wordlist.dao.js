@@ -1,14 +1,15 @@
 const mongoose = require("mongoose");
+const { logger } = require("../config");
 
 const Schema = mongoose.Schema;
 
 const Wordlist = new Schema({
-  owner: { type: mongoose.Schema.Types.ObjectId, index: true },
-  description: String,
+  owner: { type: mongoose.Schema.Types.ObjectId, index: true, required: true },
+  description: { type: String, required: true },
   dateCreated: { type: Date, default: Date.now },
-  language: String,
-  name: String,
-  words: [{ name: String, images: [{ url: String, description: String }] }]
+  language: { type: String, required: true },
+  name: { type: String, required: true },
+  words: [{ name: { type: String, required: true }, images: [{ url: { type: String, required: true }, description: String }] }]
 });
 
 Wordlist.static("addWord", function(wordlistId, newWordObject, user) {
@@ -33,11 +34,11 @@ Wordlist.static("deleteWord", function(idWordlist, idWord, user) {
 });
 
 Wordlist.static("getWord", function(idWordlist, idWord, user) {
-  return this.findOne({ _id: idWordlist, owner: user._id, "words._id": idWord },"words.$")
+  return this.findOne({ _id: idWordlist, owner: user._id, "words._id": idWord }, "words.$");
 });
 
 Wordlist.static("getAllWords", function(idWordlist, user) {
-  return this.findOne({ _id: idWordlist, owner: user._id },"words");
+  return this.findOne({ _id: idWordlist, owner: user._id }, "words");
 });
 
 Wordlist.static("addImage", function(idWordlist, idWord, { url, description }, user) {
