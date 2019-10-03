@@ -7,12 +7,9 @@ import org.junit.rules.ExternalResource;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.DockerComposeContainer;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.utility.TestcontainersConfiguration;
 
 /**
  * EnvironmentRule
@@ -49,6 +46,7 @@ public class EnvironmentRule extends ExternalResource {
                     .withExposedService("wordlists", 3000, Wait.forListeningPort())
                     .withExposedService("db", 27017, Wait.forListeningPort())
                     .withExposedService("auth", 3000, Wait.forListeningPort())
+                    .withLogConsumer("auth", new Slf4jLogConsumer(logger))
                     .withLogConsumer("wordlists", new Slf4jLogConsumer(logger));
 
         env.start();

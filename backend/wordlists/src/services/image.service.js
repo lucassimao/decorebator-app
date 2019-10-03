@@ -1,5 +1,6 @@
 const WordlistDao = require("../dao/wordlist.dao");
 const filestorageService = require("./filestorage.service");
+const { logger } = require("../config");
 
 const addImage = async (idWordlist, idWord, { fileName, base64Image, description }, user) => {
   const url = await filestorageService.store(user, fileName, base64Image);

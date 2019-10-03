@@ -14,13 +14,15 @@ var dailyRotateFileTransport = new winston.transports.DailyRotateFile({
   maxFiles: "10d"
 });
 
+var transports = [dailyRotateFileTransport]
+if (process.env.SHOW_LOG_ON_STDOUT){
+    transports.push(new winston.transports.Console({ format: winston.format.simple()}))
+}
+
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.json(),
-  transports: [
-    dailyRotateFileTransport,
-    new winston.transports.Console({ format: winston.format.simple(), level: "error" })
-  ]
+  transports
 });
 
 const baseConfig = {

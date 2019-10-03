@@ -7,6 +7,7 @@ ENV JWT_SECRET_KEY ${JWT_SECRET_KEY}
 ENV MONGO_DB_URL ${MONGO_DB_URL}
 ENV NODE_ENV production
 ENV HTTP_PORT 3000
+ENV SHOW_LOG_ON_STDOUT true
 
 COPY package* /srv/wordlists/
 WORKDIR /srv/wordlists/src

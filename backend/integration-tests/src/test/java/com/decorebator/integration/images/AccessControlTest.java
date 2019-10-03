@@ -2,13 +2,11 @@ package com.decorebator.integration.images;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.Assert.assertThat;
-import static io.restassured.RestAssured.get;
 import static io.restassured.RestAssured.delete;
 import static org.hamcrest.Matchers.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
@@ -19,11 +17,9 @@ import com.decorebator.beans.Wordlist;
 import com.decorebator.integration.EnvironmentRule;
 import com.decorebator.integration.TestUtils;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
-import org.slf4j.LoggerFactory;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;

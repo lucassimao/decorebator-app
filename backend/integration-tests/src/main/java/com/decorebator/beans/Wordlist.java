@@ -16,13 +16,18 @@ public class Wordlist {
     public Wordlist() {
     }
 
+    @Deprecated
     public Wordlist(String owner, String description, String name, String language, List<Word> words) {
-        this.owner = owner;
+        this(description,name,language,words);
+    }
+
+    public Wordlist(String description, String name, String language, List<Word> words) {
+        this.owner = null;
         this.description = description;
         this.name = name;
         this.language = language;
         this.words = words;
-    }
+    }    
 
     public String getOwner() {
         return this.owner;

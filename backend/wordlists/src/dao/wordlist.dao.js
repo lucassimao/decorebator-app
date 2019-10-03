@@ -9,7 +9,12 @@ const Wordlist = new Schema({
   dateCreated: { type: Date, default: Date.now },
   language: { type: String, required: true },
   name: { type: String, required: true },
-  words: [{ name: { type: String, required: true }, images: [{ url: { type: String, required: true }, description: String }] }]
+  words: [
+    {
+      name: { type: String, required: true },
+      images: [{ url: { type: String, required: true }, description: String }]
+    }
+  ]
 });
 
 Wordlist.static("addWord", function(wordlistId, newWordObject, user) {
@@ -56,15 +61,10 @@ Wordlist.static("deleteImage", function(idWordlist, idWord, idImage, user) {
   );
 });
 
-Wordlist.static("patchImage", function(idWordlist, idWord, idImage, updateObject, user) {
-  const updateCommand = Object.keys(updateObject).reduce((command, property) => {
-    command[`words.$[w].images.$[i].${property}`] = updateObject[property];
-    return command;
-  }, {});
-
+Wordlist.static("patchImage", function(idWordlist, idWord, idImage, { description }, user) {
   return this.updateOne(
     { _id: idWordlist, owner: user._id },
-    { $set: updateCommand },
+    { $set: { "words.$[w].images.$[i].description": description } },
     { arrayFilters: [{ "w._id": idWord }, { "i._id": idImage }] }
   );
 });
