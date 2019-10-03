@@ -27,7 +27,7 @@ public class EnvironmentRule extends ExternalResource {
 	private Integer wordlistPort;
     private URL wordlistEndpoint;
 	private boolean clearDbBetweenMethods;
-	private String wordlistHostAndPort;    
+	private String authHostAndPort, wordlistHostAndPort;    
     
 
     public EnvironmentRule(boolean clearDbBetweenMethods){
@@ -54,6 +54,8 @@ public class EnvironmentRule extends ExternalResource {
         authPort = env.getServicePort("auth", 3000);
         signInEndpoint = new URL("http",authHost,authPort,"/signin");
         signUpEndpoint = new URL("http",authHost,authPort,"/signup");
+        authHostAndPort = "http://" + authHost + ":" + authPort;
+
 
         wordlistHost = env.getServiceHost("wordlists", 3000);
         wordlistPort = env.getServicePort("wordlists", 3000);    
@@ -108,6 +110,10 @@ public class EnvironmentRule extends ExternalResource {
     
     public String getWordlistHostAndPort() {
         return wordlistHostAndPort;
+    }
+
+    public String getAuthHostAndPort() {
+        return authHostAndPort;
     }
 
 }
