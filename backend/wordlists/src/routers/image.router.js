@@ -51,12 +51,12 @@ router
   .delete(
     "/:idImage",
     wrapAsync(async (req, res, next) => {
-      const object = ({ nModified, ok } = await service.deleteImage(
+      const { nModified, ok } = await service.deleteImage(
         req.params.idWordlist,
         req.params.idWord,
         req.params.idImage,
         req.user
-      ));
+      );
 
       if (nModified === 1 && ok === 1) {
         res.sendStatus(204);

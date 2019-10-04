@@ -42,12 +42,8 @@ router
       try {
         let wordlist = req.body;
         wordlist = await service.save(wordlist, req.user);
-        if (wordlist) {
-          res.set("Link", `/wordlists/${wordlist._id}`);
-          res.status(201).end();
-        } else {
-          next();
-        }
+        res.set("Link", `/wordlists/${wordlist._id}`);
+        res.status(201).end();
       } catch (error) {
         if (error.name == "ValidationError") {
           logger.error(error);

@@ -4,6 +4,7 @@
   "description": "Decorebator wordlist microservice",
   "scripts": {
     "test": "npx jest --detectOpenHandles 'src/'",
+    "lint": "eslint 'src/**/*.js'",
     "jest-watch": "jest --watch --detectOpenHandles 'src/'",
     "start": "node src/index.js",
     "format": "prettier --write 'src/**/*.js'"
