@@ -5,6 +5,7 @@ const ExtractJwt = require("passport-jwt").ExtractJwt;
 const mongoose = require("mongoose");
 const compression = require("compression");
 const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 
 const UserDao = require("./dao/user.dao");
 const config = require("./config");
@@ -31,8 +32,19 @@ const jwtStrategy = new JwtStrategy(jwtStrategyOpts, async (jwt_payload, done) =
   }
 });
 
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // window size: 5 minutes
+  max: 100 // 100 requests per windowMs
+});
+
 const app = express();
+
+app.set("trust proxy", 1);
 passport.use(jwtStrategy);
+
+if (!process.env.IGNORE_REQUEST_LIMIT)
+    app.use(limiter);
+    
 app.use(passport.initialize());
 app.use(passport.authenticate("jwt", { session: false }));
 if (config.httpOptions.enableCompression) app.use(compression());
