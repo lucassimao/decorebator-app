@@ -10,7 +10,7 @@ const Schema = mongoose.Schema;
 
 const User = new Schema(
   {
-    name: String,
+    name: {type: String, required: true},
     email: {
       type: String,
       required: true,
@@ -19,7 +19,7 @@ const User = new Schema(
       validate: [validator.isEmail, "A valid email must be used as your account login"]
     },
     country: { type: String, required: true, enum: countriesCode },
-    encrypted_password: String,
+    encrypted_password:  {type: String, required: true},
     dateCreated: { type: Date, default: Date.now }
   }
 );
