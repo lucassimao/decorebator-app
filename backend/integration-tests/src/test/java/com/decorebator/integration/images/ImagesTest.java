@@ -1,8 +1,11 @@
 package com.decorebator.integration.images;
 
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.matchesPattern;
+
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.List;
 
 import com.decorebator.beans.Image;
@@ -18,9 +21,6 @@ import org.junit.Test;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-
-import static io.restassured.RestAssured.*;
-import static org.hamcrest.Matchers.*;
 
 /**
  * Integration tests for word's image upload API

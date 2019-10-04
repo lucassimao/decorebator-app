@@ -47,7 +47,7 @@ public class WordsTest {
         authorization = TestUtils.signIn(registration.getLogin(), registration.getPassword(), env.getSignInEndpoint());
 
         var words = List.of(new Word("scrambled"),new Word("behind the ball 8"),new Word("flake"));
-        var wordlist = new Wordlist(null,"wordlist test","name of the wordlist","en", words);
+        var wordlist = new Wordlist("wordlist test","name of the wordlist","en", words);
 
 
         ExtractableResponse response = given()

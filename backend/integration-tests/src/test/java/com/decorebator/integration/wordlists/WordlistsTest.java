@@ -1,9 +1,10 @@
 package com.decorebator.integration.wordlists;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.matchesRegex;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
@@ -14,12 +15,9 @@ import com.decorebator.beans.Wordlist;
 import com.decorebator.integration.EnvironmentRule;
 import com.decorebator.integration.TestUtils;
 
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
-import org.testcontainers.containers.DockerComposeContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -71,7 +69,7 @@ public class WordlistsTest {
     public void registeredUserShouldBeAbleToCreateWordlistWithoutWords() {
         var registration = TestUtils.createRandomUser(signUpEndpoint);
         var authorization = TestUtils.signIn(registration.getLogin(), registration.getPassword(), signInEndpoint);
-        var wordlist = new Wordlist(null,"wordlist test","name of the wordlist","pt-br", Collections.emptyList());
+        var wordlist = new Wordlist("wordlist test","name of the wordlist","pt-br", Collections.emptyList());
         
         given()
             .contentType(ContentType.JSON)
@@ -90,7 +88,7 @@ public class WordlistsTest {
         var authorization = TestUtils.signIn(registration.getLogin(), registration.getPassword(), signInEndpoint);
         
         var words = List.of(new Word("word"),new Word("straightforward"),new Word("tight"));
-        var wordlist = new Wordlist(null,"wordlist test","name of the wordlist","pt-br", words);
+        var wordlist = new Wordlist("wordlist test","name of the wordlist","pt-br", words);
 
         ExtractableResponse response = given()
             .contentType(ContentType.JSON)
@@ -123,7 +121,7 @@ public class WordlistsTest {
         var registration = TestUtils.createRandomUser(signUpEndpoint);
         var authorization = TestUtils.signIn(registration.getLogin(), registration.getPassword(), signInEndpoint);
         
-        var wordlist = new Wordlist(null,"wordlist description","wrong name","en", Collections.emptyList());
+        var wordlist = new Wordlist("wordlist description","wrong name","en", Collections.emptyList());
 
         ExtractableResponse response = given()
             .contentType(ContentType.JSON)
@@ -155,7 +153,7 @@ public class WordlistsTest {
         var registration = TestUtils.createRandomUser(signUpEndpoint);
         var authorization = TestUtils.signIn(registration.getLogin(), registration.getPassword(), signInEndpoint);
         
-        var wordlist = new Wordlist(null,"wordlist description","wordlist to be deleted","en", Collections.emptyList());
+        var wordlist = new Wordlist("wordlist description","wordlist to be deleted","en", Collections.emptyList());
 
         ExtractableResponse response = given()
             .contentType(ContentType.JSON)
