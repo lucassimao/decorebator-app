@@ -29,7 +29,7 @@ const store = async (user, fileName, base64EncodedFile) => {
     await fsPromises.writeFile(localPath, buffer);
     return localPath;
   } else {
-    return await storeOnAmazonS3(user._id, ext, buffer);
+    return await storeOnAmazonS3(ext, buffer);
   }
 };
 
@@ -37,15 +37,14 @@ const store = async (user, fileName, base64EncodedFile) => {
  *
  * store a buffer as a new file on amazon s3
  *
- * @param {mongoose.Types.ObjectId} userId The user id
  * @param {string} extension file extension e.g: '.pdf'
  * @param {Buffer} buffer file content
  */
-async function storeOnAmazonS3(userId, extension, buffer) {
-  const bucketName = String(userId);
+async function storeOnAmazonS3(extension, buffer) {
+  const bucketName = 'decorebator';
   const keyName = shortid.generate() + extension;
 
-  await s3.createBucket({ Bucket: bucketName }).promise();
+  await s3.createBucket({ Bucket: 'decorebator' }).promise();
 
   const hash = crypto.createHash("md5");
   hash.update(buffer);
