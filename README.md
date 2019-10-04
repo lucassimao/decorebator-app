@@ -13,10 +13,15 @@ So I decided to build mine.
 ## Tech stack
 
 + Backend
-    - Node (v12.10)
-    - ExpressJS
+    - Node.js (v12.10)
+    - Express.Js
     - mongoose
-    - jest
+    - jest for unit testing
+    - Java 11 and testcontainers for microservices integration test
+    - eslint
+    - prettier
+    - Docker
+    - Amazon S3
 
 + Frontend
     - React
