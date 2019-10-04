@@ -27,4 +27,4 @@ So I decided to build mine.
     - React
     - jest/cypress
 
-## The branch 'auth' is the current active one, please check it out for more info
+## The branch 'wordlists-frontend' is the current active one, please check it out for more info
