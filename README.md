@@ -26,5 +26,6 @@ So I decided to build mine.
 + Frontend
     - React
     - jest/cypress
+    - Material-UI
 
 ## The branch 'wordlists-frontend' is the current active one, please check it out for more info
