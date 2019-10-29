@@ -25,7 +25,7 @@ export default function TopBar() {
 
   return (
     <div>
-      <AppBar color="primary" position="static">
+      <AppBar color="primary" position="fixed">
         <Toolbar>
           <Typography variant="h5" className={classes.title}>
             Decorebator <span> beta </span>

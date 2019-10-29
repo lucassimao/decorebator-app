@@ -42,7 +42,8 @@ const searchBoxStyles = makeStyles(theme => ({
     position: "relative",
     borderRadius: theme.shape.borderRadius * 2,
     backgroundColor: theme.palette.grey[200], //'#eaebed',
-    margin: theme.spacing(2)
+    margin: theme.spacing(2),
+    marginTop: theme.spacing(9)
   },
   searchIcon: {
     width: theme.spacing(5),
@@ -115,6 +116,7 @@ function App() {
       <TopBar />
 
       <SearchBox />
+
       <Typography variant="h6" className={classes.sectionHeader}>
         <AccessTimeIcon className="section-icon" />
         Recent wordlists
