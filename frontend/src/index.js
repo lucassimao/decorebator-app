@@ -6,12 +6,19 @@ import * as serviceWorker from './serviceWorker';
 import theme from './theme';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import ThemeProvider from '@material-ui/styles/ThemeProvider';
+import { Provider } from 'react-redux';
+import { createStore } from 'redux'
+import rootReducer from './reducers';
 
+
+const store = createStore(rootReducer)
 
 ReactDOM.render(
     <ThemeProvider theme={theme}>
         <CssBaseline />
-        <App />
+        <Provider store={store}>
+            <App />
+        </Provider>
     </ThemeProvider>,
     document.getElementById('root'));
 
