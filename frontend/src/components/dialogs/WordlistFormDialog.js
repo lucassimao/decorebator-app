@@ -9,23 +9,26 @@ import { makeStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
 import React from "react";
 import WordlistForm from '../WordlistForm';
+import { DialogTitle, Typography } from "@material-ui/core";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
   avatar: {
     backgroundColor: blue[100],
     color: blue[600]
   },
   dialogTitle: {
-    border: "1px solid red",
-    padding: 0,
-    display: "flex",
-    justifyContent: "space-between"
+    borderBottom: `2px solid ${theme.palette.grey[500]}`,
+    padding: theme.spacing(1),
+    backgroundColor: theme.palette.grey[200]
+  },
+  dialog:{
+      borderRadius: theme.spacing(1)
   }
-});
+}));
 
 function WordlistFormDialog(props) {
   const classes = useStyles();
@@ -38,23 +41,20 @@ function WordlistFormDialog(props) {
   };
 
   return (
-    <Dialog TransitionComponent={Transition} onClose={handleClose} open={true}>
-      <div className={classes.dialogTitle}>
-        <Link href="#">x</Link>
-        Wordlist
-        <Link  color="primary" href="#">Create</Link>
-
-      </div>
+    <Dialog classes={{paper: classes.dialog}} TransitionComponent={Transition} onClose={handleClose} open={true}>
+      <DialogTitle className={classes.dialogTitle}>
+          <Typography style={{fontWeight: 'bold'}} align="center">New wordlist</Typography>
+      </DialogTitle>
 
       <DialogContent>
          <WordlistForm />
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="primary">
-          Disagree
+          Cancel
         </Button>
         <Button onClick={handleClose} color="primary">
-          Agree
+          Save
         </Button>
       </DialogActions>
     </Dialog>

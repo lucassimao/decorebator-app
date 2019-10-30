@@ -8,7 +8,7 @@ const useStyles = makeStyles(theme => ({
   search: {
     position: "relative",
     borderRadius: theme.shape.borderRadius * 2,
-    backgroundColor: theme.palette.grey[200], //'#eaebed',
+    backgroundColor: theme.palette.grey[200],
     margin: theme.spacing(2),
     marginTop: theme.spacing(9)
   },
