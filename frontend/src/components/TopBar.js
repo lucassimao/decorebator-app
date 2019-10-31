@@ -4,11 +4,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import AddRoundedIcon from "@material-ui/icons/AddRounded";
-import React, { useState, Suspense } from "react";
-import useMediaQuery from '@material-ui/core/useMediaQuery';
-import { useTheme } from '@material-ui/core/styles';
-
-const WordlistFormDialog = React.lazy(() => import("./dialogs/WordlistFormDialog"));
+import React from "react";
+import { Link } from "react-router-dom";
 
 const useStyles = makeStyles(theme => ({
   root: {},
@@ -24,17 +21,12 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
+const NewWordlistLink = React.forwardRef((props, ref) => <Link to="/newWordlist" innerRef={ref} {...props} />);
+
+
 export default function TopBar() {
   const classes = useStyles();
-  const [showPopup, setShowPopup] = useState(false);
-  const theme = useTheme();
-  const matches = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const onAddWordlistClick = event => {
-      if (matches){
-          setShowPopup(true);
-      }
-  };
 
   return (
     <div>
@@ -43,16 +35,11 @@ export default function TopBar() {
           <Typography variant="h5" className={classes.title}>
             Decorebator <span> beta </span>
           </Typography>
-          <IconButton onClick={onAddWordlistClick} edge="start" color="inherit" aria-label="menu">
+          <IconButton component={NewWordlistLink} edge="start" color="inherit" aria-label="menu">
             <AddRoundedIcon className={classes.addButton} />
           </IconButton>
         </Toolbar>
       </AppBar>
-      {showPopup && (
-        <Suspense fallback={<div>Loading ...</div>}>
-          <WordlistFormDialog />
-        </Suspense>
-      )}
     </div>
   );
 }

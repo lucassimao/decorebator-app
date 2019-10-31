@@ -1,51 +1,31 @@
-import { makeStyles } from "@material-ui/core/styles";
-import Typography from "@material-ui/core/Typography";
-import AccessTimeIcon from "@material-ui/icons/AccessTime";
-import React from "react";
+import React, { lazy, Suspense } from "react";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import AppFooter from "./components/AppFooter";
-import SearchBox from "./components/dashboard/SearchBox";
-import Wordlists from "./components/dashboard/Wordlists";
+import Home from "./components/dashboard/Home";
 import TopBar from "./components/TopBar";
 
-const useStyles = makeStyles(theme => ({
-  sectionHeader: {
-    display: "flex",
-    alignItems: "center",
-    margin: theme.spacing(1, 2),
-    color: theme.palette.grey[500],
-    "& .section-icon": {
-      color: theme.palette.primary.main,
-      marginRight: theme.spacing(2)
-    }
-  }
-}));
+const WordlistForm = lazy(() => import('./components/WordlistForm').then(module => module))
 
 
 function App() {
-  const classes = useStyles();
 
   return (
-    <React.Fragment>
-      <TopBar />
-
-      <SearchBox />
-
-      <Typography variant="h6" className={classes.sectionHeader}>
-        <AccessTimeIcon className="section-icon" />
-        Personal wordlists
-      </Typography>
-
-      <Wordlists n={5} />
-
-      <Typography variant="h6" className={classes.sectionHeader}>
-        <AccessTimeIcon className="section-icon" />
-        Recent wordlists
-      </Typography>
-
-      <Wordlists n={10} />
-
-      <AppFooter />
-    </React.Fragment>
+    <>
+      <Router>
+        <TopBar />
+        <Switch>
+          <Route path="/newWordlist">
+            <Suspense fallback={<div> wait ...</div>}>
+              <WordlistForm />
+            </Suspense>
+          </Route>
+          <Route path="/">
+            <Home />
+          </Route>
+        </Switch>
+        <AppFooter />
+      </Router>
+    </>
   );
 }
 
