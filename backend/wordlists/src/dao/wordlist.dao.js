@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 
 const Wordlist = new Schema({
   owner: { type: mongoose.Schema.Types.ObjectId, index: true, required: true },
-  description: { type: String, required: true },
+  description: { type: String, required: false },
   dateCreated: { type: Date, default: Date.now },
   language: { type: String, required: true },
   name: { type: String, required: true },
