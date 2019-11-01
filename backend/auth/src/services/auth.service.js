@@ -58,7 +58,7 @@ const doLogin = (email, password) => {
         secret: config.jwtSecretKey,
         iat: true,
         nbf: true,
-        exp: 3600,
+        exp: config.jwtExpiration,
         iss: config.domain,
         userId: user._id,
         claims: {
