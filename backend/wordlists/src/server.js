@@ -10,6 +10,7 @@ const rateLimit = require("express-rate-limit");
 const UserDao = require("./dao/user.dao");
 const config = require("./config");
 const routers = require("./routers");
+const cors = require('cors');
 
 var jwtStrategyOpts = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -45,6 +46,9 @@ passport.use(jwtStrategy);
 if (!process.env.IGNORE_REQUEST_LIMIT)
     app.use(limiter);
     
+
+app.use(cors({exposedHeaders: 'authorization'}));
+
 app.use(passport.initialize());
 app.use(passport.authenticate("jwt", { session: false }));
 if (config.httpOptions.enableCompression) app.use(compression());

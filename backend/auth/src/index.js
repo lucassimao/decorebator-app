@@ -3,6 +3,7 @@ const db = require("./db");
 const config = require("./config");
 const rootRouter = require("./routers");
 const rateLimit = require("express-rate-limit");
+const cors = require('cors');
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // window size: 5 minutes
@@ -14,6 +15,7 @@ db.connect()
     const app = express();
 
     app.set("trust proxy", 1);
+    app.use(cors({ exposedHeaders: 'authorization' }));
 
     app.use(limiter);
     app.use("/", rootRouter);
