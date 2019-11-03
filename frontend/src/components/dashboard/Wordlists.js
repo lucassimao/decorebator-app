@@ -20,23 +20,19 @@ const useStyles = makeStyles(theme => ({
 
 function Wordlists(props) {
   const classes = useStyles();
-  const { n } = props;
-  const listItems = [];
+  const { wordlists } = props;
 
-  for (let i = 0; i < n; ++i) {
-    listItems.push(
-      <ListItem className={classes.listItem} key={i} button>
-        <ListItemIcon>
-          <InboxIcon />
-        </ListItemIcon>
-        <ListItemText className="text" primary={"Wordlist " + i} />
-      </ListItem>
-    );
-  }
 
   return (
     <List component="nav" className={classes.list}>
-      {listItems}
+      {wordlists.map(w => (
+        <ListItem className={classes.listItem} key={w._id} button>
+          <ListItemIcon>
+            <InboxIcon />
+          </ListItemIcon>
+          <ListItemText className="text" primary={w.name} />
+        </ListItem>
+      ))}
     </List>
   );
 }

@@ -4,7 +4,6 @@ import Button from "@material-ui/core/Button";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Grid from "@material-ui/core/Grid";
 import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
 import Switch from "@material-ui/core/Switch";
 import TextField from "@material-ui/core/TextField";
@@ -13,7 +12,11 @@ import GrainIcon from "@material-ui/icons/Grain";
 import HomeIcon from "@material-ui/icons/Home";
 import React, { useState } from "react";
 import useForm from "react-hook-form";
-import { Link } from "react-router-dom";
+import { connect } from 'react-redux';
+import { Link, useHistory } from "react-router-dom";
+import { SET_SUCCESS_SNACKBAR, SET_ERROR_SNACKBAR } from '../reducers/snackbar';
+import service from '../services/wordlist.service';
+import ProgressModal from './common/ProgressModal';
 
 const LANGUAGES = [
   "English",
@@ -54,7 +57,7 @@ const useStyles = makeStyles(theme => ({
     height: 20
   },
   button: {
-    margin: theme.spacing(1)
+    margin: theme.spacing(0, 1)
   },
   gridButtons: {
     marginTop: theme.spacing(2),
@@ -67,16 +70,37 @@ const HomeLink = React.forwardRef((props, ref) => (
   <Link to="/" innerRef={ref} {...props} />
 ));
 
+
 function WordlistForm(props) {
+  const { onSuccess , onError } = props;
+  const classes = useStyles();
+  const history = useHistory();
+  const [showProgress, setShowProgress] = useState(false);
+
   const { register, handleSubmit, errors } = useForm({
     defaultValues: { language: "English" }
   });
-  const classes = useStyles();
 
-  const onSubmit = data => console.log(data);
+  const onSubmit = async data => {
+    try {
+      setShowProgress(true);
+      await service.save(data);
+      setShowProgress(false);
+      onSuccess('wordlist created');
+      history.push('/');
+      
+    } catch (error) {
+      setShowProgress(false);
+      onError(error.message);
+      console.log(error);
+    }
+  }
 
   return (
     <Container className={classes.root}>
+      {/* progress dialog*/}
+      {showProgress && <ProgressModal description='Saving your new wordlist' title="Wait ..." />}
+
       <form
         className={classes.form}
         noValidate
@@ -139,8 +163,6 @@ function WordlistForm(props) {
             <Select
               name="language"
               placeholder="Language"
-              // defaultValue={language}
-              // onChange={handleLanguageSelect}
               fullWidth
               native
               inputRef={register}
@@ -178,4 +200,9 @@ function WordlistForm(props) {
   );
 }
 
-export default WordlistForm;
+const mapDispatchToProps = dispatch => ({
+  onSuccess: (message) => dispatch({ type: SET_SUCCESS_SNACKBAR, message }),
+  onError: (message) => dispatch({ type: SET_ERROR_SNACKBAR, message })
+})
+
+export default connect(null, mapDispatchToProps)(WordlistForm);

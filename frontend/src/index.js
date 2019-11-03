@@ -7,11 +7,14 @@ import theme from './theme';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import ThemeProvider from '@material-ui/styles/ThemeProvider';
 import { Provider } from 'react-redux';
-import { createStore } from 'redux'
+import { createStore, applyMiddleware } from 'redux'
+import thunkMiddleware from 'redux-thunk';
 import rootReducer from './reducers';
+import {fetchWordlists} from './thunks/wordlist.thunks';
 
 
-const store = createStore(rootReducer)
+const store = createStore(rootReducer,applyMiddleware(thunkMiddleware));
+store.dispatch(fetchWordlists());
 
 ReactDOM.render(
     <ThemeProvider theme={theme}>
