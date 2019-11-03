@@ -14,9 +14,9 @@ import React, { useState } from "react";
 import useForm from "react-hook-form";
 import { connect } from 'react-redux';
 import { Link, useHistory } from "react-router-dom";
-import { SET_SUCCESS_SNACKBAR, SET_ERROR_SNACKBAR } from '../reducers/snackbar';
-import service from '../services/wordlist.service';
-import ProgressModal from './common/ProgressModal';
+import { SET_SUCCESS_SNACKBAR, SET_ERROR_SNACKBAR } from '../../reducers/snackbar';
+import service from '../../services/wordlist.service';
+import ProgressModal from '../common/ProgressModal';
 
 const LANGUAGES = [
   "English",

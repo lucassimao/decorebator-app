@@ -23,6 +23,7 @@ function Home(props) {
   const {userWordlists} = props;
   const classes = useStyles();
 
+
   return (
     <>
       <SearchBox />
@@ -37,14 +38,14 @@ function Home(props) {
         Recent wordlists
       </Typography>
 
-      <Wordlists wordlists={userWordlists} />
+      <Wordlists wordlists={[]} />
     </>
   );
 }
 
 
 const mapStateToProps = (state) =>({
-  userWordlists : state.wordlists.userWordlists
+  userWordlists : state.wordlists.userWordlists,
 })
 
 export default connect(mapStateToProps,null)(Home);

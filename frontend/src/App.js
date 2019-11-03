@@ -6,7 +6,7 @@ import TopBar from "./components/TopBar";
 import { connect } from "react-redux";
 import { SuccessSnackbar, ErrorSnackbar } from "./components/common/AppSnackbar";
 
-const WordlistForm = lazy(() => import('./components/WordlistForm').then(module => module))
+const WordlistForm = lazy(() => import('./components/wordlist/WordlistForm').then(module => module))
 
 function App(props) {
   const { snackbar } = props;
