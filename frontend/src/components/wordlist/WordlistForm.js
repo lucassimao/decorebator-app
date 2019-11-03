@@ -101,14 +101,6 @@ function WordlistForm(props) {
             />
           </Grid>
           <Grid item xs={12}>
-            <FormControlLabel
-              control={
-                <Switch name="isPrivate" inputRef={register} color="primary" />
-              }
-              label="Private"
-            />
-          </Grid>
-          <Grid item xs={12}>
             <TextField
               fullWidth
               multiline
@@ -119,6 +111,14 @@ function WordlistForm(props) {
               label="Description"
             />
           </Grid>
+          <Grid item xs={12}>
+            <FormControlLabel
+              control={
+                <Switch  name="isPrivate" inputRef={register} color="primary" />
+              }
+              label="Private"
+            />
+          </Grid>          
           <Grid item xs={12}>
             <InputLabel htmlFor="language">Language</InputLabel>
             <Select
