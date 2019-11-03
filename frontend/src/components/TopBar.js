@@ -5,7 +5,7 @@ import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import AddRoundedIcon from "@material-ui/icons/AddRounded";
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useRouteMatch } from "react-router-dom";
 
 const useStyles = makeStyles(theme => ({
   root: {},
@@ -16,8 +16,13 @@ const useStyles = makeStyles(theme => ({
       fontSize: theme.typography.caption.fontSize
     }
   },
+  addButtonWrapper:{
+    position: 'absolute',
+    right: theme.spacing(1)
+  },
   addButton: {
-    transform: "scale(1.5)"
+    transform: "scale(1.5)",
+
   }
 }));
 
@@ -26,6 +31,8 @@ const NewWordlistLink = React.forwardRef((props, ref) => <Link to="/newWordlist"
 
 export default function TopBar() {
   const classes = useStyles();
+  const match = useRouteMatch('/');
+  const isHomePage = match && match.isExact;
 
 
   return (
@@ -35,9 +42,9 @@ export default function TopBar() {
           <Typography variant="h5" className={classes.title}>
             Decorebator <span> beta </span>
           </Typography>
-          <IconButton component={NewWordlistLink} edge="start" color="inherit" aria-label="menu">
+          {isHomePage && (<IconButton className={classes.addButtonWrapper} component={NewWordlistLink} color="inherit" aria-label="menu">
             <AddRoundedIcon className={classes.addButton} />
-          </IconButton>
+          </IconButton>)}
         </Toolbar>
       </AppBar>
     </div>
