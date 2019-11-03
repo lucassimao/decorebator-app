@@ -47,7 +47,7 @@ if (!process.env.IGNORE_REQUEST_LIMIT)
     app.use(limiter);
     
 
-app.use(cors({exposedHeaders: 'authorization'}));
+app.use(cors({exposedHeaders: ['link']}));
 
 app.use(passport.initialize());
 app.use(passport.authenticate("jwt", { session: false }));

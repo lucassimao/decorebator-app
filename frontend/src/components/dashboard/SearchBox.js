@@ -10,7 +10,6 @@ const useStyles = makeStyles(theme => ({
     borderRadius: theme.shape.borderRadius * 2,
     backgroundColor: theme.palette.grey[200],
     margin: theme.spacing(2),
-    marginTop: theme.spacing(9)
   },
   searchIcon: {
     width: theme.spacing(5),

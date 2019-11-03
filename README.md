@@ -27,5 +27,9 @@ So I decided to build mine.
     - React
     - jest/cypress
     - Material-UI
+    - redux
+    - react-redux
+    - redux-thunk
+    - react-router-dom
 
 ## The branch 'wordlists-frontend' is the current active one, please check it out for more info

@@ -1,5 +1,4 @@
 import { Container, makeStyles } from "@material-ui/core";
-import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 import Button from "@material-ui/core/Button";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Grid from "@material-ui/core/Grid";
@@ -7,16 +6,15 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import Switch from "@material-ui/core/Switch";
 import TextField from "@material-ui/core/TextField";
-import Typography from "@material-ui/core/Typography";
-import GrainIcon from "@material-ui/icons/Grain";
-import HomeIcon from "@material-ui/icons/Home";
-import React, { useState } from "react";
+import React from "react";
 import useForm from "react-hook-form";
-import { connect } from 'react-redux';
+import { connect } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
-import { SET_SUCCESS_SNACKBAR, SET_ERROR_SNACKBAR } from '../../reducers/snackbar';
-import service from '../../services/wordlist.service';
-import ProgressModal from '../common/ProgressModal';
+import { SET_ERROR_SNACKBAR, SET_SUCCESS_SNACKBAR } from "../../reducers/snackbar";
+import { SHOW_PROGRESS_MODAL, HIDE_PROGRESS_MODAL } from "../../reducers/progressModal";
+
+import service from "../../services/wordlist.service";
+import AppBreadcrumb from "../common/AppBreadcrumb";
 
 const LANGUAGES = [
   "English",
@@ -31,30 +29,11 @@ const LANGUAGES = [
 LANGUAGES.sort();
 
 const useStyles = makeStyles(theme => ({
-  root: {
-    marginTop: theme.spacing(9)
-  },
-  breadcrumbs: {
-    backgroundColor: theme.palette.grey[200],
-    padding: theme.spacing(1)
-  },
   form: {
     color: theme.palette.grey[500],
     "& label": {
       fontWeight: "bold"
     }
-  },
-  link: {
-    display: "flex",
-    textDecoration: "none"
-  },
-  navegableLink: {
-    color: "inherit"
-  },
-  icon: {
-    marginRight: theme.spacing(0.5),
-    width: 20,
-    height: 20
   },
   button: {
     margin: theme.spacing(0, 1)
@@ -70,12 +49,10 @@ const HomeLink = React.forwardRef((props, ref) => (
   <Link to="/" innerRef={ref} {...props} />
 ));
 
-
 function WordlistForm(props) {
-  const { onSuccess , onError } = props;
+  const { onSuccess, onError, showProgressModal, hideProgressModal } = props;
   const classes = useStyles();
   const history = useHistory();
-  const [showProgress, setShowProgress] = useState(false);
 
   const { register, handleSubmit, errors } = useForm({
     defaultValues: { language: "English" }
@@ -83,23 +60,21 @@ function WordlistForm(props) {
 
   const onSubmit = async data => {
     try {
-      setShowProgress(true);
-      await service.save(data);
-      setShowProgress(false);
-      onSuccess('wordlist created');
-      history.push('/');
-      
+      showProgressModal("Wait ...","Creating your wordlist")
+      const resourceUri = await service.save(data);
+      hideProgressModal();
+      onSuccess("wordlist created");
+      history.push(resourceUri);
+
     } catch (error) {
-      setShowProgress(false);
+      hideProgressModal();
       onError(error.message);
       console.log(error);
     }
-  }
+  };
 
   return (
-    <Container className={classes.root}>
-      {/* progress dialog*/}
-      {showProgress && <ProgressModal description='Saving your new wordlist' title="Wait ..." />}
+    <Container>
 
       <form
         className={classes.form}
@@ -108,21 +83,7 @@ function WordlistForm(props) {
       >
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Breadcrumbs
-              className={classes.breadcrumbs}
-              aria-label="breadcrumb"
-            >
-              <Link
-                to="/"
-                className={`${classes.link} ${classes.navegableLink}`}
-              >
-                <HomeIcon className={classes.icon} /> Home
-              </Link>
-              <Typography color="textPrimary" className={classes.link}>
-                <GrainIcon className={classes.icon} />
-                New Wordlist
-              </Typography>
-            </Breadcrumbs>
+            <AppBreadcrumb />
           </Grid>
           <Grid item xs={12}>
             <TextField
@@ -172,9 +133,7 @@ function WordlistForm(props) {
                   {lang}
                 </option>
               ))}
-              <option value="Other">
-                Other
-              </option>
+              <option value="Other">Other</option>
             </Select>
           </Grid>
         </Grid>
@@ -201,8 +160,13 @@ function WordlistForm(props) {
 }
 
 const mapDispatchToProps = dispatch => ({
-  onSuccess: (message) => dispatch({ type: SET_SUCCESS_SNACKBAR, message }),
-  onError: (message) => dispatch({ type: SET_ERROR_SNACKBAR, message })
-})
+  onSuccess: message => dispatch({ type: SET_SUCCESS_SNACKBAR, message }),
+  onError: message => dispatch({ type: SET_ERROR_SNACKBAR, message }),
+  showProgressModal: (title,description) => dispatch({type: SHOW_PROGRESS_MODAL, description, title}),
+  hideProgressModal: () => dispatch({type: HIDE_PROGRESS_MODAL}),
+});
 
-export default connect(null, mapDispatchToProps)(WordlistForm);
+export default connect(
+  null,
+  mapDispatchToProps
+)(WordlistForm);
