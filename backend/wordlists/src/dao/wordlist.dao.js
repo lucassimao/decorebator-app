@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 
 const Wordlist = new Schema({
   owner: { type: mongoose.Schema.Types.ObjectId, index: true, required: true },
+  isPrivate: { type: Boolean, default: true },
   description: { type: String, required: false },
   dateCreated: { type: Date, default: Date.now },
   language: { type: String, required: true },
@@ -16,7 +17,7 @@ const Wordlist = new Schema({
   ]
 });
 
-Wordlist.static("addWord", function(wordlistId, newWordObject, user) {
+Wordlist.static("addWord", function (wordlistId, newWordObject, user) {
   return this.findOneAndUpdate(
     { _id: wordlistId, owner: user._id },
     { $push: { words: newWordObject } },
@@ -24,7 +25,7 @@ Wordlist.static("addWord", function(wordlistId, newWordObject, user) {
   );
 });
 
-Wordlist.static("patchWord", function(idWordlist, idWord, updateObject, user) {
+Wordlist.static("patchWord", function (idWordlist, idWord, updateObject, user) {
   const updateCommand = Object.keys(updateObject).reduce((command, property) => {
     command[`words.$.${property}`] = updateObject[property];
     return command;
@@ -33,19 +34,19 @@ Wordlist.static("patchWord", function(idWordlist, idWord, updateObject, user) {
   return this.updateOne({ _id: idWordlist, owner: user._id, "words._id": idWord }, { $set: updateCommand });
 });
 
-Wordlist.static("deleteWord", function(idWordlist, idWord, user) {
+Wordlist.static("deleteWord", function (idWordlist, idWord, user) {
   return this.updateOne({ _id: idWordlist, owner: user._id }, { $pull: { words: { _id: idWord } } });
 });
 
-Wordlist.static("getWord", function(idWordlist, idWord, user) {
+Wordlist.static("getWord", function (idWordlist, idWord, user) {
   return this.findOne({ _id: idWordlist, owner: user._id, "words._id": idWord }, "words.$");
 });
 
-Wordlist.static("getAllWords", function(idWordlist, user) {
+Wordlist.static("getAllWords", function (idWordlist, user) {
   return this.findOne({ _id: idWordlist, owner: user._id }, "words");
 });
 
-Wordlist.static("addImage", function(idWordlist, idWord, { url, description }, user) {
+Wordlist.static("addImage", function (idWordlist, idWord, { url, description }, user) {
   return this.findOneAndUpdate(
     { _id: idWordlist, "words._id": idWord, owner: user._id },
     { $push: { "words.$.images": { url, description } } },
@@ -53,14 +54,14 @@ Wordlist.static("addImage", function(idWordlist, idWord, { url, description }, u
   );
 });
 
-Wordlist.static("deleteImage", function(idWordlist, idWord, idImage, user) {
+Wordlist.static("deleteImage", function (idWordlist, idWord, idImage, user) {
   return this.updateOne(
     { _id: idWordlist, "words._id": idWord, owner: user._id },
     { $pull: { "words.$.images": { _id: idImage } } }
   );
 });
 
-Wordlist.static("patchImage", function(idWordlist, idWord, idImage, { description }, user) {
+Wordlist.static("patchImage", function (idWordlist, idWord, idImage, { description }, user) {
   return this.updateOne(
     { _id: idWordlist, owner: user._id },
     { $set: { "words.$[w].images.$[i].description": description } },
