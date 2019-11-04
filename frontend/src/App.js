@@ -20,7 +20,10 @@ const WordlistEdit = lazy(() =>
 
 const useStyles = makeStyles(theme => ({
   main: {
-    marginTop: theme.spacing(9)
+    marginTop: theme.spacing(8),
+    position: 'relative',
+    // paddingBottom: theme.spacing(19),
+    border: '1px solid green'
   }
 }));
 

@@ -35,24 +35,22 @@ export default function TopBar() {
   const isHomePage = match && match.isExact;
 
   return (
-    <div>
-      <AppBar color="primary" position="fixed">
-        <Toolbar>
-          <Typography variant="h5" className={classes.title}>
-            Decorebator <span> beta </span>
-          </Typography>
-          {isHomePage && (
-            <IconButton
-              className={classes.addButtonWrapper}
-              component={NewWordlistLink}
-              color="inherit"
-              aria-label="menu"
-            >
-              <AddRoundedIcon className={classes.addButton} />
-            </IconButton>
-          )}
-        </Toolbar>
-      </AppBar>
-    </div>
+    <AppBar color="primary" position="fixed">
+      <Toolbar>
+        <Typography variant="h5" className={classes.title}>
+          Decorebator <span> beta </span>
+        </Typography>
+        {isHomePage && (
+          <IconButton
+            className={classes.addButtonWrapper}
+            component={NewWordlistLink}
+            color="inherit"
+            aria-label="menu"
+          >
+            <AddRoundedIcon className={classes.addButton} />
+          </IconButton>
+        )}
+      </Toolbar>
+    </AppBar>
   );
 }

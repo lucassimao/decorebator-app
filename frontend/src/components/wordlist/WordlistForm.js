@@ -95,7 +95,6 @@ function WordlistForm(props) {
               helperText={errors.name && "Name is required"}
               name="name"
               inputRef={register({ required: true })}
-              className={classes.textField}
               label="Name"
               variant="outlined"
             />

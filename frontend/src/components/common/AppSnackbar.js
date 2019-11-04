@@ -13,7 +13,7 @@ function AppSnackbar(props) {
     <Snackbar
       anchorOrigin={anchorOrigin}
       open={true}
-      autoHideDuration={5000}
+      autoHideDuration={3000}
       onClose={clearSnackbar}
     >
       <SnackbarContentWrapper

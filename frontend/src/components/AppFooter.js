@@ -19,7 +19,7 @@ export default function AppFooter() {
   const classes = useStyles();
 
   return (
-    <AppBar position="fixed" color="primary" className={classes.root}>
+    <AppBar component="footer" position="fixed" color="primary" className={classes.root}>
       <Toolbar className={classes.toolBar}>
         <IconButton edge="start" color="inherit">
           <ListAltRoundedIcon />

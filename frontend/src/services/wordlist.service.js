@@ -48,6 +48,21 @@ const get = async id => {
   return wordlist;
 };
 
-const api = { save, fetchUserWordlists, get };
+/**
+ * 
+ * @param {String} wordlistId The id of the wordlist to be added a new word
+ * @param {String} name The word
+ * @returns {Promise<String>} A promise which resolves to the URI of the new resource
+ */
+const addWord = async (wordlistId, name) => {
+  const response = await fetch(`${conf.api.wordlists}/${wordlistId}/words`,{
+    headers: DEFAULT_HEADERS,
+    method: 'POST',
+    body: JSON.stringify({name})
+  });
+  return response.headers.get('link');
+}
+
+const api = { save, fetchUserWordlists, get, addWord };
 
 export default api;
