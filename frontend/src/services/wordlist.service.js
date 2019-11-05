@@ -6,8 +6,7 @@ const DEFAULT_HEADERS = {
 
 // TODO remove this when signup and signin become available
 if (process.env.NODE_ENV === "development") {
-  DEFAULT_HEADERS.authorization =
-    "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NzI2NDQ5MTYsIm5iZiI6MTU3MjY0NDkxNiwiZXhwIjoxNjA0MTgwOTE2LCJpc3MiOiJodHRwczovL2RlY29yZWJhdG9yLmNvbSIsInVzZXJJZCI6IjVkYmM5NDM3YzI3NDIxMDAxMmM3NjY0ZCIsImNsYWltcyI6eyJyb2xlIjoidXNlciJ9fQ.7F-3nV4bW5aTrUV2qIfoxChzs7wFnti00AgX872EZhc";
+  DEFAULT_HEADERS.authorization = `Bearer ${process.env.REACT_APP_AUTH_TOKEN}`;
 }
 
 /**
@@ -49,20 +48,29 @@ const get = async id => {
 };
 
 /**
- * 
+ *
  * @param {String} wordlistId The id of the wordlist to be added a new word
  * @param {String} name The word
  * @returns {Promise<String>} A promise which resolves to the URI of the new resource
  */
 const addWord = async (wordlistId, name) => {
-  const response = await fetch(`${conf.api.wordlists}/${wordlistId}/words`,{
+  const response = await fetch(`${conf.api.wordlists}/${wordlistId}/words`, {
     headers: DEFAULT_HEADERS,
-    method: 'POST',
-    body: JSON.stringify({name})
+    method: "POST",
+    body: JSON.stringify({ name })
   });
-  return response.headers.get('link');
-}
+  return response.headers.get("link");
+};
 
-const api = { save, fetchUserWordlists, get, addWord };
+const deleteWord = async (wordlistId, wordId) => {
+  const response = await fetch(`${conf.api.wordlists}/${wordlistId}/words/${wordId}`, {
+    headers: DEFAULT_HEADERS,
+    method: "DELETE"
+  });
+
+  return response.ok;
+};
+
+const api = { save, fetchUserWordlists, get, addWord, deleteWord };
 
 export default api;

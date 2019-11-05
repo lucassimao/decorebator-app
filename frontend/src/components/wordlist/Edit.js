@@ -1,4 +1,4 @@
-import { Grid, List, ListItem, makeStyles, TextField } from "@material-ui/core";
+import { Grid, List, ListItem, makeStyles, TextField, Typography } from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
 import ListItemText from "@material-ui/core/ListItemText";
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -14,7 +14,7 @@ const useSyles = makeStyles(theme => (
     grid:{
       height: '100%',
       maxHeight: '100%',
-      padding: theme.spacing(0,2)
+      padding: theme.spacing(0,2,1,2)
     },
     icon: {
       padding: theme.spacing(.5)
@@ -24,7 +24,11 @@ const useSyles = makeStyles(theme => (
       marginTop: theme.spacing(1),
       '&:first-of-type': {
         margin:0
-      }
+      },
+    },
+    list:{
+        backgroundColor: '#fff',
+
     }
   }
 ))
@@ -54,28 +58,40 @@ function Edit(props) {
 
   const onTextFieldKeyDown = async (event) => {
     if (event.keyCode === 13) {
+      const word = event.target.value;
+      const itsEmpty = word && !word.trim();
+      if (itsEmpty){
+          return;
+      }
+
       event.preventDefault();
 
       showProgressModal('Wait', 'Adding new word ...');
-      const name = event.target.value;
       event.target.value = '';
-      const uri = await service.addWord(id, name);
+      const uri = await service.addWord(id, word);
       const _id = uri.substr(uri.lastIndexOf('/') + 1);
-      wordlist.words.push({ name, _id });
+      wordlist.words.push({ name: word, _id });
       hideProgressModal();
     }
   }
 
   const deleteWord = async (id) => {
     showProgressModal('Wait', 'Deleting word ...');
+    await service.deleteWord(wordlist._id, id);
     wordlist.words = wordlist.words.filter(word => word._id !== id);
     hideProgressModal();
+
   }
 
   return (
       <Grid  wrap="nowrap" direction="column"  className={classes.grid} container>
         <Grid className={classes.gridItem} item xs={12}>
           <AppBreadcrumb />
+        </Grid>
+        <Grid className={classes.gridItem} item xs={12}>
+            <Typography variant="h6">{wordlist && wordlist.name}</Typography>
+            <Typography variant="caption">{wordlist && wordlist.description}</Typography>
+
         </Grid>
         <Grid className={classes.gridItem}  item xs={12}>
           <TextField
@@ -90,7 +106,7 @@ function Edit(props) {
           />
         </Grid>
         <Grid className={classes.gridItem} item xs={12} style={{overflow:'scroll', flexGrow: 1}}>
-          <List disablePadding>
+          <List disablePadding className={classes.list}>
             {wordlist && wordlist.words.map(word => (
               <ListItem key={word._id}>
                 <ListItemText primary={word.name} />

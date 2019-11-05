@@ -19,6 +19,7 @@
         "MONGO_DB_URL": "mongodb://localhost:27017/decorebator-dev",
         "HTTP_PORT": "3001"
       },
+      "restart": true,
       "port": 9229,
       "runtimeArgs": ["--prefix", "${workspaceFolder}/backend/auth", "start"]
     },
@@ -28,9 +29,11 @@
         "name": "Wordlists",
         "runtimeExecutable": "npm",
         "port": 9228,
+        "restart": true,
         "env": {
           "MONGO_DB_URL": "mongodb://localhost:27017/decorebator-dev",
-          "HTTP_PORT": "3002"
+          "HTTP_PORT": "3002",
+          "IGNORE_REQUEST_LIMIT": "true"
         },
         "runtimeArgs": ["--prefix", "${workspaceFolder}/backend/wordlists", "start"]
       },    
