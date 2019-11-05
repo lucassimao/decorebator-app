@@ -14,7 +14,6 @@ const useStyles = makeStyles(theme => ({
 
   list: {
     backgroundColor: "white",
-    padding: theme.spacing(0, 2, 0, 2)
   }
 }));
 

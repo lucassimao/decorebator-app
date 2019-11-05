@@ -1,4 +1,5 @@
-import { Container, Grid, List, ListItem, TextField, makeStyles } from "@material-ui/core";
+import { Grid, List, ListItem, makeStyles, TextField } from "@material-ui/core";
+import IconButton from "@material-ui/core/IconButton";
 import ListItemText from "@material-ui/core/ListItemText";
 import DeleteIcon from "@material-ui/icons/Delete";
 import React, { useEffect, useState } from "react";
@@ -7,18 +8,23 @@ import { useParams } from "react-router-dom";
 import { HIDE_PROGRESS_MODAL, SHOW_PROGRESS_MODAL } from "../../reducers/progressModal";
 import service from "../../services/wordlist.service";
 import AppBreadcrumb from "../common/AppBreadcrumb";
-import IconButton from "@material-ui/core/IconButton";
 
 const useSyles = makeStyles(theme => (
   {
+    grid:{
+      height: '100%',
+      maxHeight: '100%',
+      padding: theme.spacing(0,2)
+    },
     icon: {
       padding: theme.spacing(.5)
     },
-    container : {
-      border: '1px solid blue',
-      // position: "absolute",
-      // top:0,
-      // bottom: 0
+    gridItem:{
+      flexBasis: 'auto',
+      marginTop: theme.spacing(1),
+      '&:first-of-type': {
+        margin:0
+      }
     }
   }
 ))
@@ -38,8 +44,8 @@ function Edit(props) {
         setWordlist(wordlist);
       } catch (error) {
         console.error(error);
-      } finally{
-        hideProgressModal();        
+      } finally {
+        hideProgressModal();
       }
 
     })();
@@ -67,25 +73,24 @@ function Edit(props) {
   }
 
   return (
-    <Container className={classes.container}>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
+      <Grid  wrap="nowrap" direction="column"  className={classes.grid} container>
+        <Grid className={classes.gridItem} item xs={12}>
           <AppBreadcrumb />
         </Grid>
-        <Grid item xs={12}>
-          <List  style={{border: '1px solid red', maxHeight: '200px', overflow: 'scroll'}} disablePadding>
-            <ListItem disableGutters>
-              <TextField
-                margin="dense"
-                fullWidth
-                autoComplete="off"
-                autoFocus
-                name="name"
-                label="Add a new word or expression ..."
-                onKeyDown={onTextFieldKeyDown}
-                variant="outlined"
-              />
-            </ListItem>
+        <Grid className={classes.gridItem}  item xs={12}>
+          <TextField
+            margin="dense"
+            fullWidth
+            autoComplete="off"
+            autoFocus
+            name="name"
+            label="Add a new word or expression ..."
+            onKeyDown={onTextFieldKeyDown}
+            variant="outlined"
+          />
+        </Grid>
+        <Grid className={classes.gridItem} item xs={12} style={{overflow:'scroll', flexGrow: 1}}>
+          <List disablePadding>
             {wordlist && wordlist.words.map(word => (
               <ListItem key={word._id}>
                 <ListItemText primary={word.name} />
@@ -97,7 +102,6 @@ function Edit(props) {
           </List>
         </Grid>
       </Grid>
-    </Container>
   );
 }
 

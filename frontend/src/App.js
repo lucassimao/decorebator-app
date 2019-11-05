@@ -19,11 +19,16 @@ const WordlistEdit = lazy(() =>
 );
 
 const useStyles = makeStyles(theme => ({
+  wrapper: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100vh',
+    justifyContent: 'space-between'
+  },
   main: {
-    marginTop: theme.spacing(8),
-    position: 'relative',
-    // paddingBottom: theme.spacing(19),
-    border: '1px solid green'
+    flexGrow:1,
+    paddingTop: theme.spacing(2),
+    overflow: 'scroll'
   }
 }));
 
@@ -36,25 +41,27 @@ function App(props) {
   return (
     <>
       <Router>
-        <TopBar />
-        <main className={classes.main}>
-          <Switch>
-            <Route path="/newWordlist">
-              <Suspense fallback={spinner}>
-                <WordlistForm />
-              </Suspense>
-            </Route>
-            <Route path="/wordlists/:id">
-              <Suspense fallback={spinner}>
-                <WordlistEdit />
-              </Suspense>
-            </Route>
-            <Route path="/">
-              <Home />
-            </Route>
-          </Switch>
-        </main>
-        <AppFooter />
+        <div className={classes.wrapper}>
+          <TopBar />
+          <main className={classes.main}>
+            <Switch>
+              <Route path="/newWordlist">
+                <Suspense fallback={spinner}>
+                  <WordlistForm />
+                </Suspense>
+              </Route>
+              <Route path="/wordlists/:id">
+                <Suspense fallback={spinner}>
+                  <WordlistEdit />
+                </Suspense>
+              </Route>
+              <Route path="/">
+                <Home />
+              </Route>
+            </Switch>
+          </main>
+          <AppFooter />
+        </div>
       </Router>
 
       {/* success snack bar */}

@@ -5,12 +5,13 @@ import React from "react";
 import SearchBox from "./SearchBox";
 import Wordlists from "./Wordlists";
 import { connect } from "react-redux";
+import { Container } from "@material-ui/core";
 
 const useStyles = makeStyles(theme => ({
   sectionHeader: {
     display: "flex",
     alignItems: "center",
-    margin: theme.spacing(1, 2),
+    margin: theme.spacing(1, 0),
     color: theme.palette.grey[500],
     "& .section-icon": {
       color: theme.palette.primary.main,
@@ -25,7 +26,7 @@ function Home(props) {
 
 
   return (
-    <>
+    <Container>
       <SearchBox />
       <Typography variant="h6" className={classes.sectionHeader}>
         <AccessTimeIcon className="section-icon" />
@@ -39,7 +40,7 @@ function Home(props) {
       </Typography>
 
       <Wordlists wordlists={[]} />
-    </>
+    </Container>
   );
 }
 

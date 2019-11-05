@@ -27,7 +27,8 @@ router
     const object = await wordService.addWord(req.params.idWordlist, req.body, req.user);
 
     if (object) {
-      res.set("Link", `${req.baseUrl}/${object._id}`);
+      const word = object.words[object.words.length - 1];
+      res.set("Link", `${req.baseUrl}/${word._id}`);
       res.status(201).end();
     } else {
       next();

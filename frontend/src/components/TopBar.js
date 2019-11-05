@@ -35,7 +35,7 @@ export default function TopBar() {
   const isHomePage = match && match.isExact;
 
   return (
-    <AppBar color="primary" position="fixed">
+    <AppBar color="primary" position="static">
       <Toolbar>
         <Typography variant="h5" className={classes.title}>
           Decorebator <span> beta </span>
