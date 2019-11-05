@@ -21,6 +21,6 @@ db.connect()
     app.use("/", rootRouter);
     app.listen(config.port);
 
-    console.log("auth is listenning at 3000");
+    console.log(`auth is listenning at ${process.env.HTTP_PORT}`);
   })
   .catch(console.error);

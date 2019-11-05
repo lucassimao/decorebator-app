@@ -6,7 +6,7 @@
     "test": "npx jest --detectOpenHandles 'src/'",
     "lint": "eslint 'src/**/*.js'",
     "jest-watch": "jest --watch --detectOpenHandles 'src/'",
-    "start": "node src/index.js",
+    "start": "nodemon --inspect=9228 src/index.js",
     "format": "prettier --write 'src/**/*.js'"
   },
   "repository": {
@@ -24,6 +24,7 @@
     "eslint": "^6.5.1",
     "eslint-plugin-jest": "^22.19.0",
     "jest": "^24.8.0",
+    "nodemon": "^1.19.4",
     "prettier": "^1.18.2",
     "supertest": "^4.0.2"
   },

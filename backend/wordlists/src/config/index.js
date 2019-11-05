@@ -3,6 +3,10 @@ require("winston-daily-rotate-file");
 
 const env = process.env.NODE_ENV || "development";
 
+if (!process.env.MONGO_DB_URL) throw "Mongo db url was not provided!";
+if (!process.env.HTTP_PORT) throw "Http server port must be provided!";
+
+
 if (env == "production" && !process.env.JWT_SECRET_KEY)
   throw "Jwt secret key must be provided as an environment variable in production";
 
@@ -38,6 +42,8 @@ const baseConfig = {
     auto_reconnect: true,
     useUnifiedTopology: true
   },
+  dbUrl: process.env.MONGO_DB_URL,
+  port: process.env.HTTP_PORT,
   httpOptions: {
     enableCompression: process.env.ENABLE_COMPRESSION == "true"
   }
