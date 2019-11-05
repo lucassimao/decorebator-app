@@ -13,7 +13,26 @@ const WordlistDao = require("../dao/wordlist.dao");
  */
 const list = ({ pageSize = config.defaultPageSize, page = 0 }, user) => {
   const skip = page > 0 ? page * pageSize : 0;
-  return WordlistDao.find({ owner: user._id }, null, { limit: pageSize, skip, sort: {_id : -1} });
+  return WordlistDao.find({ owner: user._id }, null, { limit: pageSize, skip, sort: { _id: -1 } });
+};
+
+/**
+ * Returns public wordlists
+ *
+ * @param {number} pageSize The amount of wordlists to be returned
+ * @param {number} page As the data set is seen as a set of pages, this param represents the requested page
+ * @param {object} user The authenticated user
+ * @param {mongoose.Types.ObjectId} user._id The user id
+ *
+ * @returns {Promise} A promise, which resolves to an array of wordlists
+ */
+const listPublic = ({ pageSize = config.defaultPageSize, page = 0 }, user) => {
+  const skip = page > 0 ? page * pageSize : 0;
+  return WordlistDao.find({ owner: { $ne: user._id }, isPrivate: false }, null, {
+    limit: pageSize,
+    skip,
+    sort: { _id: -1 }
+  });
 };
 
 /**
@@ -74,11 +93,11 @@ const remove = (id, user) => {
 
 const api = {
   list,
+  listPublic,
   save,
   get,
   update,
   delete: remove
 };
-
 
 module.exports = api;

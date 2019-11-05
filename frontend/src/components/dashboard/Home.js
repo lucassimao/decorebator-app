@@ -21,7 +21,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function Home(props) {
-  const {userWordlists} = props;
+  const {userWordlists, publicWordlists} = props;
   const classes = useStyles();
 
 
@@ -30,16 +30,16 @@ function Home(props) {
       <SearchBox />
       <Typography variant="h6" className={classes.sectionHeader}>
         <AccessTimeIcon className="section-icon" />
-        Personal wordlists
+        Your wordlists
       </Typography>
       <Wordlists wordlists={userWordlists} />
 
       <Typography variant="h6" className={classes.sectionHeader}>
         <AccessTimeIcon className="section-icon" />
-        Recent wordlists
+        Recent public wordlists
       </Typography>
 
-      <Wordlists wordlists={[]} />
+      <Wordlists wordlists={publicWordlists} />
     </Container>
   );
 }
@@ -47,6 +47,7 @@ function Home(props) {
 
 const mapStateToProps = (state) =>({
   userWordlists : state.wordlists.userWordlists,
+  publicWordlists : state.wordlists.publicWordlists
 })
 
 export default connect(mapStateToProps,null)(Home);

@@ -35,6 +35,17 @@ const fetchUserWordlists = async () => {
 };
 
 /**
+ * @returns {Promise} A promise that resolves to a array of public wordlists
+ */
+const fetchPublicWordlists = async () => {
+  const response = await fetch(`${conf.api.wordlists}/public`, {
+    headers: DEFAULT_HEADERS
+  });
+  const { wordlists } = await response.json();
+  return wordlists;
+};
+
+/**
  *
  * @param {String} id The id of wordlist
  * @returns {Promise} A promise which resolves to the wordlist
@@ -71,6 +82,6 @@ const deleteWord = async (wordlistId, wordId) => {
   return response.ok;
 };
 
-const api = { save, fetchUserWordlists, get, addWord, deleteWord };
+const api = { save, fetchUserWordlists, fetchPublicWordlists, get, addWord, deleteWord };
 
 export default api;

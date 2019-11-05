@@ -10,10 +10,12 @@ import { Provider } from "react-redux";
 import { createStore, applyMiddleware } from "redux";
 import thunkMiddleware from "redux-thunk";
 import rootReducer from "./reducers";
-import { fetchWordlists } from "./thunks/wordlist.thunks";
+import { fetchUserWordlists, fetchPublicWordlists } from "./thunks/wordlist.thunks";
 
 const store = createStore(rootReducer, applyMiddleware(thunkMiddleware));
-store.dispatch(fetchWordlists());
+store.dispatch(fetchUserWordlists());
+store.dispatch(fetchPublicWordlists());
+
 
 ReactDOM.render(
   <ThemeProvider theme={theme}>
