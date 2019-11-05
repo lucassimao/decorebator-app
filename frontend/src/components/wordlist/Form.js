@@ -49,7 +49,7 @@ const HomeLink = React.forwardRef((props, ref) => (
   <Link to="/" innerRef={ref} {...props} />
 ));
 
-function WordlistForm(props) {
+function Form(props) {
   const { onSuccess, onError, showProgressModal, hideProgressModal } = props;
   const classes = useStyles();
   const history = useHistory();
@@ -168,4 +168,4 @@ const mapDispatchToProps = dispatch => ({
 export default connect(
   null,
   mapDispatchToProps
-)(WordlistForm);
+)(Form);

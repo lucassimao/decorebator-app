@@ -12,7 +12,7 @@ import Home from "./components/dashboard/Home";
 import TopBar from "./components/TopBar";
 
 const WordlistForm = lazy(() =>
-  import("./components/wordlist/WordlistForm").then(module => module)
+  import("./components/wordlist/Form").then(module => module)
 );
 const WordlistEdit = lazy(() =>
   import("./components/wordlist/Edit").then(module => module)
