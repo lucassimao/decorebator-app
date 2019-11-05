@@ -26,7 +26,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const NewWordlistLink = React.forwardRef((props, ref) => (
-  <Link to="/newWordlist" innerRef={ref} {...props} />
+  <Link to="/wordlists/new" innerRef={ref} {...props} />
 ));
 
 export default function TopBar() {

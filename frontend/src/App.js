@@ -45,7 +45,7 @@ function App(props) {
           <TopBar />
           <main className={classes.main}>
             <Switch>
-              <Route path="/newWordlist">
+              <Route path="/wordlists/new">
                 <Suspense fallback={spinner}>
                   <WordlistForm />
                 </Suspense>
