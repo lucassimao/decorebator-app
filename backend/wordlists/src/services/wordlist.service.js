@@ -13,7 +13,7 @@ const WordlistDao = require("../dao/wordlist.dao");
  */
 const list = ({ pageSize = config.defaultPageSize, page = 0 }, user) => {
   const skip = page > 0 ? page * pageSize : 0;
-  return WordlistDao.find({ owner: user._id }, null, { limit: pageSize, skip });
+  return WordlistDao.find({ owner: user._id }, null, { limit: pageSize, skip, sort: {_id : -1} });
 };
 
 /**
