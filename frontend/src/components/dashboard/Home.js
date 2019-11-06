@@ -1,11 +1,12 @@
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import AccessTimeIcon from "@material-ui/icons/AccessTime";
-import React from "react";
+import React, { useEffect } from "react";
 import SearchBox from "./SearchBox";
 import Wordlists from "./Wordlists";
 import { connect } from "react-redux";
 import { Container } from "@material-ui/core";
+import { fetchUserWordlists, fetchPublicWordlists } from "../../thunks/wordlist.thunks";
 
 const useStyles = makeStyles(theme => ({
   sectionHeader: {
@@ -21,9 +22,14 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function Home(props) {
-  const {userWordlists, publicWordlists} = props;
+  const { userWordlists, publicWordlists, loadUserWordlists, loadPublicWordlists } = props;
   const classes = useStyles();
 
+  useEffect(() => {
+    loadUserWordlists();
+    loadPublicWordlists();
+    // eslint-disable-next-line
+  }, []);
 
   return (
     <Container>
@@ -44,10 +50,17 @@ function Home(props) {
   );
 }
 
+const mapStateToProps = state => ({
+  userWordlists: state.wordlists.userWordlists,
+  publicWordlists: state.wordlists.publicWordlists
+});
 
-const mapStateToProps = (state) =>({
-  userWordlists : state.wordlists.userWordlists,
-  publicWordlists : state.wordlists.publicWordlists
-})
+const mapDispatchToProps = dispatch => ({
+  loadUserWordlists: () => dispatch(fetchUserWordlists()),
+  loadPublicWordlists: () => dispatch(fetchPublicWordlists())
+});
 
-export default connect(mapStateToProps,null)(Home);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Home);

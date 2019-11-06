@@ -10,9 +10,9 @@ export function fetchUserWordlists(page = 0) {
 }
 
 export function fetchPublicWordlists(page = 0) {
-    return async dispatch => {
-      const wordlists = await service.fetchPublicWordlists();
-      dispatch({ type: SET_PUBLIC_WORDLISTS, wordlists, page });
-      return wordlists;
-    };
-  }
+  return async dispatch => {
+    const wordlists = await service.fetchPublicWordlists();
+    dispatch({ type: SET_PUBLIC_WORDLISTS, wordlists, page });
+    return wordlists;
+  };
+}
