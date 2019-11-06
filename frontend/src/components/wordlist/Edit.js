@@ -1,13 +1,16 @@
 import { Grid, List, ListItem, makeStyles, TextField, Typography } from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
-import ListItemText from "@material-ui/core/ListItemText";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import DeleteIcon from "@material-ui/icons/Delete";
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { useParams, useHistory } from "react-router-dom";
 import { HIDE_PROGRESS_MODAL, SHOW_PROGRESS_MODAL } from "../../reducers/progressModal";
+import { SET_SUCCESS_SNACKBAR } from "../../reducers/snackbar";
 import service from "../../services/wordlist.service";
 import AppBreadcrumb from "../common/AppBreadcrumb";
+import InputBase from "@material-ui/core/InputBase";
+import clsx from "clsx";
 
 const useSyles = makeStyles(theme => ({
   grid: {
@@ -23,24 +26,29 @@ const useSyles = makeStyles(theme => ({
     marginTop: theme.spacing(1),
     "&:first-of-type": {
       margin: 0
-    //   marginTop: theme.spacing(2),
+      //   marginTop: theme.spacing(2),
     }
   },
   list: {
     backgroundColor: "#fff"
   },
-  title:{
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingRight: theme.spacing(1)
+  title: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingRight: theme.spacing(1)
+  },
+  selectedWord :{
+      borderBottom: '1px solid',
+      borderBottomColor: theme.palette.primary.main
   }
 }));
 
 function Edit(props) {
-  const { showProgressModal, hideProgressModal } = props;
+  const { showProgressModal, hideProgressModal, onSuccess } = props;
   const [wordlist, setWordlist] = useState(null);
+  const [focusedWordId, setFocusedWordId] = useState(null);
   const { id } = useParams();
   const history = useHistory();
   const classes = useSyles();
@@ -80,6 +88,11 @@ function Edit(props) {
     }
   };
 
+  const updateWord = async (wordId, name) => {
+      await service.updateWord(wordlist._id, wordId, name);
+      onSuccess('Word updated');
+  };
+
   const deleteWord = async id => {
     showProgressModal("Wait", "Deleting word ...");
     await service.deleteWord(wordlist._id, id);
@@ -91,8 +104,8 @@ function Edit(props) {
     showProgressModal("Wait", "Deleting wordlist ...");
     await service.deleteWordlist(wordlist._id);
     hideProgressModal();
-    history.push('/');
-  }
+    history.push("/");
+  };
 
   return (
     <Grid wrap="nowrap" direction="column" className={classes.grid} container>
@@ -102,8 +115,8 @@ function Edit(props) {
       <Grid className={`${classes.gridItem} ${classes.title}`} item xs={12}>
         <Typography variant="h6">{wordlist && wordlist.name} </Typography>
         <IconButton onClick={deleteWordlist} edge="end">
-            <DeleteIcon />
-        </IconButton>        
+          <DeleteIcon />
+        </IconButton>
       </Grid>
       <Grid className={classes.gridItem} item xs={12}>
         <Typography variant="caption">{wordlist && wordlist.description}</Typography>
@@ -125,10 +138,20 @@ function Edit(props) {
           {wordlist &&
             wordlist.words.map(word => (
               <ListItem key={word._id}>
-                <ListItemText primary={word.name} />
-                <IconButton onClick={() => deleteWord(word._id)} edge="end" className={classes.icon}>
-                  <DeleteIcon />
-                </IconButton>
+                <InputBase
+                  onFocus={() => setFocusedWordId(word._id)}
+                  onBlur={evt => updateWord(word._id, evt.target.value)}
+                  defaultValue={word.name}
+                  className={clsx({
+                    [classes.selectedWord]: word._id === focusedWordId
+                  })}
+                />
+                {/* <ListItemText primary={word.name} /> */}
+                <ListItemSecondaryAction>
+                  <IconButton onClick={() => deleteWord(word._id)} edge="end" className={classes.icon}>
+                    <DeleteIcon />
+                  </IconButton>
+                </ListItemSecondaryAction>
               </ListItem>
             ))}
         </List>
@@ -140,6 +163,7 @@ function Edit(props) {
 const mapDispatchToProps = dispatch => ({
   showProgressModal: (title, description) => dispatch({ type: SHOW_PROGRESS_MODAL, description, title }),
   hideProgressModal: () => dispatch({ type: HIDE_PROGRESS_MODAL }),
+  onSuccess: message => dispatch({ type: SET_SUCCESS_SNACKBAR, message })
 });
 
 export default connect(

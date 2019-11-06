@@ -82,8 +82,18 @@ const deleteWord = async (wordlistId, wordId) => {
   return response.ok;
 };
 
+const updateWord = async (wordlistId, wordId, name) => {
+  const response = await fetch(`${conf.api.wordlists}/${wordlistId}/words/${wordId}`, {
+    headers: DEFAULT_HEADERS,
+    method: "PATCH",
+    body: JSON.stringify({ name })
+  });
+
+  return response.ok;
+};
+
 /**
- * 
+ *
  * @param {String} wordlistId Id of the wordlist to be excluded
  */
 const deleteWordlist = async wordlistId => {
@@ -95,6 +105,6 @@ const deleteWordlist = async wordlistId => {
   return response.ok;
 };
 
-const api = { save, fetchUserWordlists, fetchPublicWordlists, get, addWord, deleteWord, deleteWordlist };
+const api = { save, fetchUserWordlists, fetchPublicWordlists, get, addWord, deleteWord, deleteWordlist, updateWord };
 
 export default api;
