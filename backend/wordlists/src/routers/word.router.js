@@ -35,14 +35,14 @@ router
     }
   }))
   .patch("/:idWord", express.json(), wrapAsync(async (req, res, next) => {
-    const { nModified, ok } = await wordService.patchWord(
+    const { n, nModified, ok } = await wordService.patchWord(
       req.params.idWordlist,
       req.params.idWord,
       req.body,
       req.user
     );
 
-    if (nModified === 1 && ok === 1) {
+    if (n === 1 && ok === 1) {
       res.sendStatus(204);
     } else {
       next();

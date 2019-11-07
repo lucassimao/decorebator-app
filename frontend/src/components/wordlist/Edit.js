@@ -6,7 +6,7 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { useParams, useHistory } from "react-router-dom";
 import { HIDE_PROGRESS_MODAL, SHOW_PROGRESS_MODAL } from "../../reducers/progressModal";
-import { SET_SUCCESS_SNACKBAR } from "../../reducers/snackbar";
+import { SET_ERROR_SNACKBAR } from "../../reducers/snackbar";
 import service from "../../services/wordlist.service";
 import AppBreadcrumb from "../common/AppBreadcrumb";
 import InputBase from "@material-ui/core/InputBase";
@@ -26,7 +26,6 @@ const useSyles = makeStyles(theme => ({
     marginTop: theme.spacing(1),
     "&:first-of-type": {
       margin: 0
-      //   marginTop: theme.spacing(2),
     }
   },
   list: {
@@ -39,14 +38,14 @@ const useSyles = makeStyles(theme => ({
     alignItems: "center",
     paddingRight: theme.spacing(1)
   },
-  selectedWord :{
-      borderBottom: '1px solid',
-      borderBottomColor: theme.palette.primary.main
+  selectedWord: {
+    borderBottom: "1px solid",
+    borderBottomColor: theme.palette.primary.main
   }
 }));
 
 function Edit(props) {
-  const { showProgressModal, hideProgressModal, onSuccess } = props;
+  const { showProgressModal, hideProgressModal, onError } = props;
   const [wordlist, setWordlist] = useState(null);
   const [focusedWordId, setFocusedWordId] = useState(null);
   const { id } = useParams();
@@ -61,6 +60,7 @@ function Edit(props) {
         const wordlist = await service.get(id);
         setWordlist(wordlist);
       } catch (error) {
+        onError(error.message);
         console.error(error);
       } finally {
         hideProgressModal();
@@ -89,8 +89,11 @@ function Edit(props) {
   };
 
   const updateWord = async (wordId, name) => {
+    try {
       await service.updateWord(wordlist._id, wordId, name);
-      onSuccess('Word updated');
+    } catch (error) {
+      onError(error.message);
+    }
   };
 
   const deleteWord = async id => {
@@ -108,45 +111,45 @@ function Edit(props) {
   };
 
   return (
-    <Grid wrap="nowrap" direction="column" className={classes.grid} container>
-      <Grid className={classes.gridItem} item xs={12}>
-        <AppBreadcrumb />
-      </Grid>
-      <Grid className={`${classes.gridItem} ${classes.title}`} item xs={12}>
-        <Typography variant="h6">{wordlist && wordlist.name} </Typography>
-        <IconButton onClick={deleteWordlist} edge="end">
-          <DeleteIcon />
-        </IconButton>
-      </Grid>
-      <Grid className={classes.gridItem} item xs={12}>
-        <Typography variant="caption">{wordlist && wordlist.description}</Typography>
-      </Grid>
-      <Grid className={classes.gridItem} item xs={12}>
-        <TextField
-          margin="dense"
-          fullWidth
-          autoComplete="off"
-          autoFocus
-          name="name"
-          label="Add a new word or expression ..."
-          onKeyDown={onTextFieldKeyDown}
-          variant="outlined"
-        />
-      </Grid>
-      <Grid className={classes.gridItem} item xs={12} style={{ overflow: "scroll", flexGrow: 1 }}>
-        <List disablePadding className={classes.list}>
-          {wordlist &&
-            wordlist.words.map(word => (
+    wordlist && (
+      <Grid wrap="nowrap" direction="column" className={classes.grid} container>
+        <Grid className={classes.gridItem} item xs={12}>
+          <AppBreadcrumb />
+        </Grid>
+        <Grid className={`${classes.gridItem} ${classes.title}`} item xs={12}>
+          <Typography variant="h6">{wordlist.name} </Typography>
+          <IconButton onClick={deleteWordlist} edge="end">
+            <DeleteIcon />
+          </IconButton>
+        </Grid>
+        <Grid className={classes.gridItem} item xs={12}>
+          <Typography variant="caption">{wordlist.description}</Typography>
+        </Grid>
+        <Grid className={classes.gridItem} item xs={12}>
+          <TextField
+            margin="dense"
+            fullWidth
+            autoComplete="off"
+            autoFocus
+            onFocus={() => setFocusedWordId(null)}
+            name="name"
+            label="Add a new word or expression ..."
+            onKeyDown={onTextFieldKeyDown}
+            variant="outlined"
+          />
+        </Grid>
+        <Grid className={classes.gridItem} item xs={12} style={{ overflow: "scroll", flexGrow: 1 }}>
+          <List disablePadding className={classes.list}>
+            {wordlist.words.map(word => (
               <ListItem key={word._id}>
                 <InputBase
                   onFocus={() => setFocusedWordId(word._id)}
-                  onChange={evt => updateWord(word._id, evt.target.value)}
+                  onBlur={evt => updateWord(word._id, evt.target.value)}
                   defaultValue={word.name}
                   className={clsx({
                     [classes.selectedWord]: word._id === focusedWordId
                   })}
                 />
-                {/* <ListItemText primary={word.name} /> */}
                 <ListItemSecondaryAction>
                   <IconButton onClick={() => deleteWord(word._id)} edge="end" className={classes.icon}>
                     <DeleteIcon />
@@ -154,16 +157,17 @@ function Edit(props) {
                 </ListItemSecondaryAction>
               </ListItem>
             ))}
-        </List>
+          </List>
+        </Grid>
       </Grid>
-    </Grid>
+    )
   );
 }
 
 const mapDispatchToProps = dispatch => ({
   showProgressModal: (title, description) => dispatch({ type: SHOW_PROGRESS_MODAL, description, title }),
   hideProgressModal: () => dispatch({ type: HIDE_PROGRESS_MODAL }),
-  onSuccess: message => dispatch({ type: SET_SUCCESS_SNACKBAR, message })
+  onError: message => dispatch({ type: SET_ERROR_SNACKBAR, message })
 });
 
 export default connect(
