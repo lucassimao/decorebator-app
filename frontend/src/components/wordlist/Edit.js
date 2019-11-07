@@ -140,7 +140,7 @@ function Edit(props) {
               <ListItem key={word._id}>
                 <InputBase
                   onFocus={() => setFocusedWordId(word._id)}
-                  onBlur={evt => updateWord(word._id, evt.target.value)}
+                  onChange={evt => updateWord(word._id, evt.target.value)}
                   defaultValue={word.name}
                   className={clsx({
                     [classes.selectedWord]: word._id === focusedWordId
