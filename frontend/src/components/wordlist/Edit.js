@@ -118,9 +118,9 @@ function Edit(props) {
         </Grid>
         <Grid className={`${classes.gridItem} ${classes.title}`} item xs={12}>
           <Typography variant="h6">{wordlist.name} </Typography>
-          <IconButton onClick={deleteWordlist} edge="end">
-            <DeleteIcon />
-          </IconButton>
+            <IconButton onClick={deleteWordlist} edge="end">
+              <DeleteIcon />
+            </IconButton>
         </Grid>
         <Grid className={classes.gridItem} item xs={12}>
           <Typography variant="caption">{wordlist.description}</Typography>

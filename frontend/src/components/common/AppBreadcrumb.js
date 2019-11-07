@@ -27,7 +27,7 @@ const useStyles = makeStyles(theme => ({
 
 // breadcrumbs by route
 const items = {
-  "/newWordlist": [{ icon: ListAltRoundedIcon, text: "New Wordlist" }],
+  "/wordlists/new": [{ icon: ListAltRoundedIcon, text: "New wordlist" }],
   "/wordlists/:id": [{ icon: ListAltRoundedIcon, text: "Wordlist" }]
 };
 
