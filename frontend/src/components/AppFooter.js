@@ -17,9 +17,10 @@ const useStyles = makeStyles({
   toolBar: { display: "flex", justifyContent: "space-between" }
 });
 
-
 export default function AppFooter() {
   const classes = useStyles();
+
+  const loadWordsFromYoutubeSubtitle = () => {};
 
   return (
     <AppBar component="footer" position="static" color="primary" className={classes.root}>
@@ -27,7 +28,7 @@ export default function AppFooter() {
         <Switch>
           <Route path="/wordlists/new"></Route>
           <Route path="/wordlists/:id">
-            <IconButton edge="start" color="inherit">
+            <IconButton onClick={loadWordsFromYoutubeSubtitle} edge="start" color="inherit">
               <YouTubeIcon />
             </IconButton>
           </Route>
