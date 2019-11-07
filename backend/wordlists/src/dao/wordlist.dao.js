@@ -8,7 +8,7 @@ const Wordlist = new Schema({
   description: { type: String, required: false },
   dateCreated: { type: Date, default: Date.now },
   language: { type: String, required: true },
-  name: { type: String, required: true },
+  name: { type: String, required: true, index: true },
   words: [
     {
       name: { type: String, required: true },

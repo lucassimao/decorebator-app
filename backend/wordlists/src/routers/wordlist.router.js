@@ -13,13 +13,13 @@ const wrapAsync = asyncMiddleware => {
 };
 
 router
-.get(
+  .get(
     "/public",
     wrapAsync(async (req, res) => {
       const user = req.user;
-      const { page = 0} = req.query;
+      const { page = 0, filter } = req.query;
 
-      const wordlists = await service.listPublic({ page }, user);
+      const wordlists = await service.listPublic({ page, filter }, user);
       res.status(200).send({ wordlists });
     })
   )
@@ -27,9 +27,9 @@ router
     "/",
     wrapAsync(async (req, res) => {
       const user = req.user;
-      const { page = 0} = req.query;
+      const { page = 0, filter } = req.query;
 
-      const wordlists = await service.list({ page }, user);
+      const wordlists = await service.list({ page, filter }, user);
       res.status(200).send({ wordlists });
     })
   )

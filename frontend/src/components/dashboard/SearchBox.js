@@ -1,14 +1,15 @@
 import InputBase from "@material-ui/core/InputBase";
 import { makeStyles } from "@material-ui/core/styles";
 import SearchIcon from "@material-ui/icons/Search";
-import React  from "react";
-
+import React from "react";
+import { connect } from "react-redux";
+import { fetchUserWordlists, fetchPublicWordlists } from "../../thunks/wordlist.thunks";
 
 const useStyles = makeStyles(theme => ({
   search: {
     position: "relative",
     borderRadius: theme.shape.borderRadius * 2,
-    backgroundColor: theme.palette.grey[200],
+    backgroundColor: theme.palette.grey[200]
   },
   searchIcon: {
     width: theme.spacing(5),
@@ -31,6 +32,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function SearchBox(props) {
+  const { filterWordlists } = props;
   const classes = useStyles();
 
   return (
@@ -44,10 +46,26 @@ function SearchBox(props) {
           root: classes.inputRoot,
           input: classes.inputInput
         }}
+        onKeyUp={evt => filterWordlists(evt.target.value)}
         inputProps={{ "aria-label": "search" }}
       />
     </div>
   );
 }
 
-export default SearchBox;
+const mapDispatchToProps = dispatch => ({
+  filterWordlists: filter => {
+    if (filter && filter.trim() && filter.trim().length > 2) {
+      dispatch(fetchUserWordlists({ page: 0, filter }));
+      dispatch(fetchPublicWordlists({ page: 0, filter }));
+    } else if (filter === "") {
+      dispatch(fetchUserWordlists({ page: 0 }));
+      dispatch(fetchPublicWordlists({ page: 0 }));
+    }
+  }
+});
+
+export default connect(
+  null,
+  mapDispatchToProps
+)(SearchBox);

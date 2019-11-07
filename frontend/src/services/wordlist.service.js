@@ -26,8 +26,12 @@ const save = async wordlist => {
 /**
  * @returns {Promise} A promise that resolves to a array of wordlists
  */
-const fetchUserWordlists = async () => {
-  const response = await fetch(conf.api.wordlists, {
+const fetchUserWordlists = async (filter = undefined) => {
+  let url = conf.api.wordlists;
+  if (filter) {
+    url += `?filter=${filter}`;
+  }
+  const response = await fetch(url, {
     headers: DEFAULT_HEADERS
   });
   const { wordlists } = await response.json();
@@ -37,8 +41,12 @@ const fetchUserWordlists = async () => {
 /**
  * @returns {Promise} A promise that resolves to a array of public wordlists
  */
-const fetchPublicWordlists = async () => {
-  const response = await fetch(`${conf.api.wordlists}/public`, {
+const fetchPublicWordlists = async (filter = undefined) => {
+  let url = `${conf.api.wordlists}/public`;
+  if (filter) {
+    url += `?filter=${filter}`;
+  }
+  const response = await fetch(url, {
     headers: DEFAULT_HEADERS
   });
   const { wordlists } = await response.json();
@@ -105,6 +113,15 @@ const deleteWordlist = async wordlistId => {
   return response.ok;
 };
 
-const api = { save, fetchUserWordlists, fetchPublicWordlists, get, addWord, deleteWord, deleteWordlist, updateWord };
+const api = {
+  save,
+  fetchUserWordlists,
+  fetchPublicWordlists,
+  get,
+  addWord,
+  deleteWord,
+  deleteWordlist,
+  updateWord
+};
 
 export default api;
