@@ -1,4 +1,4 @@
-import { Container, makeStyles } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Grid from "@material-ui/core/Grid";
@@ -10,11 +10,11 @@ import React from "react";
 import useForm from "react-hook-form";
 import { connect } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
+import { HIDE_PROGRESS_MODAL, SHOW_PROGRESS_MODAL } from "../../reducers/progressModal";
 import { SET_ERROR_SNACKBAR, SET_SUCCESS_SNACKBAR } from "../../reducers/snackbar";
-import { SHOW_PROGRESS_MODAL, HIDE_PROGRESS_MODAL } from "../../reducers/progressModal";
-
 import service from "../../services/wordlist.service";
 import AppBreadcrumb from "../common/AppBreadcrumb";
+
 
 const LANGUAGES = [
   "English",
@@ -30,6 +30,11 @@ LANGUAGES.sort();
 
 const useStyles = makeStyles(theme => ({
   form: {
+    padding: theme.spacing(0,2),
+    height: '100%',
+    display: 'flex',
+    flexFlow: 'column',
+    justifyContent: 'space-between',
     color: theme.palette.grey[500],
     "& label": {
       fontWeight: "bold"
@@ -39,7 +44,7 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(0, 1)
   },
   gridButtons: {
-    marginTop: theme.spacing(2),
+    marginBottom: theme.spacing(3),
     backgroundColor: theme.palette.grey[200],
     padding: theme.spacing(1)
   }
@@ -74,8 +79,6 @@ function Form(props) {
   };
 
   return (
-    <Container>
-
       <form
         className={classes.form}
         noValidate
@@ -154,7 +157,6 @@ function Form(props) {
           </Button>
         </Grid>
       </form>
-    </Container>
   );
 }
 

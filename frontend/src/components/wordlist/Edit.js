@@ -23,7 +23,7 @@ const useSyles = makeStyles(theme => ({
   },
   gridItem: {
     flexBasis: "auto",
-    marginTop: theme.spacing(1),
+    marginTop: theme.spacing(.5),
     "&:first-of-type": {
       margin: 0
     }
@@ -83,7 +83,7 @@ function Edit(props) {
       event.target.value = "";
       const uri = await service.addWord(id, word);
       const _id = uri.substr(uri.lastIndexOf("/") + 1);
-      wordlist.words.push({ name: word, _id });
+      setWordlist({ ...wordlist, words: [...wordlist.words, { name: word, _id }] })
       hideProgressModal();
     }
   };
@@ -118,13 +118,13 @@ function Edit(props) {
         </Grid>
         <Grid className={`${classes.gridItem} ${classes.title}`} item xs={12}>
           <Typography variant="h6">{wordlist.name} </Typography>
-            <IconButton onClick={deleteWordlist} edge="end">
-              <DeleteIcon />
-            </IconButton>
+          <IconButton onClick={deleteWordlist} edge="end">
+            <DeleteIcon />
+          </IconButton>
         </Grid>
-        <Grid className={classes.gridItem} item xs={12}>
+        {wordlist.description && <Grid className={classes.gridItem} item xs={12}>
           <Typography variant="caption">{wordlist.description}</Typography>
-        </Grid>
+        </Grid>}
         <Grid className={classes.gridItem} item xs={12}>
           <TextField
             margin="dense"
@@ -151,7 +151,7 @@ function Edit(props) {
                   })}
                 />
                 <ListItemSecondaryAction>
-                  <IconButton onClick={() => deleteWord(word._id)} edge="end" className={classes.icon}>
+                  <IconButton oneClick={() => deleteWord(word._id)} edge="end" className={classes.icon}>
                     <DeleteIcon />
                   </IconButton>
                 </ListItemSecondaryAction>
