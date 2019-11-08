@@ -44,9 +44,13 @@ const NewWordlistLink = React.forwardRef((props, ref) => (
   <Link to="/wordlists/new" innerRef={ref} {...props} />
 ));
 
+const NewWordlistFromYoutubeLink = React.forwardRef((props, ref) => (
+    <Link to="/wordlists/new-from-youtube" innerRef={ref} {...props} />
+  ));
+
 const actions = [
   { icon: <ListAltRoundedIcon />, name: 'New wordlist', component : NewWordlistLink },
-  { icon: <YouTubeIcon />, name: 'From youtube' }
+  { icon: <YouTubeIcon />, name: 'From youtube', component : NewWordlistFromYoutubeLink }
 ];
 
 function Home(props) {

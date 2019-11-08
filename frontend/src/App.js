@@ -3,31 +3,25 @@ import React, { lazy, Suspense } from "react";
 import { connect } from "react-redux";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import ProgressModal from "./components/common/ProgressModal";
-import {
-  ErrorSnackbar,
-  SuccessSnackbar
-} from "./components/common/AppSnackbar";
+import { ErrorSnackbar, SuccessSnackbar } from "./components/common/AppSnackbar";
 import Home from "./components/dashboard/Home";
 import TopBar from "./components/TopBar";
 
-const WordlistForm = lazy(() =>
-  import("./components/wordlist/Form").then(module => module)
-);
-const WordlistEdit = lazy(() =>
-  import("./components/wordlist/Edit").then(module => module)
-);
+const WordlistForm = lazy(() => import("./components/wordlist/Form").then(module => module));
+const WordlistFromYoutubeForm = lazy(() => import("./components/wordlist/FormYoutube").then(module => module));
+const WordlistEdit = lazy(() => import("./components/wordlist/Edit").then(module => module));
 
 const useStyles = makeStyles(theme => ({
   wrapper: {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100vh',
-    justifyContent: 'space-between'
+    display: "flex",
+    flexDirection: "column",
+    height: "100vh",
+    justifyContent: "space-between"
   },
   main: {
-    flexGrow:1,
+    flexGrow: 1,
     paddingTop: theme.spacing(2),
-    overflow: 'scroll',
+    overflow: "scroll"
   }
 }));
 
@@ -44,6 +38,11 @@ function App(props) {
           <TopBar />
           <main className={classes.main}>
             <Switch>
+              <Route path="/wordlists/new-from-youtube">
+                <Suspense fallback={spinner}>
+                  <WordlistFromYoutubeForm />
+                </Suspense>
+              </Route>
               <Route path="/wordlists/new">
                 <Suspense fallback={spinner}>
                   <WordlistForm />
