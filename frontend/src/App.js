@@ -3,7 +3,6 @@ import React, { lazy, Suspense } from "react";
 import { connect } from "react-redux";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import ProgressModal from "./components/common/ProgressModal";
-import AppFooter from "./components/AppFooter";
 import {
   ErrorSnackbar,
   SuccessSnackbar
@@ -28,7 +27,7 @@ const useStyles = makeStyles(theme => ({
   main: {
     flexGrow:1,
     paddingTop: theme.spacing(2),
-    overflow: 'scroll'
+    overflow: 'scroll',
   }
 }));
 
@@ -60,7 +59,6 @@ function App(props) {
               </Route>
             </Switch>
           </main>
-          <AppFooter />
         </div>
       </Router>
 

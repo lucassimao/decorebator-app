@@ -3,9 +3,9 @@ import IconButton from "@material-ui/core/IconButton";
 import { makeStyles } from "@material-ui/core/styles";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
-import AddRoundedIcon from "@material-ui/icons/AddRounded";
+import AccountBoxRoundedIcon from "@material-ui/icons/AccountBoxRounded";
 import React from "react";
-import { Link, useRouteMatch } from "react-router-dom";
+import { useRouteMatch } from "react-router-dom";
 
 const useStyles = makeStyles(theme => ({
   root: {},
@@ -16,18 +16,13 @@ const useStyles = makeStyles(theme => ({
       fontSize: theme.typography.caption.fontSize
     }
   },
-  addButtonWrapper: {
+  buttonWrapper: {
     position: "absolute",
     right: theme.spacing(1)
   },
-  addButton: {
-    transform: "scale(1.5)"
-  }
 }));
 
-const NewWordlistLink = React.forwardRef((props, ref) => (
-  <Link to="/wordlists/new" innerRef={ref} {...props} />
-));
+
 
 export default function TopBar() {
   const classes = useStyles();
@@ -42,12 +37,11 @@ export default function TopBar() {
         </Typography>
         {isHomePage && (
           <IconButton
-            className={classes.addButtonWrapper}
-            component={NewWordlistLink}
+            className={classes.buttonWrapper}
             color="inherit"
-            aria-label="menu"
+            aria-label="user profile"
           >
-            <AddRoundedIcon className={classes.addButton} />
+            <AccountBoxRoundedIcon />
           </IconButton>
         )}
       </Toolbar>
