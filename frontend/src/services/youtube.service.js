@@ -3,3 +3,21 @@ const url= "https://www.youtube.com/api/timedtext?v=3nwwKbM_vJc&asr_langs=de%2Ce
 const availableLanguages = 'http://video.google.com/timedtext?type=list&v=zzfCVBSsvqA'
 
 //https://github.com/syzer/youtube-captions-scraper
+
+async function getVideoSubtitle(url,language='en'){
+    let xmlDoc;
+    const youtubeUrl = new URL(url);
+    const videoId = youtubeUrl.searchParams.get("v");
+    const response = await fetch(`https://www.youtube.com/api/timedtext?v=${videoId}&lang=${language}&fmt=srv3`);
+    
+    const xmlString
+
+    if (window.DOMParser){
+        const parser = new DOMParser();
+        xmlDoc = parser.parseFromString(xmlString, "text/xml")
+    } else {
+        xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+        xmlDoc.async = false;
+        xmlDoc.loadXML(xmlString)
+    }
+}
