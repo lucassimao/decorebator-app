@@ -151,7 +151,7 @@ function Edit(props) {
                   })}
                 />
                 <ListItemSecondaryAction>
-                  <IconButton oneClick={() => deleteWord(word._id)} edge="end" className={classes.icon}>
+                  <IconButton onClick={() => deleteWord(word._id)} edge="end" className={classes.icon}>
                     <DeleteIcon />
                   </IconButton>
                 </ListItemSecondaryAction>

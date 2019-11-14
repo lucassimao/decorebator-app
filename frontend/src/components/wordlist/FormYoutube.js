@@ -1,19 +1,25 @@
 import { makeStyles, NativeSelect } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
-import FormControl from '@material-ui/core/FormControl';
+import FormControl from "@material-ui/core/FormControl";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Grid from "@material-ui/core/Grid";
-import InputLabel from '@material-ui/core/InputLabel';
+import IconButton from "@material-ui/core/IconButton";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import InputLabel from "@material-ui/core/InputLabel";
 import Slider from "@material-ui/core/Slider";
 import Switch from "@material-ui/core/Switch";
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
-import React, { useEffect, useState } from "react";
+import ClearIcon from "@material-ui/icons/Clear";
+import React, { useEffect, useRef, useState } from "react";
 import useForm from "react-hook-form";
-import { Link } from "react-router-dom";
-import youtubeService from '../../services/youtube.service';
+import { connect } from "react-redux";
+import { Link, useHistory } from "react-router-dom";
+import { HIDE_PROGRESS_MODAL, SHOW_PROGRESS_MODAL } from "../../reducers/progressModal";
+import { SET_ERROR_SNACKBAR, SET_SUCCESS_SNACKBAR } from "../../reducers/snackbar";
+import wordlistService from "../../services/wordlist.service";
+import youtubeService from "../../services/youtube.service";
 import AppBreadcrumb from "../common/AppBreadcrumb";
-
 
 const useStyles = makeStyles(theme => ({
   form: {
@@ -34,6 +40,9 @@ const useStyles = makeStyles(theme => ({
     "& > :first-child": {
       marginRight: theme.spacing(1)
     }
+  },
+  urlInputEndAdornment: {
+    paddingRight: 0
   }
 }));
 
@@ -41,40 +50,92 @@ const HomeLink = React.forwardRef((props, ref) => <Link to="/" innerRef={ref} {.
 const URL_REGEXP = new RegExp("^https://(www.)?youtube.com/watch/*");
 const DEFAULT_MIN_WORD_LENGTH = 3;
 
-function FormYoutube() {
-
+function FormYoutube(props) {
   const classes = useStyles();
-  const { register, handleSubmit, errors, setValue, getValues } = useForm({ mode: "onBlur", defaultValues: { minWordLength: DEFAULT_MIN_WORD_LENGTH } });
+  const { onSuccess, onError, showProgressModal, hideProgressModal } = props;
+  const { register, handleSubmit, errors, setValue, getValues, clearError } = useForm({
+    defaultValues: { minWordLength: DEFAULT_MIN_WORD_LENGTH }
+  });
+  const { language, url } = getValues();
+  const history = useHistory();
   const [availableLanguages, setAvailableLanguages] = useState(null);
-  const {language} = getValues();
-
+  const urlTextFieldRef = useRef();
 
   useEffect(() => {
-    register({ name: 'minWordLength' })
-    register({name: 'language'})
+    register({ name: "minWordLength" });
+    register({ name: "language" });
   }, [register]);
 
   const onSubmit = async data => {
-    console.log(data);
-    const words = await youtubeService.getWordsFromVideoSubtitle(data.url, data.language, data.minWordLength);
-    // let filteredWords = words.filter(w => w.length >= data.minWordLength).sort();
-    console.log(words);
-    
+    try {
+      showProgressModal("Wait ...", "Obtaining video details ...");
+      const { title, description, defaultAudioLanguage: language } = await youtubeService.getVideoDetails(
+        data.url
+      );
+
+      showProgressModal("Wait ...", "Downloading subtitle ...");
+      const languageName = availableLanguages.find(lang => lang.code === data.language).name;
+      const set = await youtubeService.getWordsFromVideoSubtitle(
+        data.url,
+        data.language,
+        languageName,
+        data.minWordLength
+      );
+      const words = Array.from(set).map(name => ({ name }));
+
+      showProgressModal("Wait ...", "Creating your wordlist ...");
+      const wordlist = { name: title, description, isPrivate: data.isPrivate, words, language };
+      const resourceUri = await wordlistService.save(wordlist);
+
+      hideProgressModal();
+      history.push(resourceUri);
+
+      onSuccess("Wordlist created");
+    } catch (error) {
+      console.log(error);
+      hideProgressModal();
+      onError(String(error));
+    }
   };
 
-  const onSliderChange = (evt, value) => setValue('minWordLength', value);
-  const onLanguageChange = (evt) => setValue('language',evt.target.value);
+  const onSliderChange = (evt, value) => {
+    setValue("minWordLength", value);
+  };
 
+  const onLanguageChange = evt => {
+    const code = evt.target.value;
+    setValue("language", code);
+  };
 
-  const onYoutubeVideoUrlBlur = async (event) => {
+  const clearVideoUrl = evt => {
+    setValue("language", undefined);
+    setAvailableLanguages(undefined);
+    setValue("url", "");
+    clearError("url");
+    urlTextFieldRef.current.focus();
+  };
+
+  const onYoutubeVideoUrlBlur = async event => {
     const url = event.target.value;
 
     if (URL_REGEXP.test(url)) {
-      const languages = await youtubeService.getAvailableSubtitleLanguages(url);
-      setAvailableLanguages(languages);
-      setValue("language", languages.keys().next().value);
+      try {
+        showProgressModal("Wait ...", "Searching subtitles ...");
+        const languages = await youtubeService.getAvailableSubtitleLanguages(url);
+        setAvailableLanguages(languages);
+        if (languages.length > 0) {
+          setValue("language", languages[0].code);
+        }
+      } catch (error) {
+        console.error(error);
+        setAvailableLanguages([]);
+        onError(String(error));
+        setValue("language", undefined);
+      } finally {
+        hideProgressModal();
+      }
     }
-  }
+  };
 
   return (
     <form noValidate className={classes.form} onSubmit={handleSubmit(onSubmit)}>
@@ -92,32 +153,56 @@ function FormYoutube() {
             helperText={errors.url && errors.url.message}
             name="url"
             onBlur={onYoutubeVideoUrlBlur}
-            inputRef={register({
-              required: "Url field is required",
-              pattern: {
-                value: URL_REGEXP,
-                message: "Incorrect youtube url"
-              }
-            })}
+            InputProps={
+              url
+                ? {
+                    classes: { adornedEnd: classes.urlInputEndAdornment },
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton aria-label="clear youtube video's url" onClick={clearVideoUrl}>
+                          <ClearIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    )
+                  }
+                : null
+            }
+            inputRef={e => {
+              register(e, {
+                required: "Video url is required",
+                pattern: {
+                  value: URL_REGEXP,
+                  message: "Pattern: https://youtube.com/watch?v=..."
+                }
+              });
+              urlTextFieldRef.current = e;
+            }}
             label="Youtube video url"
             variant="outlined"
           />
         </Grid>
 
-        {availableLanguages && <Grid item xs={12}>
-          <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="language-select">Language</InputLabel>
-            <NativeSelect
-              inputProps={{
-                id: 'language-select',
-              }}
-              value={language}
-              onChange={onLanguageChange}
-            >
-              { [...availableLanguages].map(([lang, description]) => <option value={lang} key={lang}>{description}</option>)}
-            </NativeSelect>
-          </FormControl>
-        </Grid>}
+        {availableLanguages && (
+          <Grid item xs={12}>
+            <FormControl className={classes.formControl}>
+              <InputLabel htmlFor="language-select">Language</InputLabel>
+              <NativeSelect
+                inputProps={{
+                  id: "language-select"
+                }}
+                fullWidth
+                value={language}
+                onChange={onLanguageChange}
+              >
+                {[...availableLanguages].map(({ code, translated }) => (
+                  <option value={code} key={code}>
+                    {translated}
+                  </option>
+                ))}
+              </NativeSelect>
+            </FormControl>
+          </Grid>
+        )}
         <Grid item xs={12}>
           <Typography id="discrete-slider" gutterBottom>
             Minimum word length
@@ -126,6 +211,7 @@ function FormYoutube() {
             step={1}
             marks
             defaultValue={DEFAULT_MIN_WORD_LENGTH}
+            valueLabelDisplay="auto"
             onChange={onSliderChange}
             min={1}
             max={10}
@@ -133,13 +219,7 @@ function FormYoutube() {
         </Grid>
         <Grid item>
           <FormControlLabel
-            control={
-              <Switch
-                color="primary"
-                name="onlyNewWords"
-                inputRef={register}
-              />
-            }
+            control={<Switch color="primary" name="onlyNewWords" inputRef={register} />}
             label="Only new words"
           />
         </Grid>
@@ -157,4 +237,11 @@ function FormYoutube() {
   );
 }
 
-export default FormYoutube;
+const mapDispatchToProps = dispatch => ({
+  onSuccess: message => dispatch({ type: SET_SUCCESS_SNACKBAR, message }),
+  onError: message => dispatch({ type: SET_ERROR_SNACKBAR, message }),
+  showProgressModal: (title, description) => dispatch({ type: SHOW_PROGRESS_MODAL, description, title }),
+  hideProgressModal: () => dispatch({ type: HIDE_PROGRESS_MODAL })
+});
+
+export default connect(null, mapDispatchToProps)(FormYoutube);
