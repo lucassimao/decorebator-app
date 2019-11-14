@@ -1,15 +1,19 @@
-import { makeStyles } from "@material-ui/core";
+import { makeStyles, NativeSelect } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
+import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Grid from "@material-ui/core/Grid";
+import InputLabel from '@material-ui/core/InputLabel';
 import Slider from "@material-ui/core/Slider";
 import Switch from "@material-ui/core/Switch";
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
-import React, {useState} from "react";
+import React, { useEffect, useState } from "react";
 import useForm from "react-hook-form";
 import { Link } from "react-router-dom";
+import youtubeService from '../../services/youtube.service';
 import AppBreadcrumb from "../common/AppBreadcrumb";
+
 
 const useStyles = makeStyles(theme => ({
   form: {
@@ -34,19 +38,42 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const HomeLink = React.forwardRef((props, ref) => <Link to="/" innerRef={ref} {...props} />);
-const URL_REGEXP = new RegExp("^https://www.youtube.com/watch/*");
+const URL_REGEXP = new RegExp("^https://(www.)?youtube.com/watch/*");
+const DEFAULT_MIN_WORD_LENGTH = 3;
 
 function FormYoutube() {
-  const { register, handleSubmit, errors } = useForm({ mode: "onBlur" });
-  const [ minWordLength, setMinWordLength ] = useState(3);
-  const classes = useStyles();
 
-  const onSubmit = data => {
-    console.log(JSON.stringify(data));
+  const classes = useStyles();
+  const { register, handleSubmit, errors, setValue, getValues } = useForm({ mode: "onBlur", defaultValues: { minWordLength: DEFAULT_MIN_WORD_LENGTH } });
+  const [availableLanguages, setAvailableLanguages] = useState(null);
+  const {language} = getValues();
+
+
+  useEffect(() => {
+    register({ name: 'minWordLength' })
+    register({name: 'language'})
+  }, [register]);
+
+  const onSubmit = async data => {
+    console.log(data);
+    const words = await youtubeService.getWordsFromVideoSubtitle(data.url, data.language, data.minWordLength);
+    // let filteredWords = words.filter(w => w.length >= data.minWordLength).sort();
+    console.log(words);
+    
   };
 
-  const onSliderChange = (evt, value) =>{
-    setMinWordLength(value);
+  const onSliderChange = (evt, value) => setValue('minWordLength', value);
+  const onLanguageChange = (evt) => setValue('language',evt.target.value);
+
+
+  const onYoutubeVideoUrlBlur = async (event) => {
+    const url = event.target.value;
+
+    if (URL_REGEXP.test(url)) {
+      const languages = await youtubeService.getAvailableSubtitleLanguages(url);
+      setAvailableLanguages(languages);
+      setValue("language", languages.keys().next().value);
+    }
   }
 
   return (
@@ -64,6 +91,7 @@ function FormYoutube() {
             error={Boolean(errors.url)}
             helperText={errors.url && errors.url.message}
             name="url"
+            onBlur={onYoutubeVideoUrlBlur}
             inputRef={register({
               required: "Url field is required",
               pattern: {
@@ -75,6 +103,21 @@ function FormYoutube() {
             variant="outlined"
           />
         </Grid>
+
+        {availableLanguages && <Grid item xs={12}>
+          <FormControl className={classes.formControl}>
+            <InputLabel htmlFor="language-select">Language</InputLabel>
+            <NativeSelect
+              inputProps={{
+                id: 'language-select',
+              }}
+              value={language}
+              onChange={onLanguageChange}
+            >
+              { [...availableLanguages].map(([lang, description]) => <option value={lang} key={lang}>{description}</option>)}
+            </NativeSelect>
+          </FormControl>
+        </Grid>}
         <Grid item xs={12}>
           <Typography id="discrete-slider" gutterBottom>
             Minimum word length
@@ -82,9 +125,8 @@ function FormYoutube() {
           <Slider
             step={1}
             marks
-            value={minWordLength}
+            defaultValue={DEFAULT_MIN_WORD_LENGTH}
             onChange={onSliderChange}
-            inputRef={register}
             min={1}
             max={10}
           />
