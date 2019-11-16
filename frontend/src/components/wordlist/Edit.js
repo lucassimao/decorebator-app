@@ -36,7 +36,20 @@ const useSyles = makeStyles(theme => ({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingRight: theme.spacing(1)
+    paddingRight: theme.spacing(1),
+  },
+  description: {
+    display: 'box',
+    boxOrient: 'vertical',
+    lineClamp: 3,
+    overflow: 'hidden',
+    textAlign: 'justify',
+    textIndent: theme.spacing(4),
+
+    [theme.breakpoints.up('sm')]: {
+      lineClamp: 5,
+    }
+    
   },
   selectedWord: {
     borderBottom: "1px solid",
@@ -123,7 +136,7 @@ function Edit(props) {
           </IconButton>
         </Grid>
         {wordlist.description && <Grid className={classes.gridItem} item xs={12}>
-          <Typography variant="caption">{wordlist.description}</Typography>
+          <Typography variant="caption" className={classes.description}>{wordlist.description}</Typography>
         </Grid>}
         <Grid className={classes.gridItem} item xs={12}>
           <TextField
