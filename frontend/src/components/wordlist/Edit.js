@@ -49,7 +49,7 @@ const useSyles = makeStyles(theme => ({
     [theme.breakpoints.up('sm')]: {
       lineClamp: 5,
     }
-    
+
   },
   selectedWord: {
     borderBottom: "1px solid",
@@ -59,28 +59,32 @@ const useSyles = makeStyles(theme => ({
 
 function Edit(props) {
   const { showProgressModal, hideProgressModal, onError } = props;
-  const [wordlist, setWordlist] = useState(null);
-  const [focusedWordId, setFocusedWordId] = useState(null);
   const { id } = useParams();
   const history = useHistory();
   const classes = useSyles();
+  const [focusedWord, setFocusedWord] = useState(null);
+  const [wordlist, setWordlist] = useState(null);
+  const [words, setWords] = useState([]);
 
-  // loading the wordlist with the ID
-  useEffect(() => {
-    showProgressModal("Loading ...");
-    (async () => {
-      try {
-        const wordlist = await service.get(id);
-        setWordlist(wordlist);
-      } catch (error) {
-        onError(error.message);
-        console.error(error);
-      } finally {
-        hideProgressModal();
-      }
-    })();
-    // eslint-disable-next-line
-  }, []);
+  // eslint-disable-next-line
+  useEffect(() => { getWordlistById(id) }, []);
+
+  async function getWordlistById(wordlistId) {
+    try {
+
+      showProgressModal("Loading ...");
+
+      const { words, ...wordlist } = await service.get(id);
+      setWordlist(wordlist);
+      setWords(words);
+
+    } catch (error) {
+      onError(error.message);
+      console.error(error);
+    } finally {
+      hideProgressModal();
+    }
+  }
 
   const onTextFieldKeyDown = async event => {
     if (event.keyCode === 13) {
@@ -102,17 +106,24 @@ function Edit(props) {
   };
 
   const updateWord = async (wordId, name) => {
-    try {
-      await service.updateWord(wordlist._id, wordId, name);
-    } catch (error) {
-      onError(error.message);
+
+    if (name !== focusedWord.name) {
+      try {
+        await service.updateWord(wordlist._id, wordId, name);
+        setWords(words.map(w => w._id === wordId ? { _id: wordId, name } : w));
+      } catch (error) {
+        onError(error.message);
+      }
     }
+
   };
 
   const deleteWord = async id => {
     showProgressModal("Wait", "Deleting word ...");
     await service.deleteWord(wordlist._id, id);
-    wordlist.words = wordlist.words.filter(word => word._id !== id);
+
+    setWords(words.filter(w => w._id !==  id));
+    setFocusedWord(null);
     hideProgressModal();
   };
 
@@ -144,7 +155,7 @@ function Edit(props) {
             fullWidth
             autoComplete="off"
             autoFocus
-            onFocus={() => setFocusedWordId(null)}
+            onFocus={() => setFocusedWord(null)}
             name="name"
             label="Add a new word or expression ..."
             onKeyDown={onTextFieldKeyDown}
@@ -153,14 +164,14 @@ function Edit(props) {
         </Grid>
         <Grid className={classes.gridItem} item xs={12} style={{ overflow: "scroll", flexGrow: 1 }}>
           <List disablePadding className={classes.list}>
-            {wordlist.words.map(word => (
+            {words.map(word => (
               <ListItem key={word._id}>
                 <InputBase
-                  onFocus={() => setFocusedWordId(word._id)}
+                  onFocus={() => setFocusedWord({ _id: word._id, name: word.name })}
                   onBlur={evt => updateWord(word._id, evt.target.value)}
                   defaultValue={word.name}
                   className={clsx({
-                    [classes.selectedWord]: word._id === focusedWordId
+                    [classes.selectedWord]: focusedWord && word._id === focusedWord._id
                   })}
                 />
                 <ListItemSecondaryAction>
