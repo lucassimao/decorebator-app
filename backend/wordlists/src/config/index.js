@@ -12,6 +12,7 @@ if (env == "production" && !process.env.JWT_SECRET_KEY)
 
 var dailyRotateFileTransport = new winston.transports.DailyRotateFile({
   filename: "decorebator-wordlists-%DATE%.log",
+  level: 'info',
   datePattern: "YYYY-MM-DD-HH",
   zippedArchive: true,
   maxSize: "20m",
@@ -19,12 +20,11 @@ var dailyRotateFileTransport = new winston.transports.DailyRotateFile({
 });
 
 var transports = [dailyRotateFileTransport]
-if (process.env.SHOW_LOG_ON_STDOUT){
-    transports.push(new winston.transports.Console({ format: winston.format.simple()}))
+if (process.env.SHOW_LOG_ON_STDOUT) {
+  transports.push(new winston.transports.Console({ format: winston.format.simple(), level: 'silly' }))
 }
 
 const logger = winston.createLogger({
-  level: "info",
   format: winston.format.json(),
   transports
 });

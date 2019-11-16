@@ -14,6 +14,8 @@
       "type": "node",
       "request": "launch",
       "name": "Auth",
+      "runtimeVersion": "13.1.0",
+      "console": "integratedTerminal",
       "runtimeExecutable": "npm",
       "env": {
         "MONGO_DB_URL": "mongodb://localhost:27017/decorebator-dev",
@@ -25,6 +27,8 @@
     },
     {
         "type": "node",
+        "runtimeVersion": "13.1.0",
+        "console": "integratedTerminal",
         "request": "launch",
         "name": "Wordlists",
         "runtimeExecutable": "npm",
@@ -33,7 +37,8 @@
         "env": {
           "MONGO_DB_URL": "mongodb://localhost:27017/decorebator-dev",
           "HTTP_PORT": "3002",
-          "IGNORE_REQUEST_LIMIT": "true"
+          "IGNORE_REQUEST_LIMIT": "true",
+          "SHOW_LOG_ON_STDOUT": "true"
         },
         "runtimeArgs": ["--prefix", "${workspaceFolder}/backend/wordlists", "start"]
       },    

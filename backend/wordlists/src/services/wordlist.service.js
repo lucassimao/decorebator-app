@@ -16,7 +16,7 @@ const list = ({ pageSize = config.defaultPageSize, page = 0, filter }, user) => 
   const skip = page > 0 ? page * pageSize : 0;
   const query = { owner: user._id };
   if (filter) {
-    query.name = new RegExp(filter,'i');
+    query.name = new RegExp(filter, 'i');
   }
   return WordlistDao.find(query, null, { limit: pageSize, skip, sort: { _id: -1 } });
 };
@@ -36,7 +36,7 @@ const listPublic = ({ pageSize = config.defaultPageSize, page = 0, filter }, use
   const skip = page > 0 ? page * pageSize : 0;
   const query = { owner: { $ne: user._id }, isPrivate: false };
   if (filter) {
-    query.name = new RegExp(filter,'i');
+    query.name = new RegExp(filter, 'i');
   }
   return WordlistDao.find(query, null, {
     limit: pageSize,
@@ -54,8 +54,30 @@ const listPublic = ({ pageSize = config.defaultPageSize, page = 0, filter }, use
  *
  * @returns {Promise} A promise, which resolves to the persisted object
  */
-const save = (wordlist, user) => {
-  return WordlistDao.create({ ...wordlist, owner: user._id });
+const save = async (wordlist, user) => {
+  let { words } = wordlist;
+  const logger = config.logger;
+
+  logger.debug(`Registering new wordlist for user ${user._id} with ${words.length} words`);
+
+  if ('onlyNewWords' in wordlist) {
+    if (wordlist.onlyNewWords && Array.isArray(wordlist.words) && wordlist.words.length > 0) {
+
+      // extracting all user's wordlist terms
+      const existingWords = await WordlistDao.aggregate(
+        [{ $match: { owner: user._id } }, { $project: { 'words': 1, _id: 0 } }, { $unwind: '$words' },
+        { $replaceWith: '$words' }, { $group: { _id: '$name' } }, { $sort: { _id: 1 } },]
+      );
+      const existingNames = existingWords.map(w => w._id);
+      logger.debug(`User ${user._id} has ${existingNames.length} words already`);
+
+      words = words.filter(({ name }) => !__binarySearch(existingNames, name, 0, existingNames.length));
+      logger.debug(`Filtered wordlist for user ${user._id} now with ${words.length} words`);
+
+    }
+    delete wordlist.onlyNewWords;
+  }
+  return WordlistDao.create({ ...wordlist, owner: user._id, words });
 };
 
 /**
@@ -100,6 +122,31 @@ const update = (id, updateObj, user) => {
 const remove = (id, user) => {
   return WordlistDao.deleteOne({ _id: id, owner: user._id });
 };
+
+/**
+ * Makes a binary search of element inside the array.
+ * 
+ * Assumptions: - The array is already sorted
+ *              - There's no undefined element on the array
+ * 
+ * @param {Array<any>} array The array of elements 
+ * @param {any} element The element to be searched in the array
+ * @returns {Boolean} indicating whether the element is in the array or not
+ */
+function __binarySearch(array, element, start, end, debug = false) {
+  const middle = start + Math.floor((end - start) / 2);
+  debug && config.logger.debug(`start: ${start}, middle : ${midele}, end: ${end}`);
+
+  if (start >= end) {
+    return false;
+  } else if (array[middle] < element) {
+    return __binarySearch(array, element, middle + 1, end, debug);
+  } else if (array[middle] > element) {
+    return __binarySearch(array, element, start, middle, debug);
+  } else {
+    return array[middle] === element;
+  }
+}
 
 const api = {
   list,

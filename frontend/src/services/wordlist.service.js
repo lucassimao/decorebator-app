@@ -20,6 +20,9 @@ const save = async wordlist => {
     body: JSON.stringify(wordlist),
     headers: DEFAULT_HEADERS
   });
+  if (!response.ok){
+    throw new Error("Couldn't create wordlist: " + response.statusText)
+  }
   return response.headers.get("Link");
 };
 

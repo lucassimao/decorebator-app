@@ -47,7 +47,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const HomeLink = React.forwardRef((props, ref) => <Link to="/" innerRef={ref} {...props} />);
-const URL_REGEXP = new RegExp("^https://(www.)?youtube.com/watch/*");
+const URL_REGEXP = new RegExp("^((https|http)://(www.)?)?youtube.com/watch/*");
 const DEFAULT_MIN_WORD_LENGTH = 3;
 
 function FormYoutube(props) {
@@ -69,7 +69,7 @@ function FormYoutube(props) {
   const onSubmit = async data => {
     try {
       showProgressModal("Wait ...", "Obtaining video details ...");
-      const { title, description, defaultAudioLanguage: language } = await youtubeService.getVideoDetails(
+      const { title: name, description, defaultAudioLanguage: language } = await youtubeService.getVideoDetails(
         data.url
       );
 
@@ -84,7 +84,7 @@ function FormYoutube(props) {
       const words = Array.from(set).map(name => ({ name }));
 
       showProgressModal("Wait ...", "Creating your wordlist ...");
-      const wordlist = { name: title, description, isPrivate: data.isPrivate, words, language };
+      const wordlist = { name, description, words, language, isPrivate: data.isPrivate, onlyNewWords: data.onlyNewWords };
       const resourceUri = await wordlistService.save(wordlist);
 
       hideProgressModal();
@@ -156,15 +156,15 @@ function FormYoutube(props) {
             InputProps={
               url
                 ? {
-                    classes: { adornedEnd: classes.urlInputEndAdornment },
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton aria-label="clear youtube video's url" onClick={clearVideoUrl}>
-                          <ClearIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    )
-                  }
+                  classes: { adornedEnd: classes.urlInputEndAdornment },
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton aria-label="clear youtube video's url" onClick={clearVideoUrl}>
+                        <ClearIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }
                 : null
             }
             inputRef={e => {
@@ -191,7 +191,7 @@ function FormYoutube(props) {
                   id: "language-select"
                 }}
                 fullWidth
-                value={language}
+                defaultValue={language}
                 onChange={onLanguageChange}
               >
                 {[...availableLanguages].map(({ code, translated }) => (
@@ -217,10 +217,18 @@ function FormYoutube(props) {
             max={10}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={12}>
           <FormControlLabel
             control={<Switch color="primary" name="onlyNewWords" inputRef={register} />}
             label="Only new words"
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <FormControlLabel
+            control={
+              <Switch name="isPrivate" inputRef={register} color="primary" />
+            }
+            label="Private"
           />
         </Grid>
       </Grid>
