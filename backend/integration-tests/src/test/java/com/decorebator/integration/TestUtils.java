@@ -48,7 +48,7 @@ public class TestUtils {
     }
 
 	public static String createRandomWordlist(String authorization, URL wordlistsEndpoint) {
-        var wordlist = new Wordlist(null, "Random wordlist created by TesUtils", "Random wordlist", "pt-br", Collections.emptyList());
+        var wordlist = new Wordlist("Random wordlist created by TesUtils", "Random wordlist", "pt-br", Collections.emptyList());
 
         Response response = given()
             .contentType(ContentType.JSON)

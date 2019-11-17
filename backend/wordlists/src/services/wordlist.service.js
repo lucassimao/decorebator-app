@@ -56,12 +56,19 @@ const listPublic = ({ pageSize = config.defaultPageSize, page = 0, filter }, use
  */
 const save = async (wordlist, user) => {
   let { words } = wordlist;
+  const userSentValidArrayOfWords = words && Array.isArray(words) && words.length > 0;
   const logger = config.logger;
 
-  logger.debug(`Registering new wordlist for user ${user._id} with ${words.length} words`);
+  if (userSentValidArrayOfWords) {
+    for (const w of words) {
+      w.name = w.name.toLowerCase();
+    }
+  }
 
   if ('onlyNewWords' in wordlist) {
-    if (wordlist.onlyNewWords && Array.isArray(wordlist.words) && wordlist.words.length > 0) {
+    if (wordlist.onlyNewWords && userSentValidArrayOfWords) {
+
+      logger.debug(`Registering new wordlist for user ${user._id} with ${words.length} words`);
 
       // extracting all user's wordlist terms
       const existingWords = await WordlistDao.aggregate(

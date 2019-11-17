@@ -8,7 +8,9 @@ import static org.hamcrest.Matchers.matchesRegex;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.decorebator.beans.Word;
 import com.decorebator.beans.Wordlist;
@@ -60,7 +62,6 @@ public class WordlistsTest {
             .statusCode(400)
             .contentType(ContentType.JSON)
             .body("name.name",is("ValidatorError"))
-            .body("description.name",is("ValidatorError"))
             .body("language.name",is("ValidatorError"));
 
     }    
@@ -113,6 +114,57 @@ public class WordlistsTest {
             .body("words.size()",is(3))
             .body("words.name",hasItems("word","straightforward","tight"));
 
+    }
+
+    @Test
+    public void userShouldBeAbleToCreateWordlistsOnlyWithBrandNewWords() {
+        var registration = TestUtils.createRandomUser(signUpEndpoint);
+        var authorization = TestUtils.signIn(registration.getLogin(), registration.getPassword(), signInEndpoint);
+
+        var words = List.of(new Word("law"),new Word("Rollin'"),new Word("cow's milk"));
+        var wordlist1 = new Wordlist("first wordlist","dd","en", words);
+
+
+        given()
+            .contentType(ContentType.JSON)
+            .header("authorization","bearer " + authorization)
+            .body(wordlist1)
+        .when()
+            .post("/")
+        .then()
+            .statusCode(201);
+
+        // sending all words from the previous wordlist, upper cased
+        var words2 = new LinkedList<>(words.stream().map(Word::getName).map(String::toUpperCase).map(Word::new).collect(Collectors.toList()));
+        words2.addAll(List.of(new Word("single"), new Word("ballpark")));
+
+        var wordlist2 = new Wordlist("second wordlist","xpto","en", words2,true);
+
+        ExtractableResponse response = given()
+            .contentType(ContentType.JSON)
+            .header("authorization", "bearer " + authorization)
+            .body(wordlist2)
+        .when()
+            .post("/")
+        .then()
+            .statusCode(201)
+            .header("link", matchesRegex(WORDLIST_RESOURCE_REGEX))
+            .extract();
+
+        String resourceUri = response.header("link");
+        String resourceId = resourceUri.substring("/wordlists".length());
+    
+        given()
+            .header("authorization", "bearer " + authorization)
+        .when()
+            .get(resourceId)
+        .then()
+            .statusCode(200)
+            .body("words.size()",is(2))
+            .body("words.name",hasItems("single","ballpark"));        
+        
+
+        
     }
 
 

@@ -11,22 +11,25 @@ public class Wordlist {
 
     String owner, description, name, language;
     List<Word> words;
+    boolean onlyNewWords;
 
 
     public Wordlist() {
+        this.onlyNewWords=false;
     }
 
-    @Deprecated
-    public Wordlist(String owner, String description, String name, String language, List<Word> words) {
-        this(description,name,language,words);
-    }
 
     public Wordlist(String description, String name, String language, List<Word> words) {
+        this(description,name,language,words,false);
+    }      
+
+    public Wordlist(String description, String name, String language, List<Word> words,boolean onlyNewWords) {
         this.owner = null;
         this.description = description;
         this.name = name;
         this.language = language;
         this.words = words;
+        this.onlyNewWords = onlyNewWords;
     }    
 
     public String getOwner() {
@@ -94,33 +97,19 @@ public class Wordlist {
         return this;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == this)
-            return true;
-        if (!(o instanceof Wordlist)) {
-            return false;
-        }
-        Wordlist wordlist = (Wordlist) o;
-        return Objects.equals(owner, wordlist.owner) && Objects.equals(description, wordlist.description) && Objects.equals(name, wordlist.name) && Objects.equals(language, wordlist.language) && Objects.equals(words, wordlist.words);
+    /**
+     * @return the onlyNewWords
+     */
+    public boolean isOnlyNewWords() {
+        return onlyNewWords;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(owner, description, name, language, words);
+    /**
+     * @param onlyNewWords the onlyNewWords to set
+     */
+    public void setOnlyNewWords(boolean onlyNewWords) {
+        this.onlyNewWords = onlyNewWords;
     }
-
-    @Override
-    public String toString() {
-        return "{" +
-            " owner='" + getOwner() + "'" +
-            ", description='" + getDescription() + "'" +
-            ", name='" + getName() + "'" +
-            ", language='" + getLanguage() + "'" +
-            ", words='" + getWords() + "'" +
-            "}";
-    }
-
 
 
 }

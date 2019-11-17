@@ -87,7 +87,7 @@ async function getWordsFromVideoSubtitle(url, languageCode, languageName, minLen
     if (line && line.trim()) {
       line
         .split(/\s+/) // spliting by white space chars
-        .map(w => w.replace(/\W/g, "").toLowerCase()) // removing non alphanumeric chars and lowering case
+        .map(w => w.toLowerCase()) // lowering case
         .forEach(w => {
           if (w.length >= minLength) {
             words.add(w);
