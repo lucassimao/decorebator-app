@@ -18,7 +18,7 @@ const list = ({ pageSize = config.defaultPageSize, page = 0, filter }, user) => 
   if (filter) {
     query.name = new RegExp(filter, 'i');
   }
-  return WordlistDao.find(query, null, { limit: pageSize, skip, sort: { _id: -1 } });
+  return WordlistDao.find(query, null, { lean: true, limit: pageSize, skip, sort: { _id: -1 } });
 };
 
 /**
@@ -40,6 +40,7 @@ const listPublic = ({ pageSize = config.defaultPageSize, page = 0, filter }, use
   }
   return WordlistDao.find(query, null, {
     limit: pageSize,
+    lean: true,
     skip,
     sort: { _id: -1 }
   });
@@ -84,6 +85,7 @@ const save = async (wordlist, user) => {
     }
     delete wordlist.onlyNewWords;
   }
+
   return WordlistDao.create({ ...wordlist, owner: user._id, words });
 };
 
@@ -101,7 +103,7 @@ const get = (id, user) => {
   if (user) {
     query.owner = user._id;
   }
-  return WordlistDao.findOne(query);
+  return WordlistDao.findOne(query, null, { lean: true });
 };
 
 /**
