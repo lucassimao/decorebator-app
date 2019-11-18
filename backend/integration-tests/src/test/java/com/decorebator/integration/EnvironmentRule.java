@@ -43,6 +43,7 @@ public class EnvironmentRule extends ExternalResource {
 
         this.env  = new DockerComposeContainer(new File(TestUtils.DOCKER_COMPOSER_YML))
                     .withLocalCompose(true)
+                    .withEnv("TEST_CONTAINERS", "true")
                     .withExposedService("wordlists", 3000, Wait.forListeningPort())
                     .withExposedService("db", 27017, Wait.forListeningPort())
                     .withExposedService("auth", 3000, Wait.forListeningPort())

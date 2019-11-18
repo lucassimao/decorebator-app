@@ -16,4 +16,4 @@ RUN npm install
 COPY src /srv/auth/src
 
 EXPOSE ${HTTP_PORT}
-CMD npm start 
+CMD ["npm", "run","start-test"] 

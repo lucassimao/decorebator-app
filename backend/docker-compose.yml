@@ -1,6 +1,8 @@
 version: '3'
 services:
   auth:
+    environment: 
+      - TEST_CONTAINERS
     depends_on: 
       - db
     build:
@@ -11,6 +13,8 @@ services:
     ports: 
       - "3002:3000" 
   wordlists:
+    environment: 
+      - TEST_CONTAINERS    
     depends_on: 
       - db
     build:
@@ -24,5 +28,5 @@ services:
       - $HOME/.aws/:/root/.aws/:ro
   db:
     image: mongo:4.2 
-    # ports:
-      # - "27017:27017"
+    ports:
+      - "27017:27017"
