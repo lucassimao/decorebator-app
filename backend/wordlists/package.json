@@ -6,7 +6,7 @@
     "test": "npx jest --detectOpenHandles 'src/'",
     "lint": "eslint 'src/**/*.js'",
     "jest-watch": "jest --watch --detectOpenHandles 'src/'",
-    "start": "nodemon --inspect=9228 src/index.js",
+    "start": "nodemon src/index.js",
     "format": "prettier --write 'src/**/*.js'"
   },
   "repository": {
@@ -21,22 +21,22 @@
   "author": "Lucas Simão",
   "license": "ISC",
   "devDependencies": {
-    "eslint": "^6.5.1",
-    "eslint-plugin-jest": "^22.19.0",
+    "eslint": "^6.6.0",
+    "eslint-plugin-jest": "^22.21.0",
     "jest": "^24.8.0",
     "nodemon": "^1.19.4",
-    "prettier": "^1.18.2",
+    "prettier": "^1.19.1",
     "supertest": "^4.0.2"
   },
   "dependencies": {
-    "aws-sdk": "^2.550.0",
+    "aws-sdk": "^2.573.0",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-rate-limit": "^5.0.0",
-    "helmet": "^3.21.1",
+    "helmet": "^3.21.2",
     "image-type": "^4.1.0",
-    "mongoose": "^5.7.5",
+    "mongoose": "^5.7.11",
     "passport": "^0.4.0",
     "passport-jwt": "^4.0.0",
     "shortid": "^2.2.15",

@@ -1,22 +1,12 @@
-FROM node:12.9.1-alpine
-
-ARG JWT_SECRET_KEY 
-ARG MONGO_DB_URL
-
-ENV JWT_SECRET_KEY ${JWT_SECRET_KEY}
-ENV MONGO_DB_URL ${MONGO_DB_URL}
-ENV NODE_ENV production
-ENV HTTP_PORT 3000
-ENV SHOW_LOG_ON_STDOUT true
-ENV IGNORE_REQUEST_LIMIT true
-
+FROM node:13.1.0-alpine
 
 COPY package* /srv/wordlists/
 WORKDIR /srv/wordlists/src
 RUN npm install
+RUN npm install -g nodemon
 
 COPY src /srv/wordlists/src
-EXPOSE 3000
+EXPOSE ${HTTP_PORT}
 
-CMD ["npm","run", "start-test" ]
+CMD ["npm", "start" ]
 

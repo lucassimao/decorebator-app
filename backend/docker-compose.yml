@@ -3,25 +3,31 @@ services:
   auth:
     environment: 
       - TEST_CONTAINERS
+      - IGNORE_REQUEST_LIMIT
+      - SHOW_LOG_ON_STDOUT
+      - NODE_ENV
+      - JWT_SECRET_KEY
+      - MONGO_DB_URL
+      - HTTP_PORT=3000
     depends_on: 
       - db
     build:
       context: auth/
-      args:
-        JWT_SECRET_KEY: 12345
-        MONGO_DB_URL: mongodb://db:27017/decorebator
     ports: 
       - "3002:3000" 
   wordlists:
     environment: 
-      - TEST_CONTAINERS    
+      - TEST_CONTAINERS
+      - IGNORE_REQUEST_LIMIT
+      - SHOW_LOG_ON_STDOUT
+      - NODE_ENV
+      - JWT_SECRET_KEY
+      - MONGO_DB_URL    
+      - HTTP_PORT=3000
     depends_on: 
       - db
     build:
       context: wordlists/
-      args: 
-        JWT_SECRET_KEY: 12345
-        MONGO_DB_URL: mongodb://db:27017/decorebator
     ports:
     - "3001:3000"
     volumes: 
