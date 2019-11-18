@@ -16,14 +16,14 @@
       "name": "Auth",
       "runtimeVersion": "13.1.0",
       "console": "integratedTerminal",
-      "runtimeExecutable": "npm",
+      "runtimeExecutable": "nodemon",
       "env": {
         "MONGO_DB_URL": "mongodb://localhost:27017/decorebator-dev",
         "HTTP_PORT": "3001"
       },
       "restart": true,
       "port": 9229,
-      "runtimeArgs": ["--prefix", "${workspaceFolder}/backend/auth", "start"]
+      "runtimeArgs": ["--inspect=9229", "${workspaceFolder}/backend/auth/src/index.js"]
     },
     {
         "type": "node",
@@ -31,7 +31,7 @@
         "console": "integratedTerminal",
         "request": "launch",
         "name": "Wordlists",
-        "runtimeExecutable": "npm",
+        "runtimeExecutable": "nodemon",
         "port": 9228,
         "restart": true,
         "env": {
@@ -40,7 +40,7 @@
           "IGNORE_REQUEST_LIMIT": "true",
           "SHOW_LOG_ON_STDOUT": "true"
         },
-        "runtimeArgs": ["--prefix", "${workspaceFolder}/backend/wordlists", "start"]
+        "runtimeArgs": ["--inspect=9228", "${workspaceFolder}/backend/wordlists/src/index.js"]
       },    
  
   ]
