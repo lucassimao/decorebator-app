@@ -69,22 +69,22 @@ function FormYoutube(props) {
   const onSubmit = async data => {
     try {
       showProgressModal("Wait ...", "Obtaining video details ...");
-      const { title: name, description, defaultAudioLanguage: language } = await youtubeService.getVideoDetails(
+      const { title, description } = await youtubeService.getVideoDetails(
         data.url
       );
 
       showProgressModal("Wait ...", "Downloading subtitle ...");
-      const languageName = availableLanguages.find(lang => lang.code === data.language).name;
+      const { name, translated : language } = availableLanguages.find(lang => lang.code === data.language);
       const set = await youtubeService.getWordsFromVideoSubtitle(
         data.url,
         data.language,
-        languageName,
+        name,
         data.minWordLength
       );
       const words = Array.from(set).map(name => ({ name }));
 
       showProgressModal("Wait ...", "Creating your wordlist ...");
-      const wordlist = { name, description, words, language, isPrivate: data.isPrivate, onlyNewWords: data.onlyNewWords };
+      const wordlist = { name : title, description, words, language, isPrivate: data.isPrivate, onlyNewWords: data.onlyNewWords };
       const resourceUri = await wordlistService.save(wordlist);
 
       hideProgressModal();
