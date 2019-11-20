@@ -12,7 +12,8 @@ import AppBreadcrumb from "../common/AppBreadcrumb";
 import InputBase from "@material-ui/core/InputBase";
 import clsx from "clsx";
 import { FixedSizeList } from 'react-window';
-import { InfiniteLoader } from 'react-window-infinite-loader';
+import AutoSizer from 'react-virtualized-auto-sizer';
+import InfiniteLoader from 'react-window-infinite-loader';
 
 const useSyles = makeStyles(theme => ({
   grid: {
@@ -77,8 +78,9 @@ function Edit(props) {
       showProgressModal("Loading ...");
 
       const wordlist = await service.get(id);
+      console.log(wordlist);
+
       setWordlist(wordlist);
-      setWords([]);
 
     } catch (error) {
       onError(error.message);
@@ -138,9 +140,39 @@ function Edit(props) {
 
   const loadMoreItems = async (startIndex, stopIndex) => {
     console.log('loading for ', startIndex, ' to ', stopIndex);
-    const words = await service.getWords(wordlist._id,startIndex, stopIndex - startIndex);
+    const words = await service.getWords(wordlist._id, startIndex, stopIndex - startIndex);
     return words;
-  }	
+    /* {words.map(word => (
+  
+       ))} */
+  }
+
+  const renderListItems = ({ index, style }) => {
+    if (words[index]) {
+
+      const word = words[index];
+
+      return (
+        <ListItem key={word._id}>
+          <InputBase
+            onFocus={() => setFocusedWord({ _id: word._id, name: word.name })}
+            onBlur={evt => updateWord(word._id, evt.target.value)}
+            defaultValue={word.name}
+            className={clsx({
+              [classes.selectedWord]: focusedWord && word._id === focusedWord._id
+            })}
+          />
+          <ListItemSecondaryAction>
+            <IconButton onClick={() => deleteWord(word._id)} edge="end" className={classes.icon}>
+              <DeleteIcon />
+            </IconButton>
+          </ListItemSecondaryAction>
+        </ListItem>
+      )
+    } else {
+      return <ListItem>Carregando item {index} ...</ListItem>
+    }
+  }
 
   return (
     wordlist && (
@@ -173,37 +205,32 @@ function Edit(props) {
         <Grid className={classes.gridItem} item xs={12} style={{ overflow: "scroll", flexGrow: 1 }}>
 
           <InfiniteLoader
-            isItemLoaded={false}
+            isItemLoaded={()=> true}
             itemCount={1000}
             loadMoreItems={loadMoreItems}
           >
             {({ onItemsRendered, ref }) => (
-              <FixedSizeList
-                itemCount={itemCount}
-                className={classes.list}
-                onItemsRendered={onItemsRendered}
-                ref={ref}
-              />
+
+              <AutoSizer>
+
+                {({ height, width }) => (
+                  <FixedSizeList
+                    itemCount={1000}
+                    className={classes.list}
+                    onItemsRendered={onItemsRendered}
+                    height={height}
+                    itemSize={35}
+                    width={width}
+                    // ref={ref}
+                  >
+                    {renderListItems}
+                  </FixedSizeList>
+                )}
+
+
+              </AutoSizer>
             )}
           </InfiniteLoader>
-
-          {/* {words.map(word => (
-            <ListItem key={word._id}>
-              <InputBase
-                onFocus={() => setFocusedWord({ _id: word._id, name: word.name })}
-                onBlur={evt => updateWord(word._id, evt.target.value)}
-                defaultValue={word.name}
-                className={clsx({
-                  [classes.selectedWord]: focusedWord && word._id === focusedWord._id
-                })}
-              />
-              <ListItemSecondaryAction>
-                <IconButton onClick={() => deleteWord(word._id)} edge="end" className={classes.icon}>
-                  <DeleteIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
-          ))} */}
 
         </Grid>
       </Grid>
