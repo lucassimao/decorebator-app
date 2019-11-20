@@ -16,7 +16,7 @@ const resolveStatus = async (req, res) => {
     
   const regex = /\/wordlists\/(\w+)(\/words\/(\w+)(\/images\/(\w+))?)?/;
   const [, idWordlist, , idWord, , idImage] = regex.exec(req.baseUrl + req.url);
-  const wordlist = await wordlistService.get(idWordlist);
+  const wordlist = await wordlistService.getWithWords(idWordlist);
 
   if (!wordlist) {
     res.status(404).send("wordlist not found");

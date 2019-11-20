@@ -28,13 +28,13 @@ const get = async (idWordlist, idWord, user) => {
  * @param {string|mongoose.Types.ObjectId} idWordlist the id of the wordlist
  * @param {object} user The authenticated user
  * @param {mongoose.Types.ObjectId} user._id The user id
- * @param {number} page The page number
- * @param {number} pageSize The size of the result to be returned 
+ * @param {number} skip The amount of items to skip from the start of the array of words
+ * @param {number} limit The number of items to return
  *
  * @returns {Promise} A promise, which resolves to all words of a wordlist object
  */
-const getWords = (idWordlist, user, page, pageSize) => {
-  return WordlistDao.getWords(idWordlist, user, page, pageSize);
+const getWords = (idWordlist, user, skip, limit) => {
+  return WordlistDao.getWords(idWordlist, user, skip, limit);
 };
 
 /**

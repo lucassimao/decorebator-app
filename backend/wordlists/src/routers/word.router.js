@@ -8,8 +8,8 @@ const wrapAsync = asyncMiddleware => {
 
 router
   .get("/", wrapAsync(async (req, res, next) => {
-    const { page, pageSize } = req.query;
-    const object = await wordService.getWords(req.params.idWordlist, req.user, page, pageSize);
+    const { skip, limit } = req.query;
+    const object = await wordService.getWords(req.params.idWordlist, req.user, parseInt(skip), parseInt(limit));
 
     if (object) {
       res.status(200).send(object);
