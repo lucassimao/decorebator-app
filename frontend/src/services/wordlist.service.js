@@ -20,7 +20,7 @@ const save = async wordlist => {
     body: JSON.stringify(wordlist),
     headers: DEFAULT_HEADERS
   });
-  if (!response.ok){
+  if (!response.ok) {
     throw new Error("Couldn't create wordlist: " + response.statusText)
   }
   return response.headers.get("Link");
@@ -116,6 +116,15 @@ const deleteWordlist = async wordlistId => {
   return response.ok;
 };
 
+const getWords = async (wordlistId, startIdx, pageSize) => {
+  const response = await fetch(`${conf.api.wordlists}/${wordlistId}/words?page=${startIdx}&pageSize=${pageSize}`, {
+    headers: DEFAULT_HEADERS
+  });
+
+  const words = await response.json();
+  return words;
+}
+
 const api = {
   save,
   fetchUserWordlists,
@@ -124,7 +133,8 @@ const api = {
   addWord,
   deleteWord,
   deleteWordlist,
-  updateWord
+  updateWord,
+  getWords
 };
 
 export default api;

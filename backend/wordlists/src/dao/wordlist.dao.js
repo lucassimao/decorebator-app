@@ -39,11 +39,18 @@ Wordlist.static("deleteWord", function (idWordlist, idWord, user) {
 });
 
 Wordlist.static("getWord", function (idWordlist, idWord, user) {
-  return this.findOne({ _id: idWordlist, owner: user._id, "words._id": idWord }, "words.$",{lean:true});
+  return this.findOne({ _id: idWordlist, owner: user._id, "words._id": idWord }, "words.$", { lean: true });
 });
 
-Wordlist.static("getAllWords", function (idWordlist, user) {
-  return this.findOne({ _id: idWordlist, owner: user._id }, "words",{lean:true});
+Wordlist.static("getWords", function (idWordlist, user, page, pageSize) {
+  const modifiers = { lean: true };
+
+  if (__isNumber(page) && __isNumber(pageSize)) {
+    modifiers.skip = page > 0 ? page * pageSize : 0;
+    modifiers.limit = pageSize;
+    
+  }
+  return this.findOne({ _id: idWordlist, owner: user._id }, "words", modifiers);
 });
 
 Wordlist.static("addImage", function (idWordlist, idWord, { url, description }, user) {
@@ -68,5 +75,7 @@ Wordlist.static("patchImage", function (idWordlist, idWord, idImage, { descripti
     { arrayFilters: [{ "w._id": idWord }, { "i._id": idImage }] }
   );
 });
+
+const __isNumber = value => typeof value == 'number';
 
 module.exports = mongoose.model("Wordlist", Wordlist);

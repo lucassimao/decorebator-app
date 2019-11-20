@@ -103,7 +103,7 @@ const get = (id, user) => {
   if (user) {
     query.owner = user._id;
   }
-  return WordlistDao.findOne(query, null, { lean: true });
+  return WordlistDao.findOne(query, { words: 0 }, { lean: true });
 };
 
 /**

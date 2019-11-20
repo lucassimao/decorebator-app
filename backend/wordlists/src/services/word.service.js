@@ -22,16 +22,19 @@ const get = async (idWordlist, idWord, user) => {
 };
 
 /**
- * Returns all words from an user's wordlists
+ * Returns words from an user's wordlists. If the page argument is different from
+ * null, paginates the response, otherwise, returns all words.
  *
  * @param {string|mongoose.Types.ObjectId} idWordlist the id of the wordlist
  * @param {object} user The authenticated user
  * @param {mongoose.Types.ObjectId} user._id The user id
+ * @param {number} page The page number
+ * @param {number} pageSize The size of the result to be returned 
  *
  * @returns {Promise} A promise, which resolves to all words of a wordlist object
  */
-const getAll = (idWordlist, user) => {
-  return WordlistDao.getAllWords(idWordlist, user);
+const getWords = (idWordlist, user, page, pageSize) => {
+  return WordlistDao.getWords(idWordlist, user, page, pageSize);
 };
 
 /**
@@ -79,7 +82,7 @@ const deleteWord = (idWordlist, idWord, user) => {
 
 module.exports = {
   get,
-  getAll,
+  getWords,
   addWord,
   patchWord,
   delete: deleteWord
