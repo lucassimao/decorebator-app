@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const config = require("../config");
 const WordlistDao = require("../dao/wordlist.dao");
 
@@ -100,14 +101,26 @@ const save = async (wordlist, user) => {
  *
  * @returns {Promise} A promise, which resolves to the persisted object, if found
  */
-const get = (id, user) => {
-  const query = { _id: id };
-  if (user) {
-    query.owner = user._id;
-  }
-  return WordlistDao.findOne(query, { words: 0 }, { lean: true });
-};
+const get = async (id, user) => {
+  var ObjectId = mongoose.Types.ObjectId;
 
+  const query = { _id: id instanceof ObjectId ? id : ObjectId(id) };
+  if (user) {
+    query.owner = user._id instanceof ObjectId ? user._id : ObjectId(user._id);
+  }
+
+  const result = await WordlistDao.aggregate([
+    { $match: query },
+    { $addFields: { wordsCount: { $size: "$words" } } },
+    { $project: { words: 0 } },
+    { $limit: 1 }
+  ]);
+  if (Array.isArray(result) && result.length === 1) {
+    return result[0];
+  } else {
+    return null;
+  }
+};
 
 /**
  * Search the database for a wordlist with an _id, returning all fields

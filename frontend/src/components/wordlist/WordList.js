@@ -29,11 +29,13 @@ const useSyles = makeStyles(theme => ({
 var words = [];
 const isItemLoaded = idx => Boolean(words[idx]);
 
-function WordList({ wordlistId, onError, showProgressModal, hideProgressModal }) {
+function WordList({ wordlistId, onError, showProgressModal, hideProgressModal, wordsCount = 0 }) {
   const classes = useSyles();
   const [focusedWord, setFocusedWord] = useState(null);
 
   const loadMoreItems = async (startIndex, stopIndex) => {
+      console.log(`loadMoreItems ${startIndex} ${stopIndex}`);
+      
     const quantity = stopIndex + 1 - startIndex;
     const items = await service.getWords(wordlistId, startIndex, quantity);
     words.splice(startIndex, quantity, ...items);
@@ -100,11 +102,11 @@ function WordList({ wordlistId, onError, showProgressModal, hideProgressModal })
   return (
     <AutoSizer>
       {({ height, width }) => (
-        <InfiniteLoader isItemLoaded={isItemLoaded} itemCount={1000} loadMoreItems={loadMoreItems}>
+        <InfiniteLoader isItemLoaded={isItemLoaded} itemCount={wordsCount} loadMoreItems={loadMoreItems}>
           {({ onItemsRendered, ref }) => (
             <FixedSizeList
               className={classes.list}
-              itemCount={1000}
+              itemCount={wordsCount}
               onItemsRendered={onItemsRendered}
               height={height}
               itemSize={45}

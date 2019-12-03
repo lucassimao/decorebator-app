@@ -130,7 +130,7 @@ function Edit(props) {
           />
         </Grid>
         <Grid className={classes.gridItem} item xs={12} style={{ flexGrow: 1 }}>
-          <WordList wordlistId={wordlist._id} />
+          <WordList wordsCount={wordlist.wordsCount} wordlistId={wordlist._id} />
         </Grid>
       </Grid>
     )
