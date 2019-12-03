@@ -3,8 +3,7 @@ import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import DeleteIcon from "@material-ui/icons/Delete";
-import clsx from "clsx";
-import React, { useState } from "react";
+import React from "react";
 import { connect } from "react-redux";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList } from "react-window";
@@ -19,10 +18,6 @@ const useSyles = makeStyles(theme => ({
   },
   icon: {
     padding: theme.spacing(0.5)
-  },
-  selectedWord: {
-    borderBottom: "1px solid",
-    borderBottomColor: theme.palette.primary.main
   }
 }));
 
@@ -31,11 +26,8 @@ const isItemLoaded = idx => Boolean(words[idx]);
 
 function WordList({ wordlistId, onError, showProgressModal, hideProgressModal, wordsCount = 0 }) {
   const classes = useSyles();
-  const [focusedWord, setFocusedWord] = useState(null);
 
   const loadMoreItems = async (startIndex, stopIndex) => {
-      console.log(`loadMoreItems ${startIndex} ${stopIndex}`);
-      
     const quantity = stopIndex + 1 - startIndex;
     const items = await service.getWords(wordlistId, startIndex, quantity);
     words.splice(startIndex, quantity, ...items);
@@ -44,21 +36,21 @@ function WordList({ wordlistId, onError, showProgressModal, hideProgressModal, w
   const deleteWord = async (wordlistId, wordId) => {
     showProgressModal("Wait", "Deleting word ...");
     await service.deleteWord(wordlistId, wordId);
-    words = words.map(w => (w && w._id === wordId) ? undefined : w);
+    words = words.map(w => (w && w._id === wordId ? undefined : w));
 
-    setFocusedWord(null);
     hideProgressModal();
   };
 
-  const updateWord = async (wordId, name) => {
-    if (focusedWord && name !== focusedWord.name) {
-      try {
-        await service.updateWord(wordlistId, wordId, name);
-        words = words.map(w => (w._id === wordId ? { _id: wordId, name } : w));
-      } catch (error) {
-        console.error(error);
-        onError(error.message);
+  const updateWord = async (wordId, newName) => {
+    try {
+      // the update is only triggered when the newName is different from the original name
+      if (words.find(w => w._id === wordId && w.name !== newName)) {
+        await service.updateWord(wordlistId, wordId, newName);
+        words = words.map(w => (w._id === wordId ? { _id: wordId, name: newName } : w));
       }
+    } catch (error) {
+      console.error(error);
+      onError(error.message);
     }
   };
 
@@ -70,13 +62,8 @@ function WordList({ wordlistId, onError, showProgressModal, hideProgressModal, w
         <ListItem style={style}>
           <div>
             <InputBase
-              onFocus={() => setFocusedWord({ _id: word._id, name: word.name })}
               onBlur={evt => updateWord(word._id, evt.target.value)}
-              value={word.name}
-              onChange={(evt)=> word.name = evt.target.value}
-              className={clsx({
-                [classes.selectedWord]: focusedWord && word._id === focusedWord._id
-              })}
+              defaultValue={word.name}
             />
             <ListItemSecondaryAction>
               <IconButton
