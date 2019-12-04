@@ -3,7 +3,7 @@ import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import DeleteIcon from "@material-ui/icons/Delete";
-import React from "react";
+import React, { useRef, useState } from "react";
 import { connect } from "react-redux";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList } from "react-window";
@@ -21,23 +21,25 @@ const useSyles = makeStyles(theme => ({
   }
 }));
 
-var words = [];
-const isItemLoaded = idx => Boolean(words[idx]);
-
 function WordList({ wordlistId, onError, showProgressModal, hideProgressModal, wordsCount = 0 }) {
   const classes = useSyles();
+  let [words, setWords] = useState([]);
+
+  const isItemLoaded = idx => Boolean(words[idx]);
 
   const loadMoreItems = async (startIndex, stopIndex) => {
-    const quantity = stopIndex + 1 - startIndex;
+    const quantity = stopIndex - startIndex + 1;
     const items = await service.getWords(wordlistId, startIndex, quantity);
     words.splice(startIndex, quantity, ...items);
+
+    setWords(Array.from(words));
   };
 
   const deleteWord = async (wordlistId, wordId) => {
     showProgressModal("Wait", "Deleting word ...");
     await service.deleteWord(wordlistId, wordId);
-    words = words.map(w => (w && w._id === wordId ? undefined : w));
 
+    setWords(words.filter(w => w._id !== wordId ));
     hideProgressModal();
   };
 
@@ -46,7 +48,8 @@ function WordList({ wordlistId, onError, showProgressModal, hideProgressModal, w
       // the update is only triggered when the newName is different from the original name
       if (words.find(w => w._id === wordId && w.name !== newName)) {
         await service.updateWord(wordlistId, wordId, newName);
-        words = words.map(w => (w._id === wordId ? { _id: wordId, name: newName } : w));
+
+        setWords(words.map(w => (w._id === wordId ? { _id: wordId, name: newName } : w)));
       }
     } catch (error) {
       console.error(error);
@@ -61,10 +64,7 @@ function WordList({ wordlistId, onError, showProgressModal, hideProgressModal, w
       return (
         <ListItem style={style}>
           <div>
-            <InputBase
-              onBlur={evt => updateWord(word._id, evt.target.value)}
-              defaultValue={word.name}
-            />
+            <InputBase  onBlur={evt => updateWord(word._id, evt.target.value)} defaultValue={word.name} />
             <ListItemSecondaryAction>
               <IconButton
                 onClick={() => deleteWord(wordlistId, word._id)}
@@ -89,7 +89,11 @@ function WordList({ wordlistId, onError, showProgressModal, hideProgressModal, w
   return (
     <AutoSizer>
       {({ height, width }) => (
-        <InfiniteLoader isItemLoaded={isItemLoaded} itemCount={wordsCount} loadMoreItems={loadMoreItems}>
+        <InfiniteLoader
+          isItemLoaded={isItemLoaded}
+          itemCount={wordsCount}
+          loadMoreItems={loadMoreItems}
+        >
           {({ onItemsRendered, ref }) => (
             <FixedSizeList
               className={classes.list}
