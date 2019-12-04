@@ -1,9 +1,5 @@
-import { ListItem, makeStyles } from "@material-ui/core";
-import IconButton from "@material-ui/core/IconButton";
-import InputBase from "@material-ui/core/InputBase";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
-import DeleteIcon from "@material-ui/icons/Delete";
-import React, { useRef, useState } from "react";
+import { makeStyles } from "@material-ui/core";
+import React, { useState, useRef } from "react";
 import { connect } from "react-redux";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList } from "react-window";
@@ -11,18 +7,17 @@ import InfiniteLoader from "react-window-infinite-loader";
 import { HIDE_PROGRESS_MODAL, SHOW_PROGRESS_MODAL } from "../../reducers/progressModal";
 import { SET_ERROR_SNACKBAR } from "../../reducers/snackbar";
 import service from "../../services/wordlist.service";
+import WordlistRow from "./WordlistRow";
 
 const useSyles = makeStyles(theme => ({
   list: {
     backgroundColor: "#fff"
-  },
-  icon: {
-    padding: theme.spacing(0.5)
   }
 }));
 
 function WordList({ wordlistId, onError, showProgressModal, hideProgressModal, wordsCount = 0 }) {
   const classes = useSyles();
+  const rootElementRef = useRef();
   let [words, setWords] = useState([]);
 
   const isItemLoaded = idx => Boolean(words[idx]);
@@ -35,20 +30,20 @@ function WordList({ wordlistId, onError, showProgressModal, hideProgressModal, w
     setWords(Array.from(words));
   };
 
-  const deleteWord = async (wordlistId, wordId) => {
+  const deleteWord = async wordId => {
     showProgressModal("Wait", "Deleting word ...");
     await service.deleteWord(wordlistId, wordId);
 
-    setWords(words.filter(w => w._id !== wordId ));
-    hideProgressModal();
+    if (rootElementRef.current) {
+      setWords(words.filter(w => w._id !== wordId));
+      hideProgressModal();
+    }
   };
 
   const updateWord = async (wordId, newName) => {
     try {
-      // the update is only triggered when the newName is different from the original name
-      if (words.find(w => w._id === wordId && w.name !== newName)) {
-        await service.updateWord(wordlistId, wordId, newName);
-
+      await service.updateWord(wordlistId, wordId, newName);
+      if (rootElementRef.current) {
         setWords(words.map(w => (w._id === wordId ? { _id: wordId, name: newName } : w)));
       }
     } catch (error) {
@@ -57,54 +52,30 @@ function WordList({ wordlistId, onError, showProgressModal, hideProgressModal, w
     }
   };
 
-  const Row = ({ index, style }) => {
-    if (words[index]) {
-      const word = words[index];
-
-      return (
-        <ListItem style={style}>
-          <div>
-            <InputBase  onBlur={evt => updateWord(word._id, evt.target.value)} defaultValue={word.name} />
-            <ListItemSecondaryAction>
-              <IconButton
-                onClick={() => deleteWord(wordlistId, word._id)}
-                edge="end"
-                className={classes.icon}
-              >
-                <DeleteIcon />
-              </IconButton>
-            </ListItemSecondaryAction>
-          </div>
-        </ListItem>
-      );
-    } else {
-      return (
-        <ListItem key={index} style={style}>
-          Loading ...
-        </ListItem>
-      );
-    }
-  };
-
   return (
-    <AutoSizer>
+    <AutoSizer ref={rootElementRef}>
       {({ height, width }) => (
-        <InfiniteLoader
-          isItemLoaded={isItemLoaded}
-          itemCount={wordsCount}
-          loadMoreItems={loadMoreItems}
-        >
+        <InfiniteLoader isItemLoaded={isItemLoaded} itemCount={wordsCount} loadMoreItems={loadMoreItems}>
           {({ onItemsRendered, ref }) => (
             <FixedSizeList
               className={classes.list}
               itemCount={wordsCount}
               onItemsRendered={onItemsRendered}
               height={height}
+              itemData={words}
               itemSize={45}
               width={width}
               ref={ref}
             >
-              {Row}
+              {({ index, style }) => (
+                <WordlistRow
+                  index={index}
+                  style={style}
+                  word={words[index]}
+                  updateWord={updateWord}
+                  deleteWord={deleteWord}
+                />
+              )}
             </FixedSizeList>
           )}
         </InfiniteLoader>
