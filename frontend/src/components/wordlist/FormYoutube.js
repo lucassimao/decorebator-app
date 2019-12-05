@@ -81,7 +81,7 @@ function FormYoutube(props) {
         name,
         data.minWordLength
       );
-      const words = Array.from(set).map(name => ({ name }));
+      const words = Array.from(set).sort().map(name => ({ name }));
 
       showProgressModal("Wait ...", "Creating your wordlist ...");
       const wordlist = { name : title, description, words, language, isPrivate: data.isPrivate, onlyNewWords: data.onlyNewWords };
