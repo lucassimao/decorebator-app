@@ -1,6 +1,8 @@
 import { Grid, makeStyles, TextField, Typography } from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
+import PublicIcon from "@material-ui/icons/Public";
+import VpnLockRoundedIcon from "@material-ui/icons/VpnLockRounded";
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
@@ -23,6 +25,11 @@ const useSyles = makeStyles(theme => ({
     "&:first-of-type": {
       margin: 0
     }
+  },
+  titleIcon: {
+    position: "relative",
+    bottom: theme.spacing(-0.5),
+    marginRight: theme.spacing(1)
   },
   title: {
     display: "flex",
@@ -105,7 +112,18 @@ function Edit(props) {
           <AppBreadcrumb />
         </Grid>
         <Grid className={`${classes.gridItem} ${classes.title}`} item xs={12}>
-          <Typography variant="h6">{wordlist.name} </Typography>
+          <span>
+
+            {wordlist.isPrivate ? (
+              <VpnLockRoundedIcon className={classes.titleIcon} />
+            ) : (
+              <PublicIcon className={classes.titleIcon} />
+            )}
+
+            <Typography display="inline" variant="h6">
+              {wordlist.name}
+            </Typography>
+          </span>
           <IconButton onClick={deleteWordlist} edge="end">
             <DeleteIcon />
           </IconButton>
