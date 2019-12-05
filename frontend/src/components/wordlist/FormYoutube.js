@@ -122,13 +122,17 @@ function FormYoutube(props) {
       try {
         showProgressModal("Wait ...", "Searching subtitles ...");
         const languages = await youtubeService.getAvailableSubtitleLanguages(url);
+        if (!languages || languages.length === 0){
+            throw new Error("There's no subtitle for this video");
+        }
+
         setAvailableLanguages(languages);
         if (languages.length > 0) {
           setValue("language", languages[0].code);
         }
       } catch (error) {
         console.error(error);
-        setAvailableLanguages([]);
+        setAvailableLanguages(null);
         onError(String(error));
         setValue("language", undefined);
       } finally {
