@@ -4,7 +4,7 @@ import InputBase from "@material-ui/core/InputBase";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import DeleteIcon from "@material-ui/icons/Delete";
 import PropTypes from "prop-types";
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 const useSyles = makeStyles(theme => ({
   icon: {
@@ -12,46 +12,62 @@ const useSyles = makeStyles(theme => ({
   }
 }));
 
-class InputHOC extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = { newName: props.defaultValue };
-    // console.log("constructor ", props.defaultValue);
-  }
+const InputHOC = ({ defaultValue, updateWord, wordId }) => {
+  const [newName, setNewName] = useState(defaultValue);
+  const ref = useRef(defaultValue);
 
-  handleOnChange = evt => {
-    // console.log("onChange ", evt.target.value);
-    this.setState({ newName: evt.target.value });
+  useEffect(() => {
+    return async () => {
+      // was necessary to avoid this callback closuring to a stale state
+      const newName = ref.current;
+
+      if (newName && newName !== defaultValue) {
+        await updateWord(wordId, newName);
+      }
+    };
+    // eslint-disable-next-line
+  }, []);
+
+  const handleOnChange = evt => {
+    setNewName(evt.target.value);
+    ref.current = evt.target.value;
   };
 
-  componentWillUnmount() {
-    (async () => {
-    //   console.log("will unmount ", this.state.newName);
-      await this.update();
-    })();
-  }
+  return <InputBase autoComplete="off" onBlur={handleOnChange} onChange={handleOnChange} value={newName} />;
+};
 
-  update = async () => {
-    const newName = this.state.newName;
-    const defaultValue = this.props.defaultValue;
+// class InputHOC extends React.PureComponent {
+//   constructor(props) {
+//     super(props);
+//     this.state = { newName: props.defaultValue };
+//   }
 
-    if (newName && newName !== defaultValue) {
-    //   console.log("update ", defaultValue, " ", newName);
-      await this.props.updateWord(this.props.wordId, newName);
-    }
-  };
+//   handleOnChange = evt => {
+//     this.setState({ newName: evt.target.value });
+//   };
 
-  render() {
-    return (
-      <InputBase
-        autoComplete="off"
-        onBlur={this.update}
-        onChange={this.handleOnChange}
-        value={this.state.newName}
-      />
-    );
-  }
-}
+//   componentWillUnmount() {
+//     (async () => {
+//       const newName = this.state.newName;
+//       const defaultValue = this.props.defaultValue;
+
+//       if (newName && newName !== defaultValue) {
+//         await this.props.updateWord(this.props.wordId, newName);
+//       }
+//     })();
+//   }
+
+//   render() {
+//     return (
+//       <InputBase
+//         autoComplete="off"
+//         onBlur={this.handleOnChange}
+//         onChange={this.handleOnChange}
+//         value={this.state.newName}
+//       />
+//     );
+//   }
+// }
 
 const WordlistRow = ({ index, style, deleteWord, updateWord, word }) => {
   const classes = useSyles();

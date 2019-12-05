@@ -44,7 +44,7 @@ function WordList({ wordlistId, onError, showProgressModal, hideProgressModal, w
     try {
       await service.updateWord(wordlistId, wordId, newName);
       if (rootElementRef.current) {
-        setWords(words.map(w => (w._id === wordId ? { _id: wordId, name: newName } : w)));
+        setWords(currentWords => currentWords.map(w => (w._id === wordId ? { _id: wordId, name: newName } : w)));
       }
     } catch (error) {
       console.error(error);
