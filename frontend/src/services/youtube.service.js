@@ -6,10 +6,10 @@
  * @property {string} name The language name
  * @property {string} translated The language name translated to english
  * @property {string} description The original language name
- * * 
+ * *
  * @param {String} url The youtube video url
  * @returns {Array<Language>} A array of subtitle's languages available for the video
- * 
+ *
  */
 async function getAvailableSubtitleLanguages(url) {
   const videoId = _extractVideoIdFromUrl(url);
@@ -87,10 +87,17 @@ async function getWordsFromVideoSubtitle(url, languageCode, languageName, minLen
     if (line && line.trim()) {
       line
         .split(/\s+/) // spliting by white space chars
-        .map(w => w.replace(/[(),."?!_]/g,"").toLowerCase()) // removing unecessary characters and lowering case
-        .forEach(w => {
-          if (w.length >= minLength) {
-            words.add(w);
+        .forEach(word => {
+          // removing unecessary characters and lowering case
+          word = word
+            .replace(/[[\](),."?!_]/g, "")
+            .toLowerCase()
+            .trim();
+          const hasOnlyDigits = /\d+$/.test(word);
+          const lengthIsOK = word.length >= minLength;
+
+          if (!hasOnlyDigits && lengthIsOK) {
+            words.add(word);
           }
         });
     }
