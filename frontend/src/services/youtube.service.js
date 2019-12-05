@@ -8,7 +8,7 @@
  * @property {string} description The original language name
  * *
  * @param {String} url The youtube video url
- * @returns {Array<Language>} A array of subtitle's languages available for the video
+ * @returns {Array<Language>} A array of subtitle's languages available for the video or a empty array
  *
  */
 async function getAvailableSubtitleLanguages(url) {
@@ -90,7 +90,7 @@ async function getWordsFromVideoSubtitle(url, languageCode, languageName, minLen
         .forEach(word => {
           // removing unecessary characters and lowering case
           word = word
-            .replace(/[[\](),."?!_]/g, "")
+            .replace(/[[\](),;:."?!_]/g, "")
             .toLowerCase()
             .trim();
           const hasOnlyDigits = /\d+$/.test(word);
