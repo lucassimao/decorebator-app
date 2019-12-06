@@ -5,19 +5,24 @@ import { makeStyles } from "@material-ui/core/styles";
 import ListAltRoundedIcon from "@material-ui/icons/ListAltRounded";
 import React from "react";
 import { Link } from "react-router-dom";
+import Avatar from "@material-ui/core/Avatar";
+import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 
 const useStyles = makeStyles(theme => ({
   listItem: {
-    paddingLeft: 0,
-    paddingRight:0,
-    "& .text": { borderBottom: "1px solid #c5c5c5" }
+    paddingLeft: theme.spacing(1),
+    paddingRight: 0,
+    "& .text": { marginLeft: theme.spacing(1) }
+  },
+
+  arrow:{
+    color: theme.palette.grey[500]
   },
 
   list: {
-    backgroundColor: "white"
-  },
-  icon: {
-    marginRight: theme.spacing(2)
+    boxShadow: "0 7px 14px rgba(0,0,0,0.25)",
+    backgroundColor: "#fff",
+    borderRadius: theme.shape.borderRadius
   }
 }));
 
@@ -37,8 +42,9 @@ function Wordlists(props) {
           button
           component={WordlistLink}
         >
-          <ListAltRoundedIcon className={classes.icon} />
+          <Avatar>H</Avatar>
           <ListItemText className="text" primary={w.name} />
+          <ArrowRightIcon className={classes.arrow} />
         </ListItem>
       ))}
     </List>
