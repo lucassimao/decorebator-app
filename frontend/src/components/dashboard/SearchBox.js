@@ -3,31 +3,34 @@ import { makeStyles } from "@material-ui/core/styles";
 import SearchIcon from "@material-ui/icons/Search";
 import React from "react";
 import { connect } from "react-redux";
-import { fetchUserWordlists, fetchPublicWordlists } from "../../thunks/wordlist.thunks";
+import { fetchPublicWordlists, fetchUserWordlists } from "../../thunks/wordlist.thunks";
 
 const useStyles = makeStyles(theme => ({
   search: {
-    position: "relative",
-    borderRadius: theme.shape.borderRadius * 2,
-    backgroundColor: theme.palette.grey[200]
-  },
-  searchIcon: {
-    width: theme.spacing(5),
-    height: "100%",
-    position: "absolute",
-    pointerEvents: "none",
     display: "flex",
     alignItems: "center",
-    justifyContent: "center",
-    color: theme.palette.grey[600]
+    justifyContent: "space-between",
+    padding: theme.spacing(1),
+    borderRadius: theme.shape.borderRadius * 2,
+    backgroundColor: "#fff",
+    boxShadow: "0 7px 14px rgba(0,0,0,0.25)"
+  },
+  searchWrapper: {
+    backgroundColor: theme.palette.primary.main,
+    borderRadius: theme.spacing(0.5),
+    pointerEvents: "none",
+    padding: theme.spacing(0.6,1),
+    color: "#fff",
+    boxShadow: "0 3px 7px rgba(0,0,0,0.25)"
   },
   inputRoot: {
     color: "inherit",
-    fontSize: theme.typography.fontSize * 1.2
+    flexGrow: 1,
+    marginLeft: theme.spacing(1),
+    fontSize: theme.typography.fontSize * 1.5
   },
   inputInput: {
-    padding: theme.spacing(1, 1, 1, 6),
-    width: "100%"
+    color: "#000"
   }
 }));
 
@@ -37,9 +40,6 @@ function SearchBox(props) {
 
   return (
     <div className={classes.search}>
-      <div className={classes.searchIcon}>
-        <SearchIcon />
-      </div>
       <InputBase
         placeholder="Search …"
         classes={{
@@ -49,6 +49,9 @@ function SearchBox(props) {
         onKeyUp={evt => filterWordlists(evt.target.value)}
         inputProps={{ "aria-label": "search" }}
       />
+      <div className={classes.searchWrapper}>
+        <SearchIcon />
+      </div>
     </div>
   );
 }
@@ -65,7 +68,4 @@ const mapDispatchToProps = dispatch => ({
   }
 });
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(SearchBox);
+export default connect(null, mapDispatchToProps)(SearchBox);

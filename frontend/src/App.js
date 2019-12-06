@@ -35,7 +35,7 @@ function App(props) {
     <>
       <Router>
         <div className={classes.wrapper}>
-          <TopBar />
+          {/* <TopBar /> */}
           <main className={classes.main}>
             <Switch>
               <Route path="/wordlists/new-from-youtube">
