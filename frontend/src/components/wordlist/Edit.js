@@ -58,6 +58,7 @@ function Edit(props) {
   const history = useHistory();
   const classes = useSyles();
   const [wordlist, setWordlist] = useState(null);
+  const [wordsCount, setWordsCount] = useState(0);
 
   useEffect(() => {
     getWordlistById(id);
@@ -68,8 +69,9 @@ function Edit(props) {
     try {
       showProgressModal("Loading ...");
 
-      const wordlist = await service.get(id);
+      const wordlist = await service.get(wordlistId);
       setWordlist(wordlist);
+      setWordsCount(wordlist.wordsCount);
     } catch (error) {
       onError(error.message);
       console.error(error);
@@ -90,10 +92,9 @@ function Edit(props) {
 
       showProgressModal("Wait", "Adding new word ...");
       event.target.value = "";
-      const uri = await service.addWord(id, word);
-      const _id = uri.substr(uri.lastIndexOf("/") + 1);
-      // TODO fix
-      setWordlist({ ...wordlist, words: [...wordlist.words, { name: word, _id }] });
+      await service.addWord(id, word);
+
+      setWordsCount(current => current + 1);
       hideProgressModal();
     }
   };
@@ -105,6 +106,10 @@ function Edit(props) {
     history.push("/");
   };
 
+  const onWordExcludedListener = () => {
+    setWordsCount(current => current - 1);
+  };
+
   return (
     wordlist && (
       <Grid wrap="nowrap" direction="column" className={classes.grid} container>
@@ -113,7 +118,6 @@ function Edit(props) {
         </Grid>
         <Grid className={`${classes.gridItem} ${classes.title}`} item xs={12}>
           <span>
-
             {wordlist.isPrivate ? (
               <VpnLockRoundedIcon className={classes.titleIcon} />
             ) : (
@@ -148,7 +152,11 @@ function Edit(props) {
           />
         </Grid>
         <Grid className={classes.gridItem} item xs={12} style={{ flexGrow: 1 }}>
-          <WordList wordsCount={wordlist.wordsCount} wordlistId={wordlist._id} />
+          <WordList
+            onWordExcluded={onWordExcludedListener}
+            wordsCount={wordsCount}
+            wordlistId={wordlist._id}
+          />
         </Grid>
       </Grid>
     )

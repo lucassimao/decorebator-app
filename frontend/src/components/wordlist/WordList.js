@@ -15,7 +15,7 @@ const useSyles = makeStyles(theme => ({
   }
 }));
 
-function WordList({ wordlistId, onError, showProgressModal, hideProgressModal, wordsCount = 0 }) {
+function WordList({ wordlistId, onError, showProgressModal, hideProgressModal, onWordExcluded, wordsCount = 0 }) {
   const classes = useSyles();
   const rootElementRef = useRef();
   let [words, setWords] = useState([]);
@@ -38,6 +38,11 @@ function WordList({ wordlistId, onError, showProgressModal, hideProgressModal, w
       setWords(words.filter(w => w._id !== wordId));
       hideProgressModal();
     }
+
+    if (onWordExcluded){
+        onWordExcluded(wordId);
+    }
+
   };
 
   const updateWord = async (wordId, newName) => {
