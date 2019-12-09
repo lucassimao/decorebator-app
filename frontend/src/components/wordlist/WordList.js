@@ -15,7 +15,14 @@ const useSyles = makeStyles(theme => ({
   }
 }));
 
-function WordList({ wordlistId, onError, showProgressModal, hideProgressModal, onWordExcluded, wordsCount = 0 }) {
+function WordList({
+  wordlistId,
+  onError,
+  showProgressModal,
+  hideProgressModal,
+  onWordExcluded,
+  wordsCount = 0
+}) {
   const classes = useSyles();
   const rootElementRef = useRef();
   let [words, setWords] = useState([]);
@@ -39,17 +46,18 @@ function WordList({ wordlistId, onError, showProgressModal, hideProgressModal, o
       hideProgressModal();
     }
 
-    if (onWordExcluded){
-        onWordExcluded(wordId);
+    if (onWordExcluded) {
+      onWordExcluded(wordId);
     }
-
   };
 
   const updateWord = async (wordId, newName) => {
     try {
       await service.updateWord(wordlistId, wordId, newName);
       if (rootElementRef.current) {
-        setWords(currentWords => currentWords.map(w => (w._id === wordId ? { _id: wordId, name: newName } : w)));
+        setWords(currentWords =>
+          currentWords.map(w => (w._id === wordId ? { _id: wordId, name: newName } : w))
+        );
       }
     } catch (error) {
       console.error(error);

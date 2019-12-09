@@ -36,39 +36,6 @@ const InputHOC = ({ defaultValue, updateWord, wordId }) => {
   return <InputBase autoComplete="off" onBlur={handleOnChange} onChange={handleOnChange} value={newName} />;
 };
 
-// class InputHOC extends React.PureComponent {
-//   constructor(props) {
-//     super(props);
-//     this.state = { newName: props.defaultValue };
-//   }
-
-//   handleOnChange = evt => {
-//     this.setState({ newName: evt.target.value });
-//   };
-
-//   componentWillUnmount() {
-//     (async () => {
-//       const newName = this.state.newName;
-//       const defaultValue = this.props.defaultValue;
-
-//       if (newName && newName !== defaultValue) {
-//         await this.props.updateWord(this.props.wordId, newName);
-//       }
-//     })();
-//   }
-
-//   render() {
-//     return (
-//       <InputBase
-//         autoComplete="off"
-//         onBlur={this.handleOnChange}
-//         onChange={this.handleOnChange}
-//         value={this.state.newName}
-//       />
-//     );
-//   }
-// }
-
 const WordlistRow = ({ index, style, deleteWord, updateWord, word }) => {
   const classes = useSyles();
   if (word) {
