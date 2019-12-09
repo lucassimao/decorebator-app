@@ -2,7 +2,6 @@ import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import { makeStyles } from "@material-ui/core/styles";
-import ListAltRoundedIcon from "@material-ui/icons/ListAltRounded";
 import React from "react";
 import { Link } from "react-router-dom";
 import Avatar from "@material-ui/core/Avatar";
@@ -15,7 +14,7 @@ const useStyles = makeStyles(theme => ({
     "& .text": { marginLeft: theme.spacing(1) }
   },
 
-  arrow:{
+  arrow: {
     color: theme.palette.grey[500]
   },
 
@@ -27,6 +26,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const WordlistLink = React.forwardRef((props, ref) => <Link innerRef={ref} {...props} />);
+
 
 function Wordlists(props) {
   const classes = useStyles();
@@ -42,7 +42,7 @@ function Wordlists(props) {
           button
           component={WordlistLink}
         >
-          <Avatar>H</Avatar>
+          <Avatar style={{ backgroundColor: w.avatarColor }}>{w.name[0]}</Avatar>
           <ListItemText className="text" primary={w.name} />
           <ArrowRightIcon className={classes.arrow} />
         </ListItem>

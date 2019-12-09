@@ -10,6 +10,7 @@ const Wordlist = new Schema({
   dateCreated: { type: Date, default: Date.now },
   language: { type: String, required: true },
   name: { type: String, required: true, index: true },
+  avatarColor: { type: String },
   words: [
     {
       name: { type: String, required: true },

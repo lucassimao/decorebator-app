@@ -14,27 +14,18 @@ import { HIDE_PROGRESS_MODAL, SHOW_PROGRESS_MODAL } from "../../reducers/progres
 import { SET_ERROR_SNACKBAR, SET_SUCCESS_SNACKBAR } from "../../reducers/snackbar";
 import service from "../../services/wordlist.service";
 import AppBreadcrumb from "../common/AppBreadcrumb";
+import * as colors from "@material-ui/core/colors";
 
-
-const LANGUAGES = [
-  "English",
-  "Spanish",
-  "Portuguese",
-  "French",
-  "German",
-  "Italian",
-  "Dutch",
-  "Mandarin"
-];
+const LANGUAGES = ["English", "Spanish", "Portuguese", "French", "German", "Italian", "Dutch", "Mandarin"];
 LANGUAGES.sort();
 
 const useStyles = makeStyles(theme => ({
   form: {
-    padding: theme.spacing(0,2),
-    height: '100%',
-    display: 'flex',
-    flexFlow: 'column',
-    justifyContent: 'space-between',
+    padding: theme.spacing(0, 2),
+    height: "100%",
+    display: "flex",
+    flexFlow: "column",
+    justifyContent: "space-between",
     color: theme.palette.grey[500],
     "& label": {
       fontWeight: "bold"
@@ -50,9 +41,13 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const HomeLink = React.forwardRef((props, ref) => (
-  <Link to="/" innerRef={ref} {...props} />
-));
+const generateRandomColor = () => {
+  const colorNames = Object.keys(colors);
+  const randomIdx = Math.floor(Math.random() * colorNames.length);
+  return colors[colorNames[randomIdx]][500];
+};
+
+const HomeLink = React.forwardRef((props, ref) => <Link to="/" innerRef={ref} {...props} />);
 
 function Form(props) {
   const { onSuccess, onError, showProgressModal, hideProgressModal } = props;
@@ -60,17 +55,19 @@ function Form(props) {
   const history = useHistory();
 
   const { register, handleSubmit, errors } = useForm({
-    defaultValues: { language: "English" }
+    defaultValues: { language: "English"}
   });
 
   const onSubmit = async data => {
     try {
-      showProgressModal("Wait ...","Creating your wordlist")
+      showProgressModal("Wait ...", "Creating your wordlist");
+
+      data.avatarColor = generateRandomColor();
       const resourceUri = await service.save(data);
       hideProgressModal();
       onSuccess("wordlist created");
       history.push(resourceUri);
-
+    
     } catch (error) {
       hideProgressModal();
       onError(error.message);
@@ -79,95 +76,71 @@ function Form(props) {
   };
 
   return (
-      <form
-        className={classes.form}
-        noValidate
-        onSubmit={handleSubmit(onSubmit)}
-      >
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <AppBreadcrumb />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              margin="dense"
-              fullWidth
-              autoComplete="off"
-              autoFocus
-              error={Boolean(errors.name)}
-              helperText={errors.name && "Name is required"}
-              name="name"
-              inputRef={register({ required: true })}
-              label="Name"
-              variant="outlined"
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              multiline
-              rows={3}
-              name="description"
-              inputRef={register}
-              variant="outlined"
-              label="Description"
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <FormControlLabel
-              control={
-                <Switch  name="isPrivate" inputRef={register} color="primary" />
-              }
-              label="Private"
-            />
-          </Grid>          
-          <Grid item xs={12}>
-            <InputLabel htmlFor="language">Language</InputLabel>
-            <Select
-              name="language"
-              placeholder="Language"
-              fullWidth
-              native
-              inputRef={register}
-            >
-              {LANGUAGES.map(lang => (
-                <option key={lang} value={lang}>
-                  {lang}
-                </option>
-              ))}
-              <option value="Other">Other</option>
-            </Select>
-          </Grid>
+    <form className={classes.form} noValidate onSubmit={handleSubmit(onSubmit)}>
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
+          <AppBreadcrumb />
         </Grid>
-        <Grid className={classes.gridButtons} container justify="flex-end">
-          <Button
-            component={HomeLink}
-            variant="contained"
-            className={classes.button}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            className={classes.button}
-          >
-            Save
-          </Button>
+        <Grid item xs={12}>
+          <TextField
+            margin="dense"
+            fullWidth
+            autoComplete="off"
+            autoFocus
+            error={Boolean(errors.name)}
+            helperText={errors.name && "Name is required"}
+            name="name"
+            inputRef={register({ required: true })}
+            label="Name"
+            variant="outlined"
+          />
         </Grid>
-      </form>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            multiline
+            rows={3}
+            name="description"
+            inputRef={register}
+            variant="outlined"
+            label="Description"
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <FormControlLabel
+            control={<Switch name="isPrivate" inputRef={register} color="primary" />}
+            label="Private"
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <InputLabel htmlFor="language">Language</InputLabel>
+          <Select name="language" placeholder="Language" fullWidth native inputRef={register}>
+            {LANGUAGES.map(lang => (
+              <option key={lang} value={lang}>
+                {lang}
+              </option>
+            ))}
+            <option value="Other">Other</option>
+          </Select>
+        </Grid>
+      </Grid>
+      <Grid className={classes.gridButtons} container justify="flex-end">
+        <Button component={HomeLink} variant="contained" className={classes.button}>
+          Cancel
+        </Button>
+        <Button type="submit" variant="contained" color="primary" className={classes.button}>
+          Save
+        </Button>
+      </Grid>
+    </form>
   );
 }
 
 const mapDispatchToProps = dispatch => ({
   onSuccess: message => dispatch({ type: SET_SUCCESS_SNACKBAR, message }),
   onError: message => dispatch({ type: SET_ERROR_SNACKBAR, message }),
-  showProgressModal: (title,description) => dispatch({type: SHOW_PROGRESS_MODAL, description, title}),
-  hideProgressModal: () => dispatch({type: HIDE_PROGRESS_MODAL}),
+  showProgressModal: (title, description) => dispatch({ type: SHOW_PROGRESS_MODAL, description, title }),
+  hideProgressModal: () => dispatch({ type: HIDE_PROGRESS_MODAL })
 });
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(Form);
+export default connect(null, mapDispatchToProps)(Form);

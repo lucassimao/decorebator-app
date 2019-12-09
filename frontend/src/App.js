@@ -5,7 +5,6 @@ import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import ProgressModal from "./components/common/ProgressModal";
 import { ErrorSnackbar, SuccessSnackbar } from "./components/common/AppSnackbar";
 import Home from "./components/dashboard/Home";
-import TopBar from "./components/TopBar";
 
 const WordlistForm = lazy(() => import("./components/wordlist/Form").then(module => module));
 const WordlistFromYoutubeForm = lazy(() => import("./components/wordlist/FormYoutube").then(module => module));

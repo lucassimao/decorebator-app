@@ -20,6 +20,7 @@ import { SET_ERROR_SNACKBAR, SET_SUCCESS_SNACKBAR } from "../../reducers/snackba
 import wordlistService from "../../services/wordlist.service";
 import youtubeService from "../../services/youtube.service";
 import AppBreadcrumb from "../common/AppBreadcrumb";
+import * as colors from "@material-ui/core/colors";
 
 const useStyles = makeStyles(theme => ({
   form: {
@@ -50,6 +51,12 @@ const HomeLink = React.forwardRef((props, ref) => <Link to="/" innerRef={ref} {.
 const URL_REGEXP = new RegExp("^((https|http)://(www.)?)?youtube.com/watch/*");
 const DEFAULT_MIN_WORD_LENGTH = 3;
 
+const generateRandomColor = () => {
+  const colorNames = Object.keys(colors);
+  const randomIdx = Math.floor(Math.random() * colorNames.length);
+  return colors[colorNames[randomIdx]][500];
+};
+
 function FormYoutube(props) {
   const classes = useStyles();
   const { onSuccess, onError, showProgressModal, hideProgressModal } = props;
@@ -69,22 +76,30 @@ function FormYoutube(props) {
   const onSubmit = async data => {
     try {
       showProgressModal("Wait ...", "Obtaining video details ...");
-      const { title, description } = await youtubeService.getVideoDetails(
-        data.url
-      );
+      const { title, description } = await youtubeService.getVideoDetails(data.url);
 
       showProgressModal("Wait ...", "Downloading subtitle ...");
-      const { name, translated : language } = availableLanguages.find(lang => lang.code === data.language);
+      const { name, translated: language } = availableLanguages.find(lang => lang.code === data.language);
       const set = await youtubeService.getWordsFromVideoSubtitle(
         data.url,
         data.language,
         name,
         data.minWordLength
       );
-      const words = Array.from(set).sort().map(name => ({ name }));
+      const words = Array.from(set)
+        .sort()
+        .map(name => ({ name }));
 
       showProgressModal("Wait ...", "Creating your wordlist ...");
-      const wordlist = { name : title, description, words, language, isPrivate: data.isPrivate, onlyNewWords: data.onlyNewWords };
+      const wordlist = {
+        avatarColor: generateRandomColor(),
+        name: title,
+        description,
+        words,
+        language,
+        isPrivate: data.isPrivate,
+        onlyNewWords: data.onlyNewWords
+      };
       const resourceUri = await wordlistService.save(wordlist);
 
       hideProgressModal();
@@ -122,8 +137,8 @@ function FormYoutube(props) {
       try {
         showProgressModal("Wait ...", "Searching subtitles ...");
         const languages = await youtubeService.getAvailableSubtitleLanguages(url);
-        if (!languages || languages.length === 0){
-            throw new Error("There's no subtitle for this video");
+        if (!languages || languages.length === 0) {
+          throw new Error("There's no subtitle for this video");
         }
 
         setAvailableLanguages(languages);
@@ -160,15 +175,15 @@ function FormYoutube(props) {
             InputProps={
               url
                 ? {
-                  classes: { adornedEnd: classes.urlInputEndAdornment },
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton aria-label="clear youtube video's url" onClick={clearVideoUrl}>
-                        <ClearIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  )
-                }
+                    classes: { adornedEnd: classes.urlInputEndAdornment },
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton aria-label="clear youtube video's url" onClick={clearVideoUrl}>
+                          <ClearIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    )
+                  }
                 : null
             }
             inputRef={e => {
@@ -229,9 +244,7 @@ function FormYoutube(props) {
         </Grid>
         <Grid item xs={12}>
           <FormControlLabel
-            control={
-              <Switch name="isPrivate" inputRef={register} color="primary" />
-            }
+            control={<Switch name="isPrivate" inputRef={register} color="primary" />}
             label="Private"
           />
         </Grid>
