@@ -5,9 +5,13 @@ const theme = createMuiTheme({
     borderRadius: '8px'
   },
   palette: {
-    primary: { main: "#5468ff", light: "##9096ff", dark: "#003ecb", contrastText: "#000" },
+    primary: { main: "#5468ff", light: "##9096ff", dark: "#003ecb", contrastText: "#fff" },
+    text:{
+        primary: '#334155',
+        secondary: '#8a929d'
+    },
     background: {
-      default: "#f4f5f9"
+      default: "#f4f5f9",
     }
   }
 });

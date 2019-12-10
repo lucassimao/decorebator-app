@@ -1,12 +1,10 @@
 import { Container } from "@material-ui/core";
+import Fab from "@material-ui/core/Fab";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
-import AccessTimeIcon from "@material-ui/icons/AccessTime";
+import AddIcon from "@material-ui/icons/Add";
 import ListAltRoundedIcon from "@material-ui/icons/ListAltRounded";
 import YouTubeIcon from "@material-ui/icons/YouTube";
-import SpeedDial from "@material-ui/lab/SpeedDial";
-import SpeedDialAction from "@material-ui/lab/SpeedDialAction";
-import SpeedDialIcon from "@material-ui/lab/SpeedDialIcon";
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
@@ -18,22 +16,14 @@ const useStyles = makeStyles(theme => ({
   sectionHeader: {
     display: "flex",
     alignItems: "center",
-    margin: theme.spacing(1, 0),
-    color: theme.palette.grey[500],
-    "& .section-icon": {
-      color: theme.palette.primary.main,
-      marginRight: theme.spacing(2)
-    }
+    margin: theme.spacing(3, 0, 1, 0),
+    fontWeight: "bold",
+    color: theme.palette.text.primary
   },
-  speedDial: {
+  fab: {
     position: "fixed",
-    "&.MuiSpeedDial-directionUp": {
-      bottom: theme.spacing(3),
-      right: theme.spacing(2)
-    }
-  },
-  tooltip: {
-    width: "140px"
+    bottom: theme.spacing(3),
+    right: theme.spacing(2)
   }
 }));
 
@@ -71,39 +61,20 @@ function Home(props) {
   return (
     <Container>
       <SearchBox />
-      <Typography variant="h6" className={classes.sectionHeader}>
-        <AccessTimeIcon className="section-icon" />
+      <Typography variant="h5" className={classes.sectionHeader}>
         Your wordlists
       </Typography>
       <Wordlists wordlists={userWordlists} />
 
-      <Typography variant="h6" className={classes.sectionHeader}>
-        <AccessTimeIcon className="section-icon" />
+      <Typography variant="h5" className={classes.sectionHeader}>
         Recent public wordlists
       </Typography>
 
       <Wordlists wordlists={publicWordlists} />
 
-      <SpeedDial
-        ariaLabel="Main menu"
-        className={classes.speedDial}
-        icon={<SpeedDialIcon />}
-        onClose={handleClose}
-        onOpen={handleOpen}
-        open={open}
-        direction="up"
-      >
-        {actions.map(action => (
-          <SpeedDialAction
-            key={action.name}
-            icon={action.icon}
-            component={action.component}
-            tooltipTitle={action.name}
-            tooltipOpen={false}
-            classes={{ staticTooltipLabel: classes.tooltip }}
-          />
-        ))}
-      </SpeedDial>
+      <Fab className={classes.fab} color="primary" aria-label="add">
+        <AddIcon color="" />
+      </Fab>
     </Container>
   );
 }
