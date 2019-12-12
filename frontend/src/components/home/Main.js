@@ -3,11 +3,8 @@ import Fab from "@material-ui/core/Fab";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import AddIcon from "@material-ui/icons/Add";
-import ListAltRoundedIcon from "@material-ui/icons/ListAltRounded";
-import YouTubeIcon from "@material-ui/icons/YouTube";
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
-import { Link } from "react-router-dom";
 import { fetchPublicWordlists, fetchUserWordlists } from "../../thunks/wordlist.thunks";
 import SearchBox from "./SearchBox";
 import Wordlists from "./Wordlists";
@@ -27,30 +24,11 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const NewWordlistLink = React.forwardRef((props, ref) => (
-  <Link to="/wordlists/new" innerRef={ref} {...props} />
-));
 
-const NewWordlistFromYoutubeLink = React.forwardRef((props, ref) => (
-  <Link to="/wordlists/new-from-youtube" innerRef={ref} {...props} />
-));
-
-const actions = [
-  { icon: <ListAltRoundedIcon color="primary" />, name: "New wordlist", component: NewWordlistLink },
-  {
-    icon: <YouTubeIcon style={{ color: "#f00" }} />,
-    name: "From youtube",
-    component: NewWordlistFromYoutubeLink
-  }
-];
 
 function Home(props) {
   const { userWordlists, publicWordlists, loadUserWordlists, loadPublicWordlists } = props;
   const classes = useStyles();
-  const [open, setOpen] = React.useState(false);
-
-  const handleClose = () => setOpen(false);
-  const handleOpen = () => setOpen(true);
 
   useEffect(() => {
     loadUserWordlists();
@@ -72,7 +50,7 @@ function Home(props) {
 
       <Wordlists wordlists={publicWordlists} />
 
-      <Fab className={classes.fab} color="primary" aria-label="add">
+      <Fab href="/wordlists/menu" className={classes.fab} color="primary" aria-label="add">
         <AddIcon color="" />
       </Fab>
     </Container>

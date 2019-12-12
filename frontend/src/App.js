@@ -4,11 +4,14 @@ import { connect } from "react-redux";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import ProgressModal from "./components/common/ProgressModal";
 import { ErrorSnackbar, SuccessSnackbar } from "./components/common/AppSnackbar";
-import Home from "./components/dashboard/Home";
+import Main from "./components/home/Main";
 
 const WordlistForm = lazy(() => import("./components/wordlist/Form").then(module => module));
-const WordlistFromYoutubeForm = lazy(() => import("./components/wordlist/FormYoutube").then(module => module));
+const WordlistFromYoutubeForm = lazy(() =>
+  import("./components/wordlist/FormYoutube").then(module => module)
+);
 const WordlistEdit = lazy(() => import("./components/wordlist/Edit").then(module => module));
+const MenuNewWordlist = lazy(() => import("./components/home/MenuNewWordlist").then(module => module));
 
 const useStyles = makeStyles(theme => ({
   wrapper: {
@@ -33,30 +36,32 @@ function App(props) {
   return (
     <>
       <Router>
-        <div className={classes.wrapper}>
-          {/* <TopBar /> */}
-          <main className={classes.main}>
-            <Switch>
-              <Route path="/wordlists/new-from-youtube">
-                <Suspense fallback={spinner}>
-                  <WordlistFromYoutubeForm />
-                </Suspense>
-              </Route>
-              <Route path="/wordlists/new">
-                <Suspense fallback={spinner}>
-                  <WordlistForm />
-                </Suspense>
-              </Route>
-              <Route path="/wordlists/:id">
-                <Suspense fallback={spinner}>
-                  <WordlistEdit />
-                </Suspense>
-              </Route>
-              <Route path="/">
-                <Home />
-              </Route>
-            </Switch>
-          </main>
+        <div className={classes.main}>
+          <Switch>
+            <Route path="/wordlists/new-from-youtube">
+              <Suspense fallback={spinner}>
+                <WordlistFromYoutubeForm />
+              </Suspense>
+            </Route>
+            <Route path="/wordlists/new">
+              <Suspense fallback={spinner}>
+                <WordlistForm />
+              </Suspense>
+            </Route>
+            <Route path="/wordlists/menu">
+              <Suspense fallback={spinner}>
+                <MenuNewWordlist />
+              </Suspense>
+            </Route>
+            <Route path="/wordlists/:id">
+              <Suspense fallback={spinner}>
+                <WordlistEdit />
+              </Suspense>
+            </Route>
+            <Route path="/">
+              <Main />
+            </Route>
+          </Switch>
         </div>
       </Router>
 
@@ -77,7 +82,4 @@ const mapStateToProps = state => ({
   progressModal: state.progressModal
 });
 
-export default connect(
-  mapStateToProps,
-  null
-)(App);
+export default connect(mapStateToProps, null)(App);
