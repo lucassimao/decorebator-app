@@ -41,7 +41,6 @@ function MenuNewWordlist() {
         <Fab
           size="small"
           href="/"
-          variant="outlined"
           color="primary"
           aria-label="go back"
           style={{ position: "absolute", top: 0, left: 0, fontWeight: "bold" }}
@@ -55,7 +54,7 @@ function MenuNewWordlist() {
       </header>
 
       <main className={classes.main}>
-        <Card raised="true" className={classes.card}>
+        <Card raised={true} className={classes.card}>
           <CardActionArea component={NewWordlistLink}>
             <CardMedia
               component="img"
@@ -76,7 +75,7 @@ function MenuNewWordlist() {
           </CardActionArea>
         </Card>
 
-        <Card raised="true" className={classes.card}>
+        <Card raised={true} className={classes.card}>
           <CardActionArea component={NewWordlistFromYoutubeLink}>
             <CardMedia
               component="img"
