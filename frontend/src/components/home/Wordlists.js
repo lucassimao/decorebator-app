@@ -21,7 +21,6 @@ const useStyles = makeStyles(theme => ({
   list: {
     boxShadow: "0 7px 14px rgba(0,0,0,0.25)",
     backgroundColor: "#fff",
-    borderRadius: theme.shape.borderRadius
   }
 }));
 
@@ -33,7 +32,7 @@ function Wordlists(props) {
   const { wordlists } = props;
 
   return (
-    <List component="nav" className={classes.list}>
+    <List className={classes.list}>
       {wordlists.map(w => (
         <ListItem
           className={classes.listItem}

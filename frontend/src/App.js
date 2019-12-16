@@ -14,17 +14,12 @@ const WordlistEdit = lazy(() => import("./components/wordlist/Edit").then(module
 const MenuNewWordlist = lazy(() => import("./components/home/MenuNewWordlist").then(module => module));
 
 const useStyles = makeStyles(theme => ({
+
   wrapper: {
-    display: "flex",
-    flexDirection: "column",
     height: "100vh",
-    justifyContent: "space-between"
-  },
-  main: {
-    flexGrow: 1,
-    paddingTop: theme.spacing(2),
-    overflow: "scroll"
+    padding: theme.spacing(2,0)
   }
+
 }));
 
 const spinner = <ProgressModal title="Loading ..." />;
@@ -34,10 +29,9 @@ function App(props) {
   const classes = useStyles();
 
   return (
-    <>
+    <div className={classes.wrapper}>
       <Router>
-        <div className={classes.main}>
-          <Switch>
+        <Switch>
             <Route path="/wordlists/new-from-youtube">
               <Suspense fallback={spinner}>
                 <WordlistFromYoutubeForm />
@@ -61,8 +55,7 @@ function App(props) {
             <Route path="/">
               <Main />
             </Route>
-          </Switch>
-        </div>
+        </Switch>
       </Router>
 
       {/* success snack bar */}
@@ -73,7 +66,7 @@ function App(props) {
 
       {/* progress modal */}
       {progressModal && <ProgressModal {...progressModal} />}
-    </>
+    </div>
   );
 }
 

@@ -5,7 +5,7 @@ import Typography from "@material-ui/core/Typography";
 import AddIcon from "@material-ui/icons/Add";
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
-import { fetchPublicWordlists, fetchUserWordlists } from "../../thunks/wordlist.thunks";
+import { fetchUserWordlists } from "../../thunks/wordlist.thunks";
 import SearchBox from "./SearchBox";
 import Wordlists from "./Wordlists";
 
@@ -17,41 +17,49 @@ const useStyles = makeStyles(theme => ({
     fontWeight: "bold",
     color: theme.palette.text.primary
   },
+
   fab: {
     position: "fixed",
     bottom: theme.spacing(3),
     right: theme.spacing(2)
+  },
+
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    maxHeight: '100%',
+  },
+
+  wordlistWrapper: {
+    borderRadius: theme.shape.borderRadius,
+    overflow: 'scroll'
   }
+
 }));
 
 
 
 function Home(props) {
-  const { userWordlists, publicWordlists, loadUserWordlists, loadPublicWordlists } = props;
+  const { userWordlists,  loadUserWordlists } = props;
   const classes = useStyles();
 
   useEffect(() => {
     loadUserWordlists();
-    loadPublicWordlists();
     // eslint-disable-next-line
   }, []);
 
   return (
-    <Container>
+    <Container className={classes.container}>
       <SearchBox />
       <Typography variant="h5" className={classes.sectionHeader}>
         Your wordlists
       </Typography>
-      <Wordlists wordlists={userWordlists} />
-
-      <Typography variant="h5" className={classes.sectionHeader}>
-        Recent public wordlists
-      </Typography>
-
-      <Wordlists wordlists={publicWordlists} />
+      <div className={classes.wordlistWrapper}>
+        <Wordlists wordlists={userWordlists} />
+      </div>
 
       <Fab href="/wordlists/menu" className={classes.fab} color="primary" aria-label="add">
-        <AddIcon color="" />
+        <AddIcon />
       </Fab>
     </Container>
   );
@@ -59,12 +67,10 @@ function Home(props) {
 
 const mapStateToProps = state => ({
   userWordlists: state.wordlists.userWordlists,
-  publicWordlists: state.wordlists.publicWordlists
 });
 
 const mapDispatchToProps = dispatch => ({
   loadUserWordlists: () => dispatch(fetchUserWordlists()),
-  loadPublicWordlists: () => dispatch(fetchPublicWordlists())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);
