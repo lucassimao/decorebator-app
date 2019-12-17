@@ -32,7 +32,8 @@ const useStyles = makeStyles(theme => ({
 
   wordlistWrapper: {
     borderRadius: theme.shape.borderRadius,
-    overflow: 'scroll'
+    overflow: 'scroll',
+    boxShadow: "0 7px 14px rgba(0,0,0,0.25)"
   }
 
 }));
