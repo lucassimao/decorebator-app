@@ -15,7 +15,6 @@ import YoutubeImage from "./youtube.jpg";
 const useStyles = makeStyles(theme => ({
   header: {
     position: "relative"
-    // display: "flex"
   },
   main: {
     display: "grid",

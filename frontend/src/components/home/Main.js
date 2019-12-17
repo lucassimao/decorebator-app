@@ -3,11 +3,13 @@ import Fab from "@material-ui/core/Fab";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import AddIcon from "@material-ui/icons/Add";
-import React, { useEffect } from "react";
+import React, { lazy, Suspense, useEffect } from "react";
 import { connect } from "react-redux";
 import { fetchUserWordlists } from "../../thunks/wordlist.thunks";
+import ProgressModal from "../common/ProgressModal";
 import SearchBox from "./SearchBox";
 import Wordlists from "./Wordlists";
+const Welcome = lazy(() => import("./Welcome").then(m => m));
 
 const useStyles = makeStyles(theme => ({
   sectionHeader: {
@@ -25,23 +27,20 @@ const useStyles = makeStyles(theme => ({
   },
 
   container: {
-    display: 'flex',
-    flexDirection: 'column',
-    maxHeight: '100%',
+    display: "flex",
+    flexDirection: "column",
+    maxHeight: "100%"
   },
 
   wordlistWrapper: {
     borderRadius: theme.shape.borderRadius,
-    overflow: 'scroll',
+    overflow: "scroll",
     boxShadow: "0 7px 14px rgba(0,0,0,0.25)"
   }
-
 }));
 
-
-
 function Home(props) {
-  const { userWordlists,  loadUserWordlists } = props;
+  const { userWordlists, loadUserWordlists } = props;
   const classes = useStyles();
 
   useEffect(() => {
@@ -51,27 +50,36 @@ function Home(props) {
 
   return (
     <Container className={classes.container}>
-      <SearchBox />
-      <Typography variant="h5" className={classes.sectionHeader}>
-        Your wordlists
-      </Typography>
-      <div className={classes.wordlistWrapper}>
-        <Wordlists wordlists={userWordlists} />
-      </div>
+      {!userWordlists ? (
+        <>
+          <SearchBox />
+          <Typography variant="h5" className={classes.sectionHeader}>
+            Your wordlists
+          </Typography>
 
-      <Fab href="/wordlists/menu" className={classes.fab} color="primary" aria-label="add">
-        <AddIcon />
-      </Fab>
+          <div className={classes.wordlistWrapper}>
+            <Wordlists wordlists={userWordlists} />
+          </div>
+
+          <Fab href="/wordlists/menu" className={classes.fab} color="primary" aria-label="add">
+            <AddIcon />
+          </Fab>
+        </>
+      ) : (
+        <Suspense fallback={<ProgressModal title="Loading ..." />}>
+          <Welcome />
+        </Suspense>
+      )}
     </Container>
   );
 }
 
 const mapStateToProps = state => ({
-  userWordlists: state.wordlists.userWordlists,
+  userWordlists: state.wordlists.userWordlists
 });
 
 const mapDispatchToProps = dispatch => ({
-  loadUserWordlists: () => dispatch(fetchUserWordlists()),
+  loadUserWordlists: () => dispatch(fetchUserWordlists())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);
