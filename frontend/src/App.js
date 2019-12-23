@@ -16,8 +16,8 @@ const MenuNewWordlist = lazy(() => import("./components/home/MenuNewWordlist").t
 const useStyles = makeStyles(theme => ({
 
   wrapper: {
-    height: "100vh",
-    padding: theme.spacing(2,0)
+    padding: theme.spacing(2,0),
+    height: '100vh',
   }
 
 }));

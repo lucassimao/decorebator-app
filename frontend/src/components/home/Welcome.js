@@ -1,100 +1,115 @@
-import React from "react";
+import { Container } from "@material-ui/core";
 import Card from "@material-ui/core/Card";
 import CardActionArea from "@material-ui/core/CardActionArea";
-import CardContent from "@material-ui/core/CardContent";
 import CardMedia from "@material-ui/core/CardMedia";
 import Fab from "@material-ui/core/Fab";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import { Link } from "react-router-dom";
-import WordlistsImage from "./wordlists.jpeg";
-import YoutubeImage from "./youtube2.jpg";
-import WikipediaImage from "./wikipedia.jpeg";
-
+import AddIcon from '@material-ui/icons/Add';
 import clsx from "clsx";
+import React from "react";
+import WikipediaImage from "../../img/wikipedia.jpeg";
+import WordlistsImage from "../../img/wordlists.jpeg";
+import YoutubeImage from "../../img/youtube.jpg";
+
 
 const useStyles = makeStyles(theme => ({
-  main: {
-    position: "relative"
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
-  img: {
+  cards: {
+    position: "relative",
+  },
+  card: {
     position: "absolute",
-    top: theme.spacing(12),
+    top: theme.spacing(-16),
     left: 0,
     right: 0,
-    display: "block",
-    maxWidth: "50%",
+    maxWidth: "70%",
     margin: "0 auto",
     borderRadius: theme.spacing(1)
   },
-  img1: {
-    transform: "rotate(-20deg) translate(-70px,10px)"
+  img: {
+    objectFit: "fill"
   },
-  img2: {
-    transform: "rotate(20deg) translate(70px,10px)"
+  youtubeCard: {
+    maxWidth: "80%",
+  },
+  wordlistsCard: {
+    transform: "rotate(-15deg) translate(-70px,10px)"
+  },
+  wikipediaCard: {
+    transform: "rotate(15deg) translate(70px,10px)"
+  },
+  button:{
+    marginTop: theme.spacing(3)
   }
 }));
 
-const NewWordlistLink = React.forwardRef((props, ref) => (
-  <Link to="/wordlists/new" innerRef={ref} {...props} />
-));
-
-const NewWordlistFromYoutubeLink = React.forwardRef((props, ref) => (
-  <Link to="/wordlists/new-from-youtube" innerRef={ref} {...props} />
-));
 function Welcome() {
   const classes = useStyles();
 
   return (
-    <>
-      <Typography variant="h6" style={{ fontWeight: "bold" }} align="center">
-        No wordlists!
-      </Typography>
+    <Container className={classes.container}>
 
-      <Typography variant="body2" color="textSecondary" align="center" component="p">
-        Create a brand new empty wordlist
-      </Typography>
+      {/* used to center both the cards and the title */}
+      <div>
 
-      <div className={classes.main}>
-        <Card raised={true} className={clsx(classes.img, classes.img1)}>
-          <CardActionArea component={NewWordlistLink}>
-            <CardMedia
-              component="img"
-              alt="Create empty wordlist"
-              style={{ objectFit: "fill" }}
-              image={WordlistsImage}
-              title="Create empty wordlist"
-            />
-          </CardActionArea>
-          {/* <CardContent></CardContent> */}
-        </Card>
-        <Card raised={true} className={clsx(classes.img, classes.img2)}>
-          <CardActionArea component={NewWordlistLink}>
-            <CardMedia
-              component="img"
-              alt="Create empty wordlist"
-              style={{ objectFit: "fill" }}
-              image={WikipediaImage}
-              title="Create empty wordlist"
-            />
-          </CardActionArea>
-          {/* <CardContent></CardContent> */}
-        </Card>
-        <Card raised={true} className={clsx(classes.img)}>
-          <CardActionArea component={NewWordlistLink}>
-            <CardMedia
-              component="img"
-              alt="Create empty wordlist"
-              style={{ objectFit: "fill" }}
-              image={YoutubeImage}
-              title="Create empty wordlist"
-            />
-          </CardActionArea>
-          {/* <CardContent></CardContent> */}
-        </Card>
+        <div className={classes.cards}>
+          <Card raised={true} className={clsx(classes.card, classes.wordlistsCard)}>
+            <CardActionArea>
+              <CardMedia
+                component="img"
+                alt="Create empty wordlist"
+                className={classes.img}
+                image={WordlistsImage}
+                title="Create empty wordlist"
+              />
+            </CardActionArea>
+          </Card>
+          <Card raised={true} className={clsx(classes.card, classes.wikipediaCard)}>
+            <CardActionArea>
+              <CardMedia
+                component="img"
+                alt="Create empty wordlist"
+                className={classes.img}
+                image={WikipediaImage}
+                title="Create empty wordlist"
+              />
+            </CardActionArea>
+          </Card>
+          <Card raised={true} className={clsx(classes.card, classes.youtubeCard)}>
+            <CardActionArea>
+              <CardMedia
+                component="img"
+                className={classes.img}
+                alt="Create empty wordlist"
+                image={YoutubeImage}
+                title="Create empty wordlist"
+              />
+            </CardActionArea>
+          </Card>
+        </div>
+
+        <Typography variant="h5" style={{ fontWeight: "bold" }} align="center">
+          No wordlists !
+        </Typography>
+
+        <Typography variant="body1" color="textSecondary" align="center" component="p">
+          Create a brand new wordlist
+        </Typography>
       </div>
-    </>
+
+      <Fab href="/wordlists/menu" className={classes.button} color="primary" variant="extended">
+        <AddIcon /> New
+      </Fab>
+
+    </Container>
+
   );
 }
 

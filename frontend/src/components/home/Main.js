@@ -29,7 +29,6 @@ const useStyles = makeStyles(theme => ({
   container: {
     display: "flex",
     flexDirection: "column",
-    maxHeight: "100%"
   },
 
   wordlistWrapper: {
@@ -48,29 +47,26 @@ function Home(props) {
     // eslint-disable-next-line
   }, []);
 
-  return (
+  return (!userWordlists ? (
     <Container className={classes.container}>
-      {!userWordlists ? (
-        <>
-          <SearchBox />
-          <Typography variant="h5" className={classes.sectionHeader}>
-            Your wordlists
-          </Typography>
+      <SearchBox />
+      <Typography variant="h5" className={classes.sectionHeader}>
+        Your wordlists
+      </Typography>
 
-          <div className={classes.wordlistWrapper}>
-            <Wordlists wordlists={userWordlists} />
-          </div>
+      <div className={classes.wordlistWrapper}>
+        <Wordlists wordlists={userWordlists} />
+      </div>
 
-          <Fab href="/wordlists/menu" className={classes.fab} color="primary" aria-label="add">
-            <AddIcon />
-          </Fab>
-        </>
-      ) : (
-        <Suspense fallback={<ProgressModal title="Loading ..." />}>
-          <Welcome />
-        </Suspense>
-      )}
-    </Container>
+      <Fab href="/wordlists/menu" className={classes.fab} color="primary" aria-label="add">
+        <AddIcon />
+      </Fab>
+    </Container>)
+    : (
+      <Suspense fallback={<ProgressModal title="Loading ..." />}>
+        <Welcome />
+      </Suspense>
+    )
   );
 }
 
