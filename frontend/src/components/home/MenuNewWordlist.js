@@ -9,8 +9,8 @@ import Typography from "@material-ui/core/Typography";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import React from "react";
 import { Link } from "react-router-dom";
-import WordlistsImage from "./wordlists.jpeg";
-import YoutubeImage from "./youtube.jpg";
+import WordlistsImage from "../../img/wordlists.jpeg";
+import YoutubeImage from "../../img/youtube.jpg";
 
 const useStyles = makeStyles(theme => ({
   header: {
