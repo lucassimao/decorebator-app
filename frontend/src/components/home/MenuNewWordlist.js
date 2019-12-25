@@ -24,7 +24,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const NewWordlistLink = React.forwardRef((props, ref) => (
+const NewEmptyWordlistLink = React.forwardRef((props, ref) => (
   <Link to="/wordlists/new" innerRef={ref} {...props} />
 ));
 
@@ -54,7 +54,7 @@ function MenuNewWordlist() {
 
       <main className={classes.main}>
         <Card raised={true} className={classes.card}>
-          <CardActionArea component={NewWordlistLink}>
+          <CardActionArea component={NewEmptyWordlistLink}>
             <CardMedia
               component="img"
               alt="Create empty wordlist"

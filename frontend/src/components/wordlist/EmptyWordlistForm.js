@@ -49,7 +49,7 @@ const generateRandomColor = () => {
 
 const HomeLink = React.forwardRef((props, ref) => <Link to="/" innerRef={ref} {...props} />);
 
-function Form(props) {
+function EmptyWordlistForm(props) {
   const { onSuccess, onError, showProgressModal, hideProgressModal } = props;
   const classes = useStyles();
   const history = useHistory();
@@ -143,4 +143,4 @@ const mapDispatchToProps = dispatch => ({
   hideProgressModal: () => dispatch({ type: HIDE_PROGRESS_MODAL })
 });
 
-export default connect(null, mapDispatchToProps)(Form);
+export default connect(null, mapDispatchToProps)(EmptyWordlistForm);
