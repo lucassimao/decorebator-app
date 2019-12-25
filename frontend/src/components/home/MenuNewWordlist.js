@@ -1,9 +1,8 @@
-import { Container } from "@material-ui/core";
+import { Container, IconButton } from "@material-ui/core";
 import Card from "@material-ui/core/Card";
 import CardActionArea from "@material-ui/core/CardActionArea";
 import CardContent from "@material-ui/core/CardContent";
 import CardMedia from "@material-ui/core/CardMedia";
-import Fab from "@material-ui/core/Fab";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
@@ -14,13 +13,15 @@ import YoutubeImage from "../../img/youtube.jpg";
 
 const useStyles = makeStyles(theme => ({
   header: {
-    position: "relative"
+    position: "relative",
   },
   main: {
-    display: "grid",
-    gridColumnGap: theme.spacing(1),
-    gridRowGap: theme.spacing(2),
-    padding: theme.spacing(2, 0)
+    display: "flex",
+    flexDirection: 'column',
+    justifyContent: 'space-around'
+  },
+  card:{
+    margin: theme.spacing(1, 0)
   }
 }));
 
@@ -32,24 +33,24 @@ const NewWordlistFromYoutubeLink = React.forwardRef((props, ref) => (
   <Link to="/wordlists/new-from-youtube" innerRef={ref} {...props} />
 ));
 
+const HomeLink = React.forwardRef((props, ref) => (
+  <Link to="/" innerRef={ref} {...props} />
+));
+
 function MenuNewWordlist() {
   const classes = useStyles();
   return (
     <Container>
+
       <header className={classes.header}>
-        <Fab
-          size="small"
-          href="/"
-          color="primary"
-          aria-label="go back"
-          style={{ position: "absolute", top: 0, left: 0, fontWeight: "bold" }}
-        >
-          <ArrowBackIcon fontSize="small" />
-        </Fab>
+        <IconButton component={HomeLink} size="medium" color="primary"
+          style={{ position: "absolute", top: -5, left: 0, fontWeight: "bold" }}>
+          <ArrowBackIcon />
+        </IconButton>
 
         <Typography variant="h5" style={{ fontWeight: "bold" }} align="center">
-          New wordlist
-        </Typography>
+          Choose a type
+</Typography>
       </header>
 
       <main className={classes.main}>

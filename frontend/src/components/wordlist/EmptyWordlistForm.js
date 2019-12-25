@@ -22,7 +22,7 @@ const useStyles = makeStyles(theme => ({
 
   header: {
     position: 'relative',
-    marginBottom: theme.spacing(2)
+    marginBottom: theme.spacing(1)
   },
   container: {
     height: "100%",
