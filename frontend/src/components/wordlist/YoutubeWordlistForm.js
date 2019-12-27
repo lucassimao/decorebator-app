@@ -16,48 +16,48 @@ import React, { useEffect, useRef, useState } from "react";
 import useForm from "react-hook-form";
 import { connect } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
-import { HIDE_PROGRESS_MODAL, SHOW_PROGRESS_MODAL } from "../../reducers/progressModal";
-import { SET_ERROR_SNACKBAR, SET_SUCCESS_SNACKBAR } from "../../reducers/snackbar";
+import {
+  HIDE_PROGRESS_MODAL,
+  SHOW_PROGRESS_MODAL
+} from "../../reducers/progressModal";
+import {
+  SET_ERROR_SNACKBAR,
+  SET_SUCCESS_SNACKBAR
+} from "../../reducers/snackbar";
 import wordlistService from "../../services/wordlist.service";
 import youtubeService from "../../services/youtube.service";
 
 const useStyles = makeStyles(theme => ({
-
   container: {
     height: "100%",
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-between'
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between"
   },
-
   header: {
-    position: 'relative',
+    position: "relative"
   },
-
   form: {
     marginTop: theme.spacing(1),
     borderRadius: theme.shape.borderRadius,
     flexGrow: 1,
-    backgroundColor: '#fff',
-    padding: theme.spacing(3,2),
+    backgroundColor: "#fff",
+    padding: theme.spacing(3, 2),
     boxShadow: "0 7px 14px rgba(0,0,0,0.25)",
-    "& label": {
-      fontWeight: "bold"
-    },
-    display: 'flex',
-    flexDirection: 'column',
+    display: "flex",
+    flexDirection: "column"
   },
   btnSave: {
     marginTop: theme.spacing(5)
   },
   urlInputEndAdornment: {
     paddingRight: 0
-  },
-  // formLabel: { fontWeight: 'bold' }
+  }
 }));
 
-
-const MenuLink = React.forwardRef((props, ref) => <Link to="/wordlists/menu" innerRef={ref} {...props} />);
+const MenuLink = React.forwardRef((props, ref) => (
+  <Link to="/wordlists/menu" innerRef={ref} {...props} />
+));
 
 const URL_REGEXP = new RegExp("^((https|http)://(www.)?)?youtube.com/watch/*");
 const DEFAULT_MIN_WORD_LENGTH = 3;
@@ -71,7 +71,14 @@ const generateRandomColor = () => {
 function YoutubeWordlistForm(props) {
   const classes = useStyles();
   const { onSuccess, onError, showProgressModal, hideProgressModal } = props;
-  const { register, handleSubmit, errors, setValue, getValues, clearError } = useForm({
+  const {
+    register,
+    handleSubmit,
+    errors,
+    setValue,
+    getValues,
+    clearError
+  } = useForm({
     defaultValues: { minWordLength: DEFAULT_MIN_WORD_LENGTH }
   });
   const { language, url } = getValues();
@@ -86,12 +93,15 @@ function YoutubeWordlistForm(props) {
 
   const onSubmit = async data => {
     try {
-
       showProgressModal("Wait ...", "Obtaining video details ...");
-      const { title, description } = await youtubeService.getVideoDetails(data.url);
+      const { title, description } = await youtubeService.getVideoDetails(
+        data.url
+      );
 
       showProgressModal("Wait ...", "Downloading subtitle ...");
-      const { name, translated: language } = availableLanguages.find(lang => lang.code === data.language);
+      const { name, translated: language } = availableLanguages.find(
+        lang => lang.code === data.language
+      );
       const set = await youtubeService.getWordsFromVideoSubtitle(
         data.url,
         data.language,
@@ -148,7 +158,9 @@ function YoutubeWordlistForm(props) {
     if (URL_REGEXP.test(url)) {
       try {
         showProgressModal("Wait ...", "Searching subtitles ...");
-        const languages = await youtubeService.getAvailableSubtitleLanguages(url);
+        const languages = await youtubeService.getAvailableSubtitleLanguages(
+          url
+        );
         if (!languages || languages.length === 0) {
           throw new Error("There's no subtitle for this video");
         }
@@ -170,11 +182,13 @@ function YoutubeWordlistForm(props) {
 
   return (
     <Container className={classes.container}>
-
       <header className={classes.header}>
-
-        <IconButton component={MenuLink} size="medium" color="primary"
-          style={{ position: "absolute", top: -6, left: 0, fontWeight: "bold" }}>
+        <IconButton
+          component={MenuLink}
+          size="medium"
+          color="primary"
+          style={{ position: "absolute", top: -6, left: 0, fontWeight: "bold" }}
+        >
           <ArrowBackIcon />
         </IconButton>
 
@@ -183,12 +197,15 @@ function YoutubeWordlistForm(props) {
         </Typography>
       </header>
 
-
       <Typography variant="body2" align="center">
-          Create a new wordlist from a youtube video subtitle
-        </Typography>
+        Create a new wordlist from a youtube video subtitle
+      </Typography>
 
-      <form noValidate className={classes.form} onSubmit={handleSubmit(onSubmit)}>
+      <form
+        noValidate
+        className={classes.form}
+        onSubmit={handleSubmit(onSubmit)}
+      >
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <TextField
@@ -203,15 +220,18 @@ function YoutubeWordlistForm(props) {
               InputProps={
                 url
                   ? {
-                    classes: { adornedEnd: classes.urlInputEndAdornment },
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton aria-label="clear youtube video's url" onClick={clearVideoUrl}>
-                          <ClearIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    )
-                  }
+                      classes: { adornedEnd: classes.urlInputEndAdornment },
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="clear youtube video's url"
+                            onClick={clearVideoUrl}
+                          >
+                            <ClearIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }
                   : null
               }
               inputRef={e => {
@@ -251,9 +271,13 @@ function YoutubeWordlistForm(props) {
             </Grid>
           )}
           <Grid item xs={12}>
-            <Typography id="discrete-slider" className={classes.formLabel} gutterBottom>
+            <Typography
+              id="discrete-slider"
+              className={classes.formLabel}
+              gutterBottom
+            >
               Minimum word length
-          </Typography>
+            </Typography>
             <Slider
               step={1}
               marks
@@ -267,7 +291,13 @@ function YoutubeWordlistForm(props) {
           <Grid item xs={12}>
             <FormControlLabel
               classes={{ label: classes.formLabel }}
-              control={<Switch color="primary" name="onlyNewWords" inputRef={register} />}
+              control={
+                <Switch
+                  color="primary"
+                  name="onlyNewWords"
+                  inputRef={register}
+                />
+              }
               label="Only new words"
             />
           </Grid>
@@ -280,10 +310,15 @@ function YoutubeWordlistForm(props) {
           </Grid> */}
         </Grid>
 
-        <Fab size="large" className={classes.btnSave} type="submit" variant="extended" color="primary">
+        <Fab
+          size="large"
+          className={classes.btnSave}
+          type="submit"
+          variant="extended"
+          color="primary"
+        >
           Save
-            </Fab>
-
+        </Fab>
       </form>
     </Container>
   );
@@ -292,7 +327,8 @@ function YoutubeWordlistForm(props) {
 const mapDispatchToProps = dispatch => ({
   onSuccess: message => dispatch({ type: SET_SUCCESS_SNACKBAR, message }),
   onError: message => dispatch({ type: SET_ERROR_SNACKBAR, message }),
-  showProgressModal: (title, description) => dispatch({ type: SHOW_PROGRESS_MODAL, description, title }),
+  showProgressModal: (title, description) =>
+    dispatch({ type: SHOW_PROGRESS_MODAL, description, title }),
   hideProgressModal: () => dispatch({ type: HIDE_PROGRESS_MODAL })
 });
 
