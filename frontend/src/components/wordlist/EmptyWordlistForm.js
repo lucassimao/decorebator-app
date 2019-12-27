@@ -22,7 +22,6 @@ const useStyles = makeStyles(theme => ({
 
   header: {
     position: 'relative',
-    marginBottom: theme.spacing(1)
   },
   container: {
     height: "100%",
@@ -31,14 +30,12 @@ const useStyles = makeStyles(theme => ({
     justifyContent: 'space-between'
   },
   form: {
+    marginTop: theme.spacing(1),
     borderRadius: theme.shape.borderRadius,
     flexGrow: 1,
     backgroundColor: '#fff',
-    padding: theme.spacing(2),
+    padding: theme.spacing(3,2),
     boxShadow: "0 7px 14px rgba(0,0,0,0.25)",
-    "& label": {
-      fontWeight: "bold"
-    },
     display: 'flex',
     flexDirection: 'column',
   },
@@ -88,7 +85,7 @@ function EmptyWordlistForm(props) {
       <header className={classes.header}>
 
         <IconButton component={MenuLink} size="medium" color="primary"
-          style={{ position: "absolute", top: -5, left: 0, fontWeight: "bold" }}>
+          style={{ position: "absolute", top: -6, left: 0, fontWeight: "bold" }}>
           <ArrowBackIcon />
         </IconButton>
 
@@ -96,6 +93,11 @@ function EmptyWordlistForm(props) {
           New wordlist
         </Typography>
       </header>
+
+
+      <Typography variant="body2" align="center">
+        Create a new wordlist using words you wish
+        </Typography>
 
       <form className={classes.form} noValidate onSubmit={handleSubmit(onSubmit)}>
         <Grid className={classes.grid} container spacing={2}>
