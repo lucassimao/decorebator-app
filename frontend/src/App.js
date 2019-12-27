@@ -7,8 +7,8 @@ import { ErrorSnackbar, SuccessSnackbar } from "./components/common/AppSnackbar"
 import Main from "./components/home/Main";
 
 const EmptyWordlistForm = lazy(() => import("./components/wordlist/EmptyWordlistForm").then(module => module));
-const WordlistFromYoutubeForm = lazy(() =>
-  import("./components/wordlist/FormYoutube").then(module => module)
+const YoutubeWordlistForm = lazy(() =>
+  import("./components/wordlist/YoutubeWordlistForm").then(module => module)
 );
 const WordlistEdit = lazy(() => import("./components/wordlist/Edit").then(module => module));
 const MenuNewWordlist = lazy(() => import("./components/home/MenuNewWordlist").then(module => module));
@@ -34,7 +34,7 @@ function App(props) {
         <Switch>
           <Route path="/wordlists/new-from-youtube">
             <Suspense fallback={spinner}>
-              <WordlistFromYoutubeForm />
+              <YoutubeWordlistForm />
             </Suspense>
           </Route>
           <Route path="/wordlists/new">

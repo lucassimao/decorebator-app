@@ -57,7 +57,7 @@ const generateRandomColor = () => {
   return colors[colorNames[randomIdx]][500];
 };
 
-function FormYoutube(props) {
+function YoutubeWordlistForm(props) {
   const classes = useStyles();
   const { onSuccess, onError, showProgressModal, hideProgressModal } = props;
   const { register, handleSubmit, errors, setValue, getValues, clearError } = useForm({
@@ -269,4 +269,4 @@ const mapDispatchToProps = dispatch => ({
   hideProgressModal: () => dispatch({ type: HIDE_PROGRESS_MODAL })
 });
 
-export default connect(null, mapDispatchToProps)(FormYoutube);
+export default connect(null, mapDispatchToProps)(YoutubeWordlistForm);
