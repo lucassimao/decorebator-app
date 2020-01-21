@@ -24,13 +24,13 @@ const useStyles = makeStyles(theme => ({
     position: 'relative',
   },
   container: {
-    height: "100%",
+    maxHeight: "100%",
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between'
   },
   form: {
-    marginTop: theme.spacing(1),
+    marginTop: theme.spacing(2),
     borderRadius: theme.shape.borderRadius,
     flexGrow: 1,
     backgroundColor: '#fff',
@@ -103,7 +103,7 @@ function EmptyWordlistForm(props) {
         <Grid className={classes.grid} container spacing={2}>
           <Grid item xs={12}>
             <TextField
-              margin="dense"
+              // margin="dense"
               fullWidth
               autoComplete="off"
               autoFocus
