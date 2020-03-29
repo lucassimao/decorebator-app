@@ -47,7 +47,7 @@ function Home(props) {
     // eslint-disable-next-line
   }, []);
 
-  return (userWordlists ? (
+  return (userWordlists?.length > 0 ? (
     <Container className={classes.container}>
       <SearchBox />
       <Typography variant="h5" className={classes.sectionHeader}>
