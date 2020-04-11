@@ -12,24 +12,17 @@ import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import ClearIcon from "@material-ui/icons/Clear";
-import React, { useEffect, useRef, useState } from "react";
-import useForm from "react-hook-form";
+import React, { useRef, useState } from "react";
 import { connect } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
-import {
-  HIDE_PROGRESS_MODAL,
-  SHOW_PROGRESS_MODAL
-} from "../../reducers/progressModal";
-import {
-  SET_ERROR_SNACKBAR,
-  SET_SUCCESS_SNACKBAR
-} from "../../reducers/snackbar";
+import { HIDE_PROGRESS_MODAL, SHOW_PROGRESS_MODAL } from "../../reducers/progressModal";
+import { SET_ERROR_SNACKBAR, SET_SUCCESS_SNACKBAR } from "../../reducers/snackbar";
 import wordlistService from "../../services/wordlist.service";
 import youtubeService from "../../services/youtube.service";
 
 const useStyles = makeStyles(theme => ({
   container: {
-    height: "100%",
+    maxHeight: "100%",
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between"
@@ -38,7 +31,7 @@ const useStyles = makeStyles(theme => ({
     position: "relative"
   },
   form: {
-    marginTop: theme.spacing(1),
+    marginTop: theme.spacing(2),
     borderRadius: theme.shape.borderRadius,
     flexGrow: 1,
     backgroundColor: "#fff",
@@ -47,7 +40,7 @@ const useStyles = makeStyles(theme => ({
     display: "flex",
     flexDirection: "column"
   },
-  btnSave: {
+  mainButton: {
     marginTop: theme.spacing(5)
   },
   urlInputEndAdornment: {
@@ -59,7 +52,7 @@ const MenuLink = React.forwardRef((props, ref) => (
   <Link to="/wordlists/menu" innerRef={ref} {...props} />
 ));
 
-const URL_REGEXP = new RegExp("^((https|http)://(www.)?)?youtube.com/watch/*");
+const URL_REGEXP = new RegExp("^((https|http)://(www.)?)?youtu");
 const DEFAULT_MIN_WORD_LENGTH = 3;
 
 const generateRandomColor = () => {
@@ -70,44 +63,32 @@ const generateRandomColor = () => {
 
 function YoutubeWordlistForm(props) {
   const classes = useStyles();
-  const { onSuccess, onError, showProgressModal, hideProgressModal } = props;
-  const {
-    register,
-    handleSubmit,
-    errors,
-    setValue,
-    getValues,
-    clearError
-  } = useForm({
-    defaultValues: { minWordLength: DEFAULT_MIN_WORD_LENGTH }
-  });
-  const { language, url } = getValues();
-  const [availableLanguages, setAvailableLanguages] = useState(null);
   const history = useHistory();
   const urlTextFieldRef = useRef();
+  const { onSuccess, onError, showProgressModal, hideProgressModal } = props;
+  const [availableLanguages, setAvailableLanguages] = useState(null);
+  const [url, setUrl] = useState('');
+  const [languageCode, setLanguageCode] = useState('');
+  const [minWordLength, setMinWordLength] = useState(DEFAULT_MIN_WORD_LENGTH);
+  const [onlyNewWords, setOnlyNewWords] = useState(false);
 
-  useEffect(() => {
-    register({ name: "minWordLength" });
-    register({ name: "language" });
-  }, [register]);
+  const onSubmit = async () => {
+    if (availableLanguages && languageCode) {
+      return createNewWordlist();
+    } else {
+      return searchAvailableSubtitles();
+    }
+  }
 
-  const onSubmit = async data => {
+  const createNewWordlist = async () => {
     try {
-      showProgressModal("Wait ...", "Obtaining video details ...");
-      const { title, description } = await youtubeService.getVideoDetails(
-        data.url
-      );
 
+      showProgressModal("Wait ...", "Obtaining video details ...");
+      const { title, description } = await youtubeService.getVideoDetails(url);
+      
       showProgressModal("Wait ...", "Downloading subtitle ...");
-      const { name, translated: language } = availableLanguages.find(
-        lang => lang.code === data.language
-      );
-      const set = await youtubeService.getWordsFromVideoSubtitle(
-        data.url,
-        data.language,
-        name,
-        data.minWordLength
-      );
+      const { translated: translatedLanguageName } = availableLanguages.find(lang => lang.code === languageCode);
+      const set = await youtubeService.getWordsFromVideoSubtitle(url, languageCode, translatedLanguageName, minWordLength);
       const words = Array.from(set)
         .sort()
         .map(name => ({ name }));
@@ -118,9 +99,9 @@ function YoutubeWordlistForm(props) {
         name: title,
         description,
         words,
-        language,
+        language: languageCode,
         isPrivate: true,
-        onlyNewWords: data.onlyNewWords
+        onlyNewWords
       };
       const resourceUri = await wordlistService.save(wordlist);
 
@@ -136,47 +117,42 @@ function YoutubeWordlistForm(props) {
   };
 
   const onSliderChange = (evt, value) => {
-    setValue("minWordLength", value);
+    setMinWordLength(value);
   };
 
   const onLanguageChange = evt => {
     const code = evt.target.value;
-    setValue("language", code);
+    setLanguageCode(code);
   };
 
   const clearVideoUrl = evt => {
-    setValue("language", undefined);
+    setLanguageCode('')
     setAvailableLanguages(undefined);
-    setValue("url", "");
-    clearError("url");
+    setUrl('');
     urlTextFieldRef.current.focus();
   };
 
-  const findAvailableSubtitles = async event => {
-    const url = event.target.value;
+  const searchAvailableSubtitles = async () => {
 
     if (URL_REGEXP.test(url)) {
       try {
         showProgressModal("Wait ...", "Searching subtitles ...");
-        const languages = await youtubeService.getAvailableSubtitleLanguages(
-          url
-        );
+        const languages = await youtubeService.getAvailableSubtitleLanguages(url);
         if (!languages || languages.length === 0) {
-          throw new Error("There's no subtitle for this video");
+          throw new Error("No subtitle found");
         }
-
         setAvailableLanguages(languages);
-        if (languages.length > 0) {
-          setValue("language", languages[0].code);
-        }
+        setLanguageCode(languages[0].code);
       } catch (error) {
-        console.error(error);
+        console.error(error.message);
         setAvailableLanguages(null);
-        onError(String(error));
-        setValue("language", undefined);
+        onError(String(error.message));
+        setLanguageCode("");
       } finally {
         hideProgressModal();
       }
+    } else {
+      onError('Use a valid Youtube URL');
     }
   };
 
@@ -201,125 +177,106 @@ function YoutubeWordlistForm(props) {
         Create a new wordlist from a youtube video subtitle
       </Typography>
 
-      <form
-        noValidate
-        className={classes.form}
-        onSubmit={handleSubmit(onSubmit)}
-      >
+      <div className={classes.form}>
+
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <TextField
-              margin="dense"
               fullWidth
               autoComplete="off"
               autoFocus
-              error={Boolean(errors.url)}
-              helperText={errors.url && errors.url.message}
               name="url"
-              onBlur={findAvailableSubtitles}
+              value={url}
+              onChange={(evt) => setUrl(evt.target.value)}
               InputProps={
                 url
                   ? {
-                      classes: { adornedEnd: classes.urlInputEndAdornment },
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            aria-label="clear youtube video's url"
-                            onClick={clearVideoUrl}
-                          >
-                            <ClearIcon />
-                          </IconButton>
-                        </InputAdornment>
-                      )
-                    }
+                    classes: { adornedEnd: classes.urlInputEndAdornment },
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="clear youtube video's url"
+                          onClick={clearVideoUrl}
+                        >
+                          <ClearIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    )
+                  }
                   : null
               }
-              inputRef={e => {
-                register(e, {
-                  required: "Video url is required",
-                  pattern: {
-                    value: URL_REGEXP,
-                    message: "Pattern: https://youtube.com/watch?v=..."
-                  }
-                });
-                urlTextFieldRef.current = e;
-              }}
+              inputRef={urlTextFieldRef}
               label="Video url"
               variant="outlined"
             />
           </Grid>
 
           {availableLanguages && (
-            <Grid item xs={12}>
-              <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="language-select">Language</InputLabel>
-                <NativeSelect
-                  inputProps={{
-                    id: "language-select"
-                  }}
-                  fullWidth
-                  defaultValue={language}
-                  onChange={onLanguageChange}
+            <>
+              <Grid item xs={12}>
+                <FormControl className={classes.formControl}>
+                  <InputLabel htmlFor="language-select">Language</InputLabel>
+                  <NativeSelect
+                    inputProps={{
+                      id: "language-select"
+                    }}
+                    fullWidth
+                    value={languageCode}
+                    onChange={onLanguageChange}
+                  >
+                    {[...availableLanguages].map(({ code, translated }) => (
+                      <option value={code} key={code}>
+                        {translated}
+                      </option>
+                    ))}
+                  </NativeSelect>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography
+                  id="discrete-slider"
+                  className={classes.formLabel}
+                  gutterBottom
                 >
-                  {[...availableLanguages].map(({ code, translated }) => (
-                    <option value={code} key={code}>
-                      {translated}
-                    </option>
-                  ))}
-                </NativeSelect>
-              </FormControl>
-            </Grid>
-          )}
-          <Grid item xs={12}>
-            <Typography
-              id="discrete-slider"
-              className={classes.formLabel}
-              gutterBottom
-            >
-              Minimum word length
+                  Minimum word length
             </Typography>
-            <Slider
-              step={1}
-              marks
-              defaultValue={DEFAULT_MIN_WORD_LENGTH}
-              valueLabelDisplay="auto"
-              onChange={onSliderChange}
-              min={1}
-              max={10}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <FormControlLabel
-              classes={{ label: classes.formLabel }}
-              control={
-                <Switch
-                  color="primary"
-                  name="onlyNewWords"
-                  inputRef={register}
+                <Slider
+                  step={1}
+                  marks
+                  value={minWordLength}
+                  valueLabelDisplay="auto"
+                  onChange={onSliderChange}
+                  min={1}
+                  max={10}
                 />
-              }
-              label="Only new words"
-            />
-          </Grid>
-          {/* <Grid item xs={12}>
-            <FormControlLabel
-              classes={{ label: classes.formLabel }}
-              control={<Switch name="isPrivate" inputRef={register} color="primary" />}
-              label="Private"
-            />
-          </Grid> */}
+              </Grid>
+              <Grid item xs={12}>
+                <FormControlLabel
+                  classes={{ label: classes.formLabel }}
+                  control={
+                    <Switch
+                      color="primary"
+                      value={onlyNewWords}
+                      onChange={(evt)=> setOnlyNewWords(evt.target.checked)}
+                    />
+                  }
+                  label="Only new words"
+                />
+              </Grid>
+            </>
+          )}
         </Grid>
 
         <Fab
           size="large"
-          className={classes.btnSave}
-          type="submit"
+          className={classes.mainButton}
+          onClick={onSubmit}
           variant="extended"
           color="primary"
         >
-          Save
+          {availableLanguages ? 'Save' : 'Search subtitles'}
         </Fab>
-      </form>
+      </div>
     </Container>
   );
 }

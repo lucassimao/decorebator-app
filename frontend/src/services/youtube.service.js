@@ -70,7 +70,7 @@ async function getVideoDetails(url) {
 async function getWordsFromVideoSubtitle(url, languageCode, languageName, minLength) {
   const videoId = _extractVideoIdFromUrl(url);
   const response = await fetch(
-    `https://www.youtube.com/api/timedtext?v=${videoId}&lang=${languageCode}&fmt=srv3&name=${languageName}`
+    `https://www.youtube.com/api/timedtext?v=${videoId}&lang=${languageCode}&fmt=srv3`//&name=${languageName}`
   );
   if (!response.ok) {
     throw new Error(response.statusText);
