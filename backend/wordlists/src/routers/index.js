@@ -2,7 +2,7 @@ const Router = require("express").Router;
 const wordRouter = require("./word.router");
 const wordlistRouter = require("./wordlist.router");
 const imageRouter = require("./image.router");
-
+const { logger } = require("../config");
 const wordlistService = require("../services/wordlist.service");
 
 const root = Router();
@@ -13,9 +13,12 @@ const root = Router();
  *
  */
 const resolveStatus = async (req, res) => {
-    
   const regex = /\/wordlists\/(\w+)(\/words\/(\w+)(\/images\/(\w+))?)?/;
   const [, idWordlist, , idWord, , idImage] = regex.exec(req.baseUrl + req.url);
+
+  const msg = `No suitable route for ${req.baseUrl + req.url} ... resolving status`;
+  logger.warn(msg);
+
   const wordlist = await wordlistService.getWithWords(idWordlist);
 
   if (!wordlist) {

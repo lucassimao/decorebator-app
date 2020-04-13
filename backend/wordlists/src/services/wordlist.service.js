@@ -13,13 +13,21 @@ const WordlistDao = require("../dao/wordlist.dao");
  *
  * @returns {Promise} A promise, which resolves to an array of wordlists
  */
-const list = ({ pageSize = config.defaultPageSize, page = 0, filter }, user) => {
+const list = (
+  { pageSize = config.defaultPageSize, page = 0, filter },
+  user
+) => {
   const skip = page > 0 ? page * pageSize : 0;
   const query = { owner: user._id };
   if (filter) {
     query.name = new RegExp(filter, "i");
   }
-  return WordlistDao.find(query, null, { lean: true, limit: pageSize, skip, sort: { _id: -1 } });
+  return WordlistDao.find(query, null, {
+    lean: true,
+    limit: pageSize,
+    skip,
+    sort: { _id: -1 }
+  });
 };
 
 /**
@@ -33,7 +41,10 @@ const list = ({ pageSize = config.defaultPageSize, page = 0, filter }, user) => 
  *
  * @returns {Promise} A promise, which resolves to an array of wordlists
  */
-const listPublic = ({ pageSize = config.defaultPageSize, page = 0, filter }, user) => {
+const listPublic = (
+  { pageSize = config.defaultPageSize, page = 0, filter },
+  user
+) => {
   const skip = page > 0 ? page * pageSize : 0;
   const query = { owner: { $ne: user._id }, isPrivate: false };
   if (filter) {
@@ -58,7 +69,8 @@ const listPublic = ({ pageSize = config.defaultPageSize, page = 0, filter }, use
  */
 const save = async (wordlist, user) => {
   let { words } = wordlist;
-  const userSentValidArrayOfWords = words && Array.isArray(words) && words.length > 0;
+  const userSentValidArrayOfWords =
+    words && Array.isArray(words) && words.length > 0;
   const logger = config.logger;
 
   if (userSentValidArrayOfWords) {
@@ -69,7 +81,9 @@ const save = async (wordlist, user) => {
 
   if ("onlyNewWords" in wordlist) {
     if (wordlist.onlyNewWords && userSentValidArrayOfWords) {
-      logger.debug(`Registering new wordlist for user ${user._id} with ${words.length} words`);
+      logger.debug(
+        `Registering new wordlist for user ${user._id} with ${words.length} words`
+      );
 
       // extracting all user's wordlist terms
       const existingWords = await WordlistDao.aggregate([
@@ -81,10 +95,17 @@ const save = async (wordlist, user) => {
         { $sort: { _id: 1 } }
       ]);
       const existingNames = existingWords.map(w => w._id);
-      logger.debug(`User ${user._id} has ${existingNames.length} words already`);
+      logger.debug(
+        `User ${user._id} has ${existingNames.length} words already`
+      );
 
-      words = words.filter(({ name }) => !__binarySearch(existingNames, name, 0, existingNames.length));
-      logger.debug(`Filtered wordlist for user ${user._id} now with ${words.length} words`);
+      words = words.filter(
+        ({ name }) =>
+          !__binarySearch(existingNames, name, 0, existingNames.length)
+      );
+      logger.debug(
+        `Filtered wordlist for user ${user._id} now with ${words.length} words`
+      );
     }
     delete wordlist.onlyNewWords;
   }
@@ -177,7 +198,8 @@ const remove = (id, user) => {
  */
 function __binarySearch(array, element, start, end, debug = false) {
   const middle = start + Math.floor((end - start) / 2);
-  debug && config.logger.debug(`start: ${start}, middle : ${midele}, end: ${end}`);
+  debug &&
+    config.logger.debug(`start: ${start}, middle : ${middle}, end: ${end}`);
 
   if (start >= end) {
     return false;

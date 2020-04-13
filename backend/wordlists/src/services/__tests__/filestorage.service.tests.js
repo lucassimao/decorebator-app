@@ -11,7 +11,11 @@ describe("File storage service tests", () => {
 
     const originalFileMd5 = await getFileMd5(filepath);
     const content = await readFileContentAsBase64(filepath);
-    const copiedFilepath = await service.store({ _id: 123 }, "file.pdf", content);
+    const copiedFilepath = await service.store(
+      { _id: 123 },
+      "file.pdf",
+      content
+    );
     const copiedFileMd5 = await getFileMd5(copiedFilepath);
 
     await fsPromises.access(filepath, fs.constants.R_OK);
@@ -25,7 +29,11 @@ describe("File storage service tests", () => {
     const originalFileMd5 = await getFileMd5(filepath);
     const content = await readFileContentAsBase64(filepath);
 
-    const uri = await service.storeOnAmazonS3("wordlists-test-03410718389", "file.pdf", content);
+    const uri = await service.storeOnAmazonS3(
+      "wordlists-test-03410718389",
+      "file.pdf",
+      content
+    );
     https.get(uri, res => {
       expect(res.statusCode).toBe(200);
       const contentLength = parseInt(res.headers["content-length"]);

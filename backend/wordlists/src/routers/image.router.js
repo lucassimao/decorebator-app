@@ -16,10 +16,17 @@ router
     "/",
     express.json({ limit: "2MB" }),
     wrapAsync(async (req, res, next) => {
-      const wordlist = await service.addImage(req.params.idWordlist, req.params.idWord, req.body, req.user);
+      const wordlist = await service.addImage(
+        req.params.idWordlist,
+        req.params.idWord,
+        req.body,
+        req.user
+      );
 
       if (wordlist) {
-        const word = wordlist.words.find(word => String(word._id) == req.params.idWord);
+        const word = wordlist.words.find(
+          word => String(word._id) == req.params.idWord
+        );
         const newImage = word.images[word.images.length - 1];
 
         res.set("Link", `${req.baseUrl}/${newImage._id}`);

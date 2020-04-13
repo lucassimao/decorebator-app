@@ -6,11 +6,12 @@ const mongoose = require("mongoose");
 const compression = require("compression");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const morgan = require("morgan");
+const cors = require("cors");
 
 const UserDao = require("./dao/user.dao");
 const config = require("./config");
 const routers = require("./routers");
-const cors = require('cors');
 
 var jwtStrategyOpts = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -20,18 +21,23 @@ var jwtStrategyOpts = {
   // opts.audience : 'yoursite.net';
 };
 
-const jwtStrategy = new JwtStrategy(jwtStrategyOpts, async (jwt_payload, done) => {
-  try {
-    const user = await UserDao.findOne({ _id: mongoose.Types.ObjectId(jwt_payload.userId) });
-    if (user) {
-      return done(null, user);
-    } else {
-      return done(null, false);
+const jwtStrategy = new JwtStrategy(
+  jwtStrategyOpts,
+  async (jwt_payload, done) => {
+    try {
+      const user = await UserDao.findOne({
+        _id: mongoose.Types.ObjectId(jwt_payload.userId)
+      });
+      if (user) {
+        return done(null, user);
+      } else {
+        return done(null, false);
+      }
+    } catch (error) {
+      return done(error, false);
     }
-  } catch (error) {
-    return done(error, false);
   }
-});
+);
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // window size: 5 minutes
@@ -41,17 +47,20 @@ const limiter = rateLimit({
 const app = express();
 
 app.set("trust proxy", 1);
+app.use(cors({ exposedHeaders: ["link"] }));
+
 passport.use(jwtStrategy);
-
-if (!process.env.IGNORE_REQUEST_LIMIT)
-    app.use(limiter);
-    
-
-app.use(cors({exposedHeaders: ['link']}));
-
 app.use(passport.initialize());
 app.use(passport.authenticate("jwt", { session: false }));
-if (config.httpOptions.enableCompression) app.use(compression());
+
+if (!process.env.IGNORE_REQUEST_LIMIT) {
+  app.use(limiter);
+}
+if (config.httpOptions.enableCompression) {
+  app.use(compression());
+}
+
+app.use(config.isDev ? morgan("dev", { immediate: true }) : morgan("combined"));
 app.use(helmet());
 app.use("/", routers);
 

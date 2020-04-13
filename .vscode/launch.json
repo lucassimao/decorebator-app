@@ -11,6 +11,13 @@
   ],
   "configurations": [
     {
+      "type": "java",
+      "name": "Java Debug (Attach)",
+      "request": "attach",
+      "hostName": "localhost",
+      "port": "5005"
+    },
+    {
       "type": "node",
       "request": "launch",
       "name": "Auth",

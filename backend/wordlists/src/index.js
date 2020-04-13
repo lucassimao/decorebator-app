@@ -1,10 +1,10 @@
 const server = require("./server");
 const db = require("./db");
-const config = require("./config");
+const { port, logger } = require("./config");
 
 db.connect()
   .then(() => {
-    server.listen(config.port);
-    console.log(`wordlists is listenning at ${config.port}`);
+    server.listen(port);
+    logger.info(`wordlists is listenning at ${port}`);
   })
-  .catch(console.error);
+  .catch(logger.error);

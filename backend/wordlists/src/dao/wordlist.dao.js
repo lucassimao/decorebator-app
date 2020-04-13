@@ -28,43 +28,62 @@ Wordlist.static("addWord", function(wordlistId, newWordObject, user) {
 });
 
 Wordlist.static("patchWord", function(idWordlist, idWord, updateObject, user) {
-  const updateCommand = Object.keys(updateObject).reduce((command, property) => {
-    command[`words.$.${property}`] = updateObject[property];
-    return command;
-  }, {});
+  const updateCommand = Object.keys(updateObject).reduce(
+    (command, property) => {
+      command[`words.$.${property}`] = updateObject[property];
+      return command;
+    },
+    {}
+  );
 
-  return this.updateOne({ _id: idWordlist, owner: user._id, "words._id": idWord }, { $set: updateCommand });
+  return this.updateOne(
+    { _id: idWordlist, owner: user._id, "words._id": idWord },
+    { $set: updateCommand }
+  );
 });
 
 Wordlist.static("deleteWord", function(idWordlist, idWord, user) {
-  return this.updateOne({ _id: idWordlist, owner: user._id }, { $pull: { words: { _id: idWord } } });
+  return this.updateOne(
+    { _id: idWordlist, owner: user._id },
+    { $pull: { words: { _id: idWord } } }
+  );
 });
 
 Wordlist.static("getWord", function(idWordlist, idWord, user) {
-  return this.findOne({ _id: idWordlist, owner: user._id, "words._id": idWord }, "words.$", { lean: true });
+  return this.findOne(
+    { _id: idWordlist, owner: user._id, "words._id": idWord },
+    "words.$",
+    { lean: true }
+  );
 });
 
 Wordlist.static("getWords", function(idWordlist, user, skip, limit) {
-  // turnning of the reading of all properties but words
-  const projection = Object.keys(Wordlist.paths)
-    .filter(property => property != "words")
-    .reduce((acc, cur) => {
-      acc[cur] = 0;
-      return acc;
-    }, {});
+  let projection;
 
   if (isNaN(skip) || isNaN(limit)) {
-    projection.words = 1;
-    logger.warn(`Reading all words from wordlist ${idWordlist} user ${user._id} skip ${skip} limit ${limit}`);
+    projection = { words: 1 };
+    logger.warn(
+      `Reading all words from wordlist ${idWordlist} user ${user._id} skip ${skip} limit ${limit}`
+    );
   } else {
-    projection.words = { $slice: [skip, limit] };
-    projection["words.images"] = 0;
+    projection = { words: { $slice: [skip, limit] }, "words.images": 0 };
+    // turnning of the remaining wordlist properties
+    Object.keys(Wordlist.paths)
+      .filter(property => property != "words")
+      .forEach(property => (projection[property] = 0));
   }
 
-  return this.findOne({ _id: idWordlist, owner: user._id }, projection, { lean: true });
+  return this.findOne({ _id: idWordlist, owner: user._id }, projection, {
+    lean: true
+  });
 });
 
-Wordlist.static("addImage", function(idWordlist, idWord, { url, description }, user) {
+Wordlist.static("addImage", function(
+  idWordlist,
+  idWord,
+  { url, description },
+  user
+) {
   return this.findOneAndUpdate(
     { _id: idWordlist, "words._id": idWord, owner: user._id },
     { $push: { "words.$.images": { url, description } } },
@@ -79,7 +98,13 @@ Wordlist.static("deleteImage", function(idWordlist, idWord, idImage, user) {
   );
 });
 
-Wordlist.static("patchImage", function(idWordlist, idWord, idImage, { description }, user) {
+Wordlist.static("patchImage", function(
+  idWordlist,
+  idWord,
+  idImage,
+  { description },
+  user
+) {
   return this.updateOne(
     { _id: idWordlist, owner: user._id },
     { $set: { "words.$[w].images.$[i].description": description } },

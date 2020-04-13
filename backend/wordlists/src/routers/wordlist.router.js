@@ -80,7 +80,11 @@ router
     "/:id",
     express.json(),
     wrapAsync(async (req, res, next) => {
-      const updateResult = await service.update(req.params.id, req.body, req.user);
+      const updateResult = await service.update(
+        req.params.id,
+        req.body,
+        req.user
+      );
 
       if (updateResult.ok === 1 && updateResult.nModified === 1) {
         res.set("Link", `/wordlists/${req.params.id}`);

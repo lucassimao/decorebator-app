@@ -13,12 +13,11 @@ const WordlistDao = require("../dao/wordlist.dao");
 const get = async (idWordlist, idWord, user) => {
   const result = await WordlistDao.getWord(idWordlist, idWord, user);
 
-  if (result && result.words){
-      return result.words[0]
+  if (result && result.words) {
+    return result.words[0];
   } else {
-      return null;
+    return null;
   }
-  
 };
 
 /**
