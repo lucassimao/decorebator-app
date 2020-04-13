@@ -15,6 +15,7 @@ module.exports = {
         "ecmaVersion": 2018
     },
     "rules": {
+        "no-console": 2,
         "jest/no-disabled-tests": "warn",
         "jest/no-focused-tests": "error",
         "jest/no-identical-title": "error",

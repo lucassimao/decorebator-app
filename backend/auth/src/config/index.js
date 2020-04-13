@@ -1,12 +1,46 @@
+const winston = require("winston");
+require("winston-daily-rotate-file");
+
+const env = process.env.NODE_ENV || "development";
+const transports = [];
+
+if (env == "production") {
+  transports.push(
+    new winston.transports.Console({
+      format: winston.format.simple(),
+      level: "info"
+    })
+  );
+} else {
+  const dailyRotateFileTransport = new winston.transports.DailyRotateFile({
+    filename: "decorebator-auth-%DATE%.log",
+    level: "info",
+    datePattern: "YYYY-MM-DD-HH",
+    zippedArchive: true,
+    maxSize: "20m",
+    maxFiles: "10d"
+  });
+
+  transports.push(dailyRotateFileTransport);
+  transports.push(
+    new winston.transports.Console({
+      format: winston.format.simple(),
+      level: "silly"
+    })
+  );
+}
+
+const logger = winston.createLogger({
+  format: winston.format.json(),
+  transports
+});
+
 if (!process.env.MONGO_DB_URL) throw "Mongo db url was not provided!";
 if (!process.env.HTTP_PORT) throw "Http server port must be provided!";
 
-const env = process.env.NODE_ENV || "development";
-if (env == "production" && !process.env.JWT_SECRET_KEY)
-  throw "Jwt secret key must be provided as an environment variable in production";
-
 const baseConfig = {
   env,
+  logger,
   isDev: env == "development",
   isTest: env == "test",
   defaultPageSize: 10,

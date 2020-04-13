@@ -4,7 +4,6 @@ services:
     environment: 
       - TEST_CONTAINERS
       - IGNORE_REQUEST_LIMIT
-      - SHOW_LOG_ON_STDOUT
       - NODE_ENV
       - JWT_SECRET_KEY
       - MONGO_DB_URL
@@ -14,12 +13,11 @@ services:
     build:
       context: auth/
     ports: 
-      - "3002:3000" 
+      - "3001:3000" 
   wordlists:
     environment: 
       - TEST_CONTAINERS
       - IGNORE_REQUEST_LIMIT
-      - SHOW_LOG_ON_STDOUT
       - NODE_ENV
       - JWT_SECRET_KEY
       - MONGO_DB_URL    
@@ -29,10 +27,28 @@ services:
     build:
       context: wordlists/
     ports:
-    - "3001:3000"
+    - "3002:3000"
     volumes: 
       - $HOME/.aws/:/root/.aws/:ro
+  quizzes:
+    environment: 
+      - TEST_CONTAINERS
+      - NODE_ENV=test
+      - JWT_SECRET_KEY
+      - MONGO_DB_URL
+      - HTTP_PORT=4000
+    depends_on: 
+      - db
+      - auth
+    build:
+      context: quizzes/
+    ports: 
+      - "3003:4000" 
   db:
     image: mongo:4.2 
+    volumes: 
+      - "mongodb_data:/data/db"
     ports:
       - "27017:27017"
+volumes: 
+  mongodb_data:

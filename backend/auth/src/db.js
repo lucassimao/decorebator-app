@@ -3,23 +3,24 @@ const process = require("process");
 const config = require("./config");
 
 let isConnected = false;
+const logger = config.logger;
 
 mongoose.set("useFindAndModify", false);
 mongoose.set("useCreateIndex", true);
 
 mongoose.connection.on("error", error => {
-  console.log("There was a problem establishing db connection");
-  console.error(error);
+  logger.error("There was a problem establishing db connection");
+  logger.error(error);
   process.exit(-1);
 });
 
 mongoose.connection.on("disconnected", function() {
-  // console.log('Mongoose default connection to DB disconnected');
+  logger.error("Mongoose default connection to DB disconnected");
   isConnected = false;
 });
 
 mongoose.connection.once("open", function() {
-  // console.log('MongoDB connection is open! ');
+  logger.debug("MongoDB connection is open! ");
   isConnected = true;
 });
 

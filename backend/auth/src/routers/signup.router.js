@@ -1,5 +1,6 @@
 const express = require("express");
 const AuthService = require("../services/auth.service");
+const logger = require("../config");
 
 const router = express.Router();
 
@@ -27,7 +28,7 @@ router.post("/signup", express.json(), async (req, res, next) => {
         }
         break;
       default:
-        console.error(error);
+        logger.error(error);
         next(error);
     }
   }
