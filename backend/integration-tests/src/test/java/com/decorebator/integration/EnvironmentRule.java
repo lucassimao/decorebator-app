@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.utility.ResourceReaper;
 
 /**
  * EnvironmentRule
@@ -44,6 +45,7 @@ public class EnvironmentRule extends ExternalResource {
         this.env  = new DockerComposeContainer(new File(TestUtils.DOCKER_COMPOSER_YML))
                     .withLocalCompose(true)
                     .withEnv("TEST_CONTAINERS", "true")
+                    .withEnv("NODE_ENV", "development")
                     .withEnv("IGNORE_REQUEST_LIMIT", "true")
                     .withEnv("SHOW_LOG_ON_STDOUT", "true")
                     .withEnv("MONGO_DB_URL", "mongodb://db:27017/decorebator-test")
@@ -51,8 +53,8 @@ public class EnvironmentRule extends ExternalResource {
                     .withExposedService("wordlists", 3000, Wait.forListeningPort())
                     .withExposedService("db", 27017, Wait.forListeningPort())
                     .withExposedService("auth", 3000, Wait.forListeningPort())
-                    .withLogConsumer("auth", new Slf4jLogConsumer(logger))
-                    .withLogConsumer("wordlists", new Slf4jLogConsumer(logger));
+                    .withLogConsumer("auth", new Slf4jLogConsumer(logger).withMdc("container", "auth"))
+                    .withLogConsumer("wordlists", new Slf4jLogConsumer(logger).withMdc("container", "wordlists"));
 
         env.start();
         authHost = env.getServiceHost("auth", 3000);

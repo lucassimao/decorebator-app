@@ -60,7 +60,7 @@ public class AccessControlTest {
         _1stWordId = given()
                         .header("authorization", "bearer " + authorization)
                       .when()
-                        .get(wordlistUri)
+                        .get(wordlistUri + "/words")
                     .then()
                         .statusCode(200)
                         .extract()
