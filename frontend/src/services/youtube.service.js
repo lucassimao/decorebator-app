@@ -64,13 +64,13 @@ async function getVideoDetails(url) {
  *
  * @param {String} url The youtube video url
  * @param {String} languageCode The language code of the subtitle
- * @param {String} languageName The language name of the subtitle
+ * @param {String} name The name attribute of the subtitle ( its null sometimes)
  * @returns {Set<String>} A set of words from the subtitle
  */
-async function getWordsFromVideoSubtitle(url, languageCode, languageName, minLength) {
+async function getWordsFromVideoSubtitle(url, languageCode, name, minLength) {
   const videoId = _extractVideoIdFromUrl(url);
   const response = await fetch(
-    `https://www.youtube.com/api/timedtext?v=${videoId}&lang=${languageCode}&fmt=srv3`//&name=${languageName}`
+    `https://www.youtube.com/api/timedtext?v=${videoId}&lang=${languageCode}&fmt=srv3&name=${name}`
   );
   if (!response.ok) {
     throw new Error(response.statusText);

@@ -87,8 +87,8 @@ function YoutubeWordlistForm(props) {
       const { title, description } = await youtubeService.getVideoDetails(url);
       
       showProgressModal("Wait ...", "Downloading subtitle ...");
-      const { translated: translatedLanguageName } = availableLanguages.find(lang => lang.code === languageCode);
-      const set = await youtubeService.getWordsFromVideoSubtitle(url, languageCode, translatedLanguageName, minWordLength);
+      const { translated: translatedLanguageName, name } = availableLanguages.find(lang => lang.code === languageCode);
+      const set = await youtubeService.getWordsFromVideoSubtitle(url, languageCode, name, minWordLength);
       const words = Array.from(set)
         .sort()
         .map(name => ({ name }));
@@ -99,7 +99,7 @@ function YoutubeWordlistForm(props) {
         name: title,
         description,
         words,
-        language: languageCode,
+        language: translatedLanguageName,
         isPrivate: true,
         onlyNewWords
       };
