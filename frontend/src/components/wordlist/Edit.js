@@ -1,8 +1,6 @@
 import { Grid, makeStyles, TextField, Typography } from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
-import PublicIcon from "@material-ui/icons/Public";
-import VpnLockRoundedIcon from "@material-ui/icons/VpnLockRounded";
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
@@ -118,11 +116,11 @@ function Edit(props) {
         </Grid>
         <Grid className={`${classes.gridItem} ${classes.title}`} item xs={12}>
           <span>
-            {wordlist.isPrivate ? (
+            {/* {wordlist.isPrivate ? (
               <VpnLockRoundedIcon className={classes.titleIcon} />
             ) : (
               <PublicIcon className={classes.titleIcon} />
-            )}
+            )} */}
 
             <Typography display="inline" variant="h6">
               {wordlist.name}
@@ -132,6 +130,11 @@ function Edit(props) {
             <DeleteIcon />
           </IconButton>
         </Grid>
+        <Grid className={classes.gridItem} item xs={12}>
+            <Typography variant="caption">
+              {wordsCount} {wordlist.language.toLowerCase()} word(s)
+            </Typography>
+          </Grid>        
         {wordlist.description && (
           <Grid className={classes.gridItem} item xs={12}>
             <Typography variant="caption" className={classes.description}>
