@@ -1,0 +1,34 @@
+{
+  "name": "decorebator-youtube",
+  "version": "0.0.1",
+  "description": "Set of utilities to interact with youtube",
+  "main": "index.js",
+  "scripts": {
+    "test": "NODE_ENV=test SHOW_LOG_ON_STDOUT=true MONGO_DB_URL=mongo://localhost:27017/decorebator-tests mocha 'src/**/__tests__/*' -R spec",
+    "lint": "eslint 'src/**/*.js'",
+    "jest-watch": "jest --watch --detectOpenHandles 'src/'",
+    "start": "nodemon src/index.js",
+    "format": "prettier --write 'src/**/*.js'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/lucassimao/decorebator-app.git"
+  },
+  "author": "Lucas Simão",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lucassimao/decorebator-app/issues"
+  },
+  "homepage": "https://github.com/lucassimao/decorebator-app#readme",
+  "dependencies": {
+    "apollo-server": "^2.12.0",
+    "graphql": "^15.0.0",
+    "mongoose": "^5.9.7",
+    "nodemon": "^2.0.3",
+    "winston": "^3.2.1",
+    "winston-daily-rotate-file": "^4.4.2"
+  },
+  "devDependencies": {
+    "mocha": "^7.1.1"
+  }
+}

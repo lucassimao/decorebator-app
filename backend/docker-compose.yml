@@ -33,7 +33,7 @@ services:
   quizzes:
     environment: 
       - TEST_CONTAINERS
-      - NODE_ENV=test
+      - NODE_ENV
       - JWT_SECRET_KEY
       - MONGO_DB_URL
       - HTTP_PORT=4000
@@ -44,6 +44,19 @@ services:
       context: quizzes/
     ports: 
       - "3003:4000" 
+  youtube:
+    environment: 
+      - TEST_CONTAINERS
+      - NODE_ENV
+      - JWT_SECRET_KEY
+      - MONGO_DB_URL
+      - HTTP_PORT=4000
+    depends_on: 
+      - db
+    build:
+      context: youtube/
+    ports: 
+      - "3004:4000"      
   db:
     image: mongo:4.2 
     volumes: 
