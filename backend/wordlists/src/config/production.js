@@ -1,9 +1,22 @@
-if (!process.env.MONGO_DB_URL) throw "Mongo db url was not provided!";
-if (!process.env.HTTP_PORT) throw "Http server port must be provided!";
+const winston = require("winston");
 
 if (!process.env.JWT_SECRET_KEY)
   throw "Jwt secret key must be provided as an environment variable in production";
 
+const transports = [];
+transports.push(
+  new winston.transports.Console({
+    format: winston.format.simple(),
+    level: "info"
+  })
+);
+
+const logger = winston.createLogger({
+  format: winston.format.json(),
+  transports
+});
+
 module.exports = {
-  httpDomain: `https://decorebator.com`
+  httpDomain: `https://decorebator.com`,
+  logger
 };
