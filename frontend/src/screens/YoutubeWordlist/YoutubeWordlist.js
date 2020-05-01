@@ -1,24 +1,21 @@
-import { Container, Fab, makeStyles, NativeSelect } from "@material-ui/core";
+import { Container, Fab, makeStyles } from "@material-ui/core";
 import * as colors from "@material-ui/core/colors";
-import FormControl from "@material-ui/core/FormControl";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Grid from "@material-ui/core/Grid";
 import IconButton from "@material-ui/core/IconButton";
 import InputAdornment from "@material-ui/core/InputAdornment";
-import InputLabel from "@material-ui/core/InputLabel";
-import Slider from "@material-ui/core/Slider";
-import Switch from "@material-ui/core/Switch";
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import ClearIcon from "@material-ui/icons/Clear";
-import React, { useRef, useState } from "react";
+import React, { useReducer, useRef } from "react";
 import { connect } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import { HIDE_PROGRESS_MODAL, SHOW_PROGRESS_MODAL } from "../../reducers/progressModal";
 import { SET_ERROR_SNACKBAR, SET_SUCCESS_SNACKBAR } from "../../reducers/snackbar";
 import wordlistService from "../../services/wordlist.service";
 import youtubeService from "../../services/youtube.service";
+import Form from './components/Form';
+import { reducer, INITIAL_STATE } from './reducer';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -53,7 +50,6 @@ const MenuLink = React.forwardRef((props, ref) => (
 ));
 
 const URL_REGEXP = new RegExp("^((https|http)://(www.)?)?youtu");
-const DEFAULT_MIN_WORD_LENGTH = 3;
 
 const generateRandomColor = () => {
   const colorNames = Object.keys(colors);
@@ -61,34 +57,39 @@ const generateRandomColor = () => {
   return colors[colorNames[randomIdx]][500];
 };
 
-function YoutubeWordlistForm(props) {
+function Screen(props) {
   const classes = useStyles();
   const history = useHistory();
   const urlTextFieldRef = useRef();
   const { onSuccess, onError, showProgressModal, hideProgressModal } = props;
-  const [availableLanguages, setAvailableLanguages] = useState(null);
-  const [url, setUrl] = useState('');
-  const [languageCode, setLanguageCode] = useState('');
-  const [minWordLength, setMinWordLength] = useState(DEFAULT_MIN_WORD_LENGTH);
-  const [onlyNewWords, setOnlyNewWords] = useState(false);
+  const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
 
   const onSubmit = async () => {
-    if (availableLanguages && languageCode) {
+    const { showForm, url } = state;
+
+    if (showForm) {
       return createNewWordlist();
     } else {
-      return searchAvailableSubtitles();
+
+      if (URL_REGEXP.test(url)) {
+        dispatch({ type: 'SHOW_FORM' })
+      } else {
+        onError('Use a valid Youtube URL');
+        clearVideoUrl();
+      }
     }
   }
 
   const createNewWordlist = async () => {
     try {
 
+      const { url, subtitle: { language, downloadUrl }, minWordLength } = state;
+
       showProgressModal("Wait ...", "Obtaining video details ...");
       const { title, description } = await youtubeService.getVideoDetails(url);
-      
+
       showProgressModal("Wait ...", "Downloading subtitle ...");
-      const { translated: translatedLanguageName, name } = availableLanguages.find(lang => lang.code === languageCode);
-      const set = await youtubeService.getWordsFromVideoSubtitle(url, languageCode, name, minWordLength);
+      const set = await youtubeService.getWordsFromVideoSubtitle(downloadUrl, minWordLength);
       const words = Array.from(set)
         .sort()
         .map(name => ({ name }));
@@ -99,9 +100,9 @@ function YoutubeWordlistForm(props) {
         name: title,
         description,
         words,
-        language: translatedLanguageName,
+        language: language.name,
         isPrivate: true,
-        onlyNewWords
+        onlyNewWords: state.onlyNewWords
       };
       const resourceUri = await wordlistService.save(wordlist);
 
@@ -116,44 +117,10 @@ function YoutubeWordlistForm(props) {
     }
   };
 
-  const onSliderChange = (evt, value) => {
-    setMinWordLength(value);
-  };
 
-  const onLanguageChange = evt => {
-    const code = evt.target.value;
-    setLanguageCode(code);
-  };
-
-  const clearVideoUrl = evt => {
-    setLanguageCode('')
-    setAvailableLanguages(undefined);
-    setUrl('');
+  const clearVideoUrl = () => {
+    dispatch({ type: 'RESET' })
     urlTextFieldRef.current.focus();
-  };
-
-  const searchAvailableSubtitles = async () => {
-
-    if (URL_REGEXP.test(url)) {
-      try {
-        showProgressModal("Wait ...", "Searching subtitles ...");
-        const languages = await youtubeService.getAvailableSubtitleLanguages(url);
-        if (!languages || languages.length === 0) {
-          throw new Error("No subtitle found");
-        }
-        setAvailableLanguages(languages);
-        setLanguageCode(languages[0].code);
-      } catch (error) {
-        console.error(error.message);
-        setAvailableLanguages(null);
-        onError(String(error.message));
-        setLanguageCode("");
-      } finally {
-        hideProgressModal();
-      }
-    } else {
-      onError('Use a valid Youtube URL');
-    }
   };
 
   return (
@@ -186,10 +153,10 @@ function YoutubeWordlistForm(props) {
               autoComplete="off"
               autoFocus
               name="url"
-              value={url}
-              onChange={(evt) => setUrl(evt.target.value)}
+              value={state.url}
+              onChange={(evt) => dispatch({ type: 'SET_URL', url: evt.target.value })}
               InputProps={
-                url
+                state.url
                   ? {
                     classes: { adornedEnd: classes.urlInputEndAdornment },
                     endAdornment: (
@@ -211,60 +178,7 @@ function YoutubeWordlistForm(props) {
             />
           </Grid>
 
-          {availableLanguages && (
-            <>
-              <Grid item xs={12}>
-                <FormControl className={classes.formControl}>
-                  <InputLabel htmlFor="language-select">Language</InputLabel>
-                  <NativeSelect
-                    inputProps={{
-                      id: "language-select"
-                    }}
-                    fullWidth
-                    value={languageCode}
-                    onChange={onLanguageChange}
-                  >
-                    {[...availableLanguages].map(({ code, translated }) => (
-                      <option value={code} key={code}>
-                        {translated}
-                      </option>
-                    ))}
-                  </NativeSelect>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography
-                  id="discrete-slider"
-                  className={classes.formLabel}
-                  gutterBottom
-                >
-                  Minimum word length
-            </Typography>
-                <Slider
-                  step={1}
-                  marks
-                  value={minWordLength}
-                  valueLabelDisplay="auto"
-                  onChange={onSliderChange}
-                  min={1}
-                  max={10}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  classes={{ label: classes.formLabel }}
-                  control={
-                    <Switch
-                      color="primary"
-                      value={onlyNewWords}
-                      onChange={(evt)=> setOnlyNewWords(evt.target.checked)}
-                    />
-                  }
-                  label="Only new words"
-                />
-              </Grid>
-            </>
-          )}
+          {state.showForm && <Form url={state.url} dispatch={dispatch} />}
         </Grid>
 
         <Fab
@@ -274,7 +188,7 @@ function YoutubeWordlistForm(props) {
           variant="extended"
           color="primary"
         >
-          {availableLanguages ? 'Save' : 'Search subtitles'}
+          {state.showForm ? 'Save' : 'Search subtitles'}
         </Fab>
       </div>
     </Container>
@@ -289,4 +203,4 @@ const mapDispatchToProps = dispatch => ({
   hideProgressModal: () => dispatch({ type: HIDE_PROGRESS_MODAL })
 });
 
-export default connect(null, mapDispatchToProps)(YoutubeWordlistForm);
+export const YoutubeWordlist = connect(null, mapDispatchToProps)(Screen);

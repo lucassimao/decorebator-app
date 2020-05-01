@@ -11,7 +11,8 @@ async function getAvailableVideoSubtitles(youtubeUrl) {
     const videoID = url.searchParams.get('v');
 
     return new Promise((resolve, reject) => {
-        https.get(`https://www.youtube.com/get_video_info?video_id=${videoID}`, (res) => {
+        const options = { headers: { 'Accept-Language': 'en, en-uk' } };
+        https.get(`https://www.youtube.com/get_video_info?video_id=${videoID}`, options, (res) => {
             const { statusCode } = res;
 
             if (statusCode == 200) {
@@ -28,12 +29,13 @@ async function getAvailableVideoSubtitles(youtubeUrl) {
                         const regex = /({"captionTracks":.*isTranslatable":(true|false)}])/;
                         const [match] = regex.exec(decodedData);
                         const { captionTracks } = JSON.parse(`${match}}`);
+
                         const result = captionTracks.map(caption => ({
-                            languageCode: caption.languageCode,
+                            language: { code: caption.languageCode, name: caption.name.simpleText },
                             isAutomatic: caption.kind == 'asr',
                             downloadUrl: caption.baseUrl
                         }));
-                        
+
                         resolve(result);
                     } catch (e) {
                         logger.error(e);

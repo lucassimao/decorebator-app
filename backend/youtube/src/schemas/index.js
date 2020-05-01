@@ -1,13 +1,17 @@
 const {gql} = require('apollo-server')
 
 const typeDefs = gql`
+    type Language{
+        code: String!
+        name: String!
+    }
     type Subtitle {
-        languageCode: String
+        language: Language!
         isAutomatic: Boolean
         downloadUrl: String
     }
     type Query {
-        getAvailableVideoSubtitles(url: String): [Subtitle]  
+        getAvailableVideoSubtitles(url: String!): [Subtitle!]  
     }
 `;
 

@@ -2,14 +2,12 @@ import { makeStyles } from "@material-ui/core";
 import React, { lazy, Suspense } from "react";
 import { connect } from "react-redux";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import ProgressModal from "./components/common/ProgressModal";
 import { ErrorSnackbar, SuccessSnackbar } from "./components/common/AppSnackbar";
+import ProgressModal from "./components/common/ProgressModal";
 import Main from "./components/home/Main";
 
 const EmptyWordlistForm = lazy(() => import("./components/wordlist/EmptyWordlistForm").then(module => module));
-const YoutubeWordlistForm = lazy(() =>
-  import("./components/wordlist/YoutubeWordlistForm").then(module => module)
-);
+const YoutubeWordlistForm = lazy(() => import("./screens/YoutubeWordlist").then(module => module));
 const WordlistEdit = lazy(() => import("./components/wordlist/Edit").then(module => module));
 const MenuNewWordlist = lazy(() => import("./components/home/MenuNewWordlist").then(module => module));
 

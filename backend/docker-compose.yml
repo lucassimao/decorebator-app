@@ -19,6 +19,7 @@ services:
       - TEST_CONTAINERS
       - IGNORE_REQUEST_LIMIT
       - NODE_ENV
+      - YOUTUBE_SERVICE_URL
       - JWT_SECRET_KEY
       - MONGO_DB_URL    
       - HTTP_PORT=3000
@@ -48,6 +49,7 @@ services:
     environment: 
       - TEST_CONTAINERS
       - NODE_ENV
+      - SHOW_LOG_ON_STDOUT
       - JWT_SECRET_KEY
       - MONGO_DB_URL
       - HTTP_PORT=4000
