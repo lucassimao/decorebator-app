@@ -7,7 +7,7 @@
     "test": "NODE_ENV=test SHOW_LOG_ON_STDOUT=true MONGO_DB_URL=mongo://localhost:27017/decorebator-tests mocha 'src/**/__tests__/*' -R spec",
     "lint": "eslint 'src/**/*.js'",
     "jest-watch": "jest --watch --detectOpenHandles 'src/'",
-    "start": "nodemon src/index.js",
+    "start": "nodemon --trace-warnings src/index.js",
     "format": "prettier --write 'src/**/*.js'"
   },
   "repository": {
