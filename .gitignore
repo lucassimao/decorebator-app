@@ -1,3 +1,5 @@
 **/node_modules/*
 **/*.log
+**/*-audit.json*.log.gz
+**/*.log.gz
 **/*-audit.json

@@ -1,9 +1,10 @@
-FROM nikolaik/python-nodejs:python2.7-nodejs13
+FROM node:14.0.0-alpine
 
 COPY package.json /srv/auth/
 COPY package-lock.json /srv/auth/
 WORKDIR /srv/auth
 
+RUN apk add --no-cache python2 g++ make
 RUN npm install
 RUN npm install -g nodemon
 
