@@ -7,8 +7,8 @@ import { useHistory, useParams } from "react-router-dom";
 import { HIDE_PROGRESS_MODAL, SHOW_PROGRESS_MODAL } from "../../reducers/progressModal";
 import { SET_ERROR_SNACKBAR } from "../../reducers/snackbar";
 import service from "../../services/wordlist.service";
-import AppBreadcrumb from "../common/AppBreadcrumb";
-import WordList from "./WordList";
+import AppBreadcrumb from "../../components/ui/AppBreadcrumb";
+import Wordlist from "./components/Wordlist";
 
 const useSyles = makeStyles(theme => ({
   grid: {
@@ -50,7 +50,7 @@ const useSyles = makeStyles(theme => ({
   }
 }));
 
-function Edit(props) {
+function Screen(props) {
   const { showProgressModal, hideProgressModal, onError } = props;
   const { id } = useParams();
   const history = useHistory();
@@ -155,7 +155,7 @@ function Edit(props) {
           />
         </Grid>
         <Grid className={classes.gridItem} item xs={12} style={{ flexGrow: 1 }}>
-          <WordList
+          <Wordlist
             onWordExcluded={onWordExcludedListener}
             wordsCount={wordsCount}
             wordlistId={wordlist._id}
@@ -172,4 +172,4 @@ const mapDispatchToProps = dispatch => ({
   onError: message => dispatch({ type: SET_ERROR_SNACKBAR, message })
 });
 
-export default connect(null, mapDispatchToProps)(Edit);
+export const EditWordlistScreen = connect(null, mapDispatchToProps)(Screen);

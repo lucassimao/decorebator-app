@@ -52,7 +52,7 @@ const generateRandomColor = () => {
 
 const MenuLink = React.forwardRef((props, ref) => <Link to="/wordlists/menu" innerRef={ref} {...props} />);
 
-function EmptyWordlistForm(props) {
+function Screen(props) {
   const { onSuccess, onError, showProgressModal, hideProgressModal } = props;
   const classes = useStyles();
   const history = useHistory();
@@ -161,4 +161,4 @@ const mapDispatchToProps = dispatch => ({
   hideProgressModal: () => dispatch({ type: HIDE_PROGRESS_MODAL })
 });
 
-export default connect(null, mapDispatchToProps)(EmptyWordlistForm);
+export const EmptyWordlistScreen = connect(null, mapDispatchToProps)(Screen);

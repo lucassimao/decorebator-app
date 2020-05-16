@@ -6,9 +6,9 @@ import AddIcon from "@material-ui/icons/Add";
 import React, { lazy, Suspense, useEffect } from "react";
 import { connect } from "react-redux";
 import { fetchUserWordlists } from "../../thunks/wordlist.thunks";
-import ProgressModal from "../common/ProgressModal";
-import SearchBox from "./SearchBox";
-import Wordlists from "./Wordlists";
+import ProgressModal from "../../components/ui/ProgressModal";
+import SearchBox from "./components/SearchBox";
+import Wordlists from "./components/UserWordlists";
 const Welcome = lazy(() => import("./Welcome").then(m => m));
 
 const useStyles = makeStyles(theme => ({
@@ -78,4 +78,4 @@ const mapDispatchToProps = dispatch => ({
   loadUserWordlists: () => dispatch(fetchUserWordlists())
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(Home);
+export const HomeScreen =  connect(mapStateToProps, mapDispatchToProps)(Home);

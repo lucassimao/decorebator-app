@@ -37,7 +37,7 @@ const HomeLink = React.forwardRef((props, ref) => (
   <Link to="/" innerRef={ref} {...props} />
 ));
 
-function MenuNewWordlist() {
+export function NewWordlistScreen() {
   const classes = useStyles();
   return (
     <Container>
@@ -101,4 +101,3 @@ function MenuNewWordlist() {
   );
 }
 
-export default MenuNewWordlist;

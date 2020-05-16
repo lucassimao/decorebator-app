@@ -203,4 +203,4 @@ const mapDispatchToProps = dispatch => ({
   hideProgressModal: () => dispatch({ type: HIDE_PROGRESS_MODAL })
 });
 
-export const YoutubeWordlist = connect(null, mapDispatchToProps)(Screen);
+export const YoutubeWordlistScreen = connect(null, mapDispatchToProps)(Screen);

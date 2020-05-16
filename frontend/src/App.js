@@ -2,14 +2,15 @@ import { makeStyles } from "@material-ui/core";
 import React, { lazy, Suspense } from "react";
 import { connect } from "react-redux";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import { ErrorSnackbar, SuccessSnackbar } from "./components/common/AppSnackbar";
-import ProgressModal from "./components/common/ProgressModal";
-import Main from "./components/home/Main";
+import { ErrorSnackbar, SuccessSnackbar } from "./components/ui/AppSnackbar";
+import ProgressModal from "./components/ui/ProgressModal";
+import HomeScreen from "./screens/Home";
 
-const EmptyWordlistForm = lazy(() => import("./components/wordlist/EmptyWordlistForm").then(module => module));
-const YoutubeWordlistForm = lazy(() => import("./screens/YoutubeWordlist").then(module => module));
-const WordlistEdit = lazy(() => import("./components/wordlist/Edit").then(module => module));
-const MenuNewWordlist = lazy(() => import("./components/home/MenuNewWordlist").then(module => module));
+const identity = (arg) => arg
+const EmptyWordlistScreen = lazy(() => import("./screens/EmptyWordlist").then(identity));
+const YoutubeWordlistScreen = lazy(() => import("./screens/YoutubeWordlist").then(identity));
+const EditWordlistScreen = lazy(() => import("./screens/EditWordlist").then(identity));
+const NewWordlistScreen = lazy(() => import("./screens/NewWordlist").then(identity));
 
 const useStyles = makeStyles(theme => ({
 
@@ -32,26 +33,26 @@ function App(props) {
         <Switch>
           <Route path="/wordlists/new-from-youtube">
             <Suspense fallback={spinner}>
-              <YoutubeWordlistForm />
+              <YoutubeWordlistScreen />
             </Suspense>
           </Route>
           <Route path="/wordlists/new">
             <Suspense fallback={spinner}>
-              <EmptyWordlistForm />
+              <EmptyWordlistScreen />
             </Suspense>
           </Route>
           <Route path="/wordlists/menu">
             <Suspense fallback={spinner}>
-              <MenuNewWordlist />
+              <NewWordlistScreen />
             </Suspense>
           </Route>
           <Route path="/wordlists/:id">
             <Suspense fallback={spinner}>
-              <WordlistEdit />
+              <EditWordlistScreen />
             </Suspense>
           </Route>
           <Route path="/">
-            <Main />
+            <HomeScreen />
           </Route>
         </Switch>
       </Router>
