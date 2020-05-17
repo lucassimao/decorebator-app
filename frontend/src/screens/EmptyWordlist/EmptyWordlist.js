@@ -6,6 +6,7 @@ import Select from "@material-ui/core/Select";
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+import PropTypes from 'proptypes';
 import React from "react";
 import useForm from "react-hook-form";
 import { connect } from "react-redux";
@@ -34,7 +35,7 @@ const useStyles = makeStyles(theme => ({
     borderRadius: theme.shape.borderRadius,
     flexGrow: 1,
     backgroundColor: '#fff',
-    padding: theme.spacing(3,2),
+    padding: theme.spacing(3, 2),
     boxShadow: "0 7px 14px rgba(0,0,0,0.25)",
     display: 'flex',
     flexDirection: 'column',
@@ -51,6 +52,7 @@ const generateRandomColor = () => {
 };
 
 const MenuLink = React.forwardRef((props, ref) => <Link to="/wordlists/menu" innerRef={ref} {...props} />);
+MenuLink.displayName = 'MenuLink'
 
 function Screen(props) {
   const { onSuccess, onError, showProgressModal, hideProgressModal } = props;
@@ -160,5 +162,12 @@ const mapDispatchToProps = dispatch => ({
   showProgressModal: (title, description) => dispatch({ type: SHOW_PROGRESS_MODAL, description, title }),
   hideProgressModal: () => dispatch({ type: HIDE_PROGRESS_MODAL })
 });
+
+Screen.propTypes = {
+  onError: PropTypes.func,
+  showProgressModal: PropTypes.func,
+  hideProgressModal: PropTypes.func,
+  onSuccess: PropTypes.func
+}
 
 export const EmptyWordlistScreen = connect(null, mapDispatchToProps)(Screen);

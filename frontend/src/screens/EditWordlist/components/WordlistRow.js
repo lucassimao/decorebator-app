@@ -4,7 +4,7 @@ import InputBase from "@material-ui/core/InputBase";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import DeleteIcon from "@material-ui/icons/Delete";
 import PropTypes from "prop-types";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 const useSyles = makeStyles(theme => ({
   icon: {
@@ -65,6 +65,10 @@ WordlistRow.propTypes = {
   style: PropTypes.object,
   deleteWord: PropTypes.func.isRequired,
   updateWord: PropTypes.func
+};
+
+InputHOC.propTypes = {
+  defaultValue: PropTypes.string, updateWord: PropTypes.func, wordId: PropTypes.string
 };
 
 export default WordlistRow;

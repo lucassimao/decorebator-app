@@ -29,13 +29,20 @@ const NewEmptyWordlistLink = React.forwardRef((props, ref) => (
   <Link to="/wordlists/new" innerRef={ref} {...props} />
 ));
 
+NewEmptyWordlistLink.displayName = 'NewEmptyWordlistLink'
+
 const NewWordlistFromYoutubeLink = React.forwardRef((props, ref) => (
   <Link to="/wordlists/new-from-youtube" innerRef={ref} {...props} />
 ));
 
+NewWordlistFromYoutubeLink.displayName = 'NewWordlistFromYoutubeLink'
+
+
 const HomeLink = React.forwardRef((props, ref) => (
   <Link to="/" innerRef={ref} {...props} />
 ));
+HomeLink.displayName = 'HomeLink'
+
 
 export function NewWordlistScreen() {
   const classes = useStyles();

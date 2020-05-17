@@ -1,13 +1,14 @@
 import { Grid, makeStyles, TextField, Typography } from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
+import PropTypes from 'proptypes';
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
+import AppBreadcrumb from "../../components/ui/AppBreadcrumb";
 import { HIDE_PROGRESS_MODAL, SHOW_PROGRESS_MODAL } from "../../reducers/progressModal";
 import { SET_ERROR_SNACKBAR } from "../../reducers/snackbar";
 import service from "../../services/wordlist.service";
-import AppBreadcrumb from "../../components/ui/AppBreadcrumb";
 import Wordlist from "./components/Wordlist";
 
 const useSyles = makeStyles(theme => ({
@@ -131,10 +132,10 @@ function Screen(props) {
           </IconButton>
         </Grid>
         <Grid className={classes.gridItem} item xs={12}>
-            <Typography variant="caption">
-              {wordsCount} {wordlist.language.toLowerCase()} word(s)
+          <Typography variant="caption">
+            {wordsCount} {wordlist.language.toLowerCase()} word(s)
             </Typography>
-          </Grid>        
+        </Grid>
         {wordlist.description && (
           <Grid className={classes.gridItem} item xs={12}>
             <Typography variant="caption" className={classes.description}>
@@ -171,5 +172,11 @@ const mapDispatchToProps = dispatch => ({
   hideProgressModal: () => dispatch({ type: HIDE_PROGRESS_MODAL }),
   onError: message => dispatch({ type: SET_ERROR_SNACKBAR, message })
 });
+
+Screen.propTypes = {
+  onError: PropTypes.func,
+  showProgressModal: PropTypes.func,
+  hideProgressModal: PropTypes.func,
+}
 
 export const EditWordlistScreen = connect(null, mapDispatchToProps)(Screen);

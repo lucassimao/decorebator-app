@@ -3,10 +3,11 @@ import Fab from "@material-ui/core/Fab";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import AddIcon from "@material-ui/icons/Add";
+import PropTypes from "proptypes";
 import React, { lazy, Suspense, useEffect } from "react";
 import { connect } from "react-redux";
-import { fetchUserWordlists } from "../../thunks/wordlist.thunks";
 import ProgressModal from "../../components/ui/ProgressModal";
+import { fetchUserWordlists } from "../../thunks/wordlist.thunks";
 import SearchBox from "./components/SearchBox";
 import Wordlists from "./components/UserWordlists";
 const Welcome = lazy(() => import("./Welcome").then(m => m));
@@ -78,4 +79,8 @@ const mapDispatchToProps = dispatch => ({
   loadUserWordlists: () => dispatch(fetchUserWordlists())
 });
 
-export const HomeScreen =  connect(mapStateToProps, mapDispatchToProps)(Home);
+Home.propTypes = {
+  userWordlists: PropTypes.func, loadUserWordlists: PropTypes.func
+}
+
+export const HomeScreen = connect(mapStateToProps, mapDispatchToProps)(Home);

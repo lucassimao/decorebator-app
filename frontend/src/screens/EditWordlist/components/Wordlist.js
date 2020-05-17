@@ -1,5 +1,6 @@
 import { makeStyles } from "@material-ui/core";
-import React, { useState, useRef } from "react";
+import PropTypes from 'proptypes';
+import React, { useRef, useState } from "react";
 import { connect } from "react-redux";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList } from "react-window";
@@ -102,6 +103,17 @@ const mapDispatchToProps = dispatch => ({
   hideProgressModal: () => dispatch({ type: HIDE_PROGRESS_MODAL }),
   onError: message => dispatch({ type: SET_ERROR_SNACKBAR, message })
 });
+
+Component.propTypes = {
+  onError: PropTypes.func,
+  showProgressModal: PropTypes.func,
+  hideProgressModal: PropTypes.func,
+  onSuccess: PropTypes.func,
+  onWordExcluded: PropTypes.func,
+  wordsCount: PropTypes.number,
+  wordlistId : PropTypes.string
+}
+
 
 const Wordlist = connect(null, mapDispatchToProps)(Component);
 export default Wordlist;

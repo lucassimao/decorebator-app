@@ -1,6 +1,7 @@
 import InputBase from "@material-ui/core/InputBase";
 import { makeStyles } from "@material-ui/core/styles";
 import SearchIcon from "@material-ui/icons/Search";
+import PropTypes from 'proptypes';
 import React from "react";
 import { connect } from "react-redux";
 import { fetchPublicWordlists, fetchUserWordlists } from "../../../thunks/wordlist.thunks";
@@ -19,7 +20,7 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: theme.palette.primary.main,
     borderRadius: theme.spacing(0.5),
     pointerEvents: "none",
-    padding: theme.spacing(0.6,1),
+    padding: theme.spacing(0.6, 1),
     color: "#fff",
     boxShadow: "0 3px 7px rgba(0,0,0,0.25)"
   },
@@ -67,5 +68,9 @@ const mapDispatchToProps = dispatch => ({
     }
   }
 });
+
+SearchBox.propTypes = {
+  filterWordlists: PropTypes.func
+}
 
 export default connect(null, mapDispatchToProps)(SearchBox);

@@ -1,4 +1,5 @@
 import { useQuery } from '@apollo/react-hooks';
+import { makeStyles, NativeSelect } from "@material-ui/core";
 import FormControl from "@material-ui/core/FormControl";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Grid from "@material-ui/core/Grid";
@@ -7,11 +8,12 @@ import Slider from "@material-ui/core/Slider";
 import Switch from "@material-ui/core/Switch";
 import Typography from "@material-ui/core/Typography";
 import ApolloClient, { gql } from 'apollo-boost';
+import PropTypes from 'proptypes';
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { HIDE_PROGRESS_MODAL, SHOW_PROGRESS_MODAL } from "../../../reducers/progressModal";
 import { SET_ERROR_SNACKBAR } from "../../../reducers/snackbar";
-import { makeStyles, NativeSelect } from "@material-ui/core";
+
 
 const useStyles = makeStyles(theme => ({
     teste: {
@@ -154,5 +156,13 @@ const mapDispatchToProps = dispatch => ({
         dispatch({ type: SHOW_PROGRESS_MODAL, description, title }),
     hideProgressModal: () => dispatch({ type: HIDE_PROGRESS_MODAL })
 });
+
+Form.propTypes = {
+    url: PropTypes.string,
+    onError: PropTypes.func,
+    showProgressModal: PropTypes.func,
+    hideProgressModal: PropTypes.func,
+    dispatch: PropTypes.func
+}
 
 export default connect(null, mapDispatchToProps)(Form);

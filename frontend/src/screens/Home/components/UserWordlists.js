@@ -1,11 +1,12 @@
+import Avatar from "@material-ui/core/Avatar";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import { makeStyles } from "@material-ui/core/styles";
+import ArrowRightIcon from "@material-ui/icons/ArrowRight";
+import PropTypes from 'proptypes';
 import React from "react";
 import { Link } from "react-router-dom";
-import Avatar from "@material-ui/core/Avatar";
-import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 
 const useStyles = makeStyles(theme => ({
   listItem: {
@@ -25,7 +26,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const WordlistLink = React.forwardRef((props, ref) => <Link innerRef={ref} {...props} />);
-
+WordlistLink.displayName = 'WordlistLink'
 
 function Wordlists(props) {
   const classes = useStyles();
@@ -50,4 +51,5 @@ function Wordlists(props) {
   );
 }
 
+Wordlists.propTypes = { wordlists: PropTypes.array }
 export default Wordlists;

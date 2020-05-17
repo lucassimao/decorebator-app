@@ -7,6 +7,7 @@ import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import ClearIcon from "@material-ui/icons/Clear";
+import PropTypes from 'proptypes';
 import React, { useReducer, useRef } from "react";
 import { connect } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
@@ -15,7 +16,7 @@ import { SET_ERROR_SNACKBAR, SET_SUCCESS_SNACKBAR } from "../../reducers/snackba
 import wordlistService from "../../services/wordlist.service";
 import youtubeService from "../../services/youtube.service";
 import Form from './components/Form';
-import { reducer, INITIAL_STATE } from './reducer';
+import { INITIAL_STATE, reducer } from './reducer';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -48,6 +49,7 @@ const useStyles = makeStyles(theme => ({
 const MenuLink = React.forwardRef((props, ref) => (
   <Link to="/wordlists/menu" innerRef={ref} {...props} />
 ));
+MenuLink.displayName = 'MenuLink'
 
 const URL_REGEXP = new RegExp("^((https|http)://(www.)?)?youtu");
 
@@ -202,5 +204,12 @@ const mapDispatchToProps = dispatch => ({
     dispatch({ type: SHOW_PROGRESS_MODAL, description, title }),
   hideProgressModal: () => dispatch({ type: HIDE_PROGRESS_MODAL })
 });
+
+Screen.propTypes = {
+  onError: PropTypes.func,
+  showProgressModal: PropTypes.func,
+  hideProgressModal: PropTypes.func,
+  onSuccess: PropTypes.func
+}
 
 export const YoutubeWordlistScreen = connect(null, mapDispatchToProps)(Screen);

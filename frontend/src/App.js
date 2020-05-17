@@ -1,4 +1,5 @@
 import { makeStyles } from "@material-ui/core";
+import PropTypes from "proptypes";
 import React, { lazy, Suspense } from "react";
 import { connect } from "react-redux";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
@@ -73,5 +74,10 @@ const mapStateToProps = state => ({
   snackbar: state.snackbar,
   progressModal: state.progressModal
 });
+
+App.propTypes = {
+  snackbar: PropTypes.shape({success: PropTypes.bool, error: PropTypes.bool, message: PropTypes.string}),
+  progressModal: PropTypes.shape({title: PropTypes.string, message: PropTypes.string})
+}
 
 export default connect(mapStateToProps, null)(App);

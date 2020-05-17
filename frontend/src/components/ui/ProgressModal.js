@@ -3,6 +3,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import Modal from "@material-ui/core/Modal";
 import { makeStyles } from "@material-ui/core/styles";
 import React from "react";
+import PropTypes from 'proptypes'
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -55,3 +56,8 @@ export default function ProgressModal(props) {
     </Modal>
   );
 }
+
+ProgressModal.propTypes = {
+  title: PropTypes.string,
+    description: PropTypes.string
+};
