@@ -10,6 +10,7 @@ import HomeScreen from "./screens/Home";
 const identity = (arg) => arg
 const EmptyWordlistScreen = lazy(() => import("./screens/EmptyWordlist").then(identity));
 const YoutubeWordlistScreen = lazy(() => import("./screens/YoutubeWordlist").then(identity));
+const FileWordlistScreen = lazy(() => import("./screens/FileWordlist").then(identity));
 const EditWordlistScreen = lazy(() => import("./screens/EditWordlist").then(identity));
 const NewWordlistScreen = lazy(() => import("./screens/NewWordlist").then(identity));
 
@@ -32,6 +33,11 @@ function App(props) {
     <div className={classes.wrapper}>
       <Router>
         <Switch>
+          <Route path="/wordlists/new-from-file">
+          <Suspense fallback={spinner}>
+              <FileWordlistScreen />
+            </Suspense> 
+          </Route>
           <Route path="/wordlists/new-from-youtube">
             <Suspense fallback={spinner}>
               <YoutubeWordlistScreen />

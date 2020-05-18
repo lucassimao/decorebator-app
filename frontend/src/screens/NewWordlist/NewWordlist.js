@@ -10,6 +10,8 @@ import React from "react";
 import { Link } from "react-router-dom";
 import WordlistsImage from "../../img/wordlists.jpeg";
 import YoutubeImage from "../../img/youtube.jpg";
+import TextFileFormatsImage from "../../img/textfileFormats.png";
+
 
 const useStyles = makeStyles(theme => ({
   header: {
@@ -20,7 +22,7 @@ const useStyles = makeStyles(theme => ({
     flexDirection: 'column',
     justifyContent: 'space-around'
   },
-  card:{
+  card: {
     margin: theme.spacing(1, 0)
   }
 }));
@@ -36,6 +38,13 @@ const NewWordlistFromYoutubeLink = React.forwardRef((props, ref) => (
 ));
 
 NewWordlistFromYoutubeLink.displayName = 'NewWordlistFromYoutubeLink'
+
+const NewWordlistFromFileLink = React.forwardRef((props, ref) => (
+  <Link to="/wordlists/new-from-file" innerRef={ref} {...props} />
+));
+
+NewWordlistFromFileLink.displayName = 'NewWordlistFromFileLink'
+
 
 
 const HomeLink = React.forwardRef((props, ref) => (
@@ -57,7 +66,7 @@ export function NewWordlistScreen() {
 
         <Typography variant="h5" style={{ fontWeight: "bold" }} align="center">
           Choose a type
-</Typography>
+      </Typography>
       </header>
 
       <main className={classes.main}>
@@ -103,6 +112,29 @@ export function NewWordlistScreen() {
             </CardContent>
           </CardActionArea>
         </Card>
+
+        <Card raised className={classes.card}>
+          <CardActionArea component={NewWordlistFromFileLink}>
+            <CardMedia
+              component="img"
+              alt="Create wordlist from a file"
+              height="140"
+              style={{ objectFit: "fill" }}
+              image={TextFileFormatsImage}
+              title="Create wordlist from a file"
+            />
+            <CardContent>
+              <Typography gutterBottom variant="h6">
+                File
+              </Typography>
+              <Typography variant="body2" color="textSecondary" component="p">
+                Create a new wordlist from any of the following file formats: 
+                txt, html, csv, rtf, doc, docx, ppt, pptx, pdf or epub
+              </Typography>
+            </CardContent>
+          </CardActionArea>
+        </Card>
+
       </main>
     </Container>
   );

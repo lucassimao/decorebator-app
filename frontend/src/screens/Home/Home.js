@@ -80,7 +80,8 @@ const mapDispatchToProps = dispatch => ({
 });
 
 Home.propTypes = {
-  userWordlists: PropTypes.func, loadUserWordlists: PropTypes.func
+  userWordlists: PropTypes.array, 
+  loadUserWordlists: PropTypes.func
 }
 
 export const HomeScreen = connect(mapStateToProps, mapDispatchToProps)(Home);
