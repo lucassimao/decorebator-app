@@ -17,7 +17,8 @@ import { SET_ERROR_SNACKBAR } from "../../../reducers/snackbar";
 
 const useStyles = makeStyles(theme => ({
     teste: {
-        marginLeft: theme.spacing(2),
+        marginTop: theme.spacing(2),
+        marginLeft: theme.spacing(1),
         verticalAlign: 'bottom'
     }
 }))
@@ -114,7 +115,7 @@ function Form(props) {
                                 onChange={(evt) => setAllowAsr(evt.target.checked)}
                             />
                         }
-                        label="Allow automatic generated subtitles"
+                        label="Allow auto generated subtitles"
                     />
                 </FormControl>
             </Grid>
