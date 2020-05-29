@@ -2,10 +2,12 @@ package com.decorebator.integration;
 
 import java.net.URL;
 import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 import com.decorebator.beans.UserLogin;
 import com.decorebator.beans.UserRegistration;
+import com.decorebator.beans.Word;
 import com.decorebator.beans.Wordlist;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -47,8 +49,8 @@ public class TestUtils {
         return createRandomWordlist(authorization, wordlistsEndpoint);
     }
 
-	public static String createRandomWordlist(String authorization, URL wordlistsEndpoint) {
-        var wordlist = new Wordlist("Random wordlist created by TesUtils", "Random wordlist", "pt-br", Collections.emptyList());
+	public static String createRandomWordlist(String authorization, URL wordlistsEndpoint,List<Word> words) {
+        var wordlist = new Wordlist("Random wordlist created by TesUtils", "Random wordlist", "pt-br", words);
 
         Response response = given()
             .contentType(ContentType.JSON)
@@ -63,6 +65,10 @@ public class TestUtils {
         } else {
             throw new IllegalStateException(response.getStatusLine());
         }
+    }
+
+	public static String createRandomWordlist(String authorization, URL wordlistsEndpoint) {
+        return createRandomWordlist(authorization, wordlistsEndpoint, Collections.emptyList());
     }    
 
     

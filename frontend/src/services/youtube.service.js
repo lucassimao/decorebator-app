@@ -65,7 +65,7 @@ async function getVideoDetails(url) {
  * @returns {Set<String>} A set of words from the subtitle
  */
 async function getWordsFromVideoSubtitle(downloadUrl, minLength) {
-  
+
   const response = await fetch(downloadUrl);
   if (!response.ok) {
     throw new Error(response.statusText);
@@ -78,23 +78,11 @@ async function getWordsFromVideoSubtitle(downloadUrl, minLength) {
 
   for (let i = 0; i < elements.length; ++i) {
     const node = elements.item(i);
-    const line = node.textContent;
+    let line = node.textContent;
     if (line && line.trim()) {
-      line
-        .split(/\s+/) // spliting by white space chars
-        .forEach(word => {
-          // removing unecessary characters and lowering case
-          word = word
-            .replace(/[[\](),;:."?!_]/g, "")
-            .toLowerCase()
-            .trim();
-          const hasOnlyDigits = /\d+$/.test(word);
-          const lengthIsOK = word.length >= minLength;
-
-          if (!hasOnlyDigits && lengthIsOK) {
-            words.add(word);
-          }
-        });
+      line = line.replace(/<font[^>]*>/ig, "").replace(/<\/font>/ig, "")
+      line.split(/\s+/) // spliting by white space chars
+        .forEach(word => words.add(word));
     }
   }
   return words;

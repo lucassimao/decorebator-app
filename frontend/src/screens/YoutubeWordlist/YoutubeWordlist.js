@@ -104,8 +104,11 @@ function Screen(props) {
         words,
         language: language.name,
         isPrivate: true,
+        minWordLength,
         onlyNewWords: state.onlyNewWords
       };
+      console.log(wordlist);
+      
       const resourceUri = await wordlistService.save(wordlist);
 
       hideProgressModal();

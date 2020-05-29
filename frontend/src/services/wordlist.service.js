@@ -15,14 +15,14 @@ if (process.env.NODE_ENV === "development") {
  * @returns {Promise} A promise which resolves to the link of the new wordlist
  */
 const save = async wordlist => {
-  const { avatarColor, base64EncodedFile, description, isPrivate = true, language, name, words, onlyNewWords = false } = wordlist
+  const { avatarColor, base64EncodedFile, description, isPrivate = true, language, name, words, onlyNewWords = false, minWordLength = 1 } = wordlist
   if (base64EncodedFile && words) {
     throw new Error("Simultaneuosly sending a file and a list of words is wrong")
   }
 
   const response = await fetch(conf.api.wordlists, {
     method: "POST",
-    body: JSON.stringify({ avatarColor, base64EncodedFile, description, isPrivate, language, name, words, onlyNewWords }),
+    body: JSON.stringify({ avatarColor, base64EncodedFile, description, isPrivate, language, name, words, onlyNewWords, minWordLength }),
     headers: DEFAULT_HEADERS
   });
   if (!response.ok) {

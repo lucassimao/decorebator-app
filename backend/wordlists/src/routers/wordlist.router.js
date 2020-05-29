@@ -47,7 +47,7 @@ router
   )
   .post(
     "/",
-    express.json(),
+    express.json({ limit: 2 * 1024 * 1024 }), // //TODO<backend> buffer size should be bigger for paying users
     wrapAsync(async (req, res) => {
       try {
         let wordlist = req.body;

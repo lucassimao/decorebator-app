@@ -85,7 +85,7 @@ function Screen(props) {
         Create a new wordlist from a file
         </Typography>
 
-      <WordlistForm onSubmit={onSubmit} allowFileUpload />
+      <WordlistForm onSubmit={onSubmit} allowOnlyNewWords allowMinWordLength allowFileUpload />
     </Container>
 
   );

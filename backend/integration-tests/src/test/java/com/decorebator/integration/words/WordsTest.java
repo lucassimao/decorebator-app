@@ -76,7 +76,7 @@ public class WordsTest {
     }
 
     @Test
-    public void shouldbeAbleToReadWordsFromHisWordlists() {
+    public void shouldbeAbleToReadWordsWordlistsInSortedOrder() {
         
         given()
             .header("authorization", "bearer " + authorization)
@@ -85,7 +85,7 @@ public class WordsTest {
         .then()
             .statusCode(200)
             .body("words.size()",is(3))   
-            .body("words.name",hasItems("scrambled","behind the ball 8","flake"));      
+            .body("words.name",hasItems("behind the ball 8","flake", "scrambled"));      
     }
 
     @Test(timeout = 5000)
@@ -111,7 +111,7 @@ public class WordsTest {
         .then()
             .statusCode(200)
             .body("words.size()",is(4))   
-            .body("words.name",hasItems("scrambled","behind the ball 8","flake","thing"));    
+            .body("words.name",hasItems("behind the ball 8","flake","scrambled","thing"));    
         
     }
 

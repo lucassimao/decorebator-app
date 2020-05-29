@@ -16,7 +16,8 @@ const Wordlist = new Schema({
       name: { type: String, required: true },
       images: [{ url: { type: String, required: true }, description: String }]
     }
-  ]
+  ],
+  fileInfo: {extension: String, size: Number, extractionMs: Number, required: false }
 });
 
 Wordlist.static("addWord", function(wordlistId, newWordObject, user) {

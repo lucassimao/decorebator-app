@@ -5,6 +5,8 @@ WORKDIR /srv/wordlists/src
 RUN npm install
 RUN npm install -g nodemon
 
+RUN apk add poppler-utils tesseract-ocr
+
 COPY src /srv/wordlists/src
 EXPOSE ${HTTP_PORT}
 

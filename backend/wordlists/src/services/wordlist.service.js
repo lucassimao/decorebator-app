@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 const config = require("../config");
 const WordlistDao = require("../dao/wordlist.dao");
+const textract = require('textract')
+const { performance } = require('perf_hooks');
+
 
 /**
  * Returns user's wordlists
@@ -58,6 +61,8 @@ const listPublic = (
   });
 };
 
+
+
 /**
  * Register a new wordlist
  *
@@ -68,19 +73,30 @@ const listPublic = (
  * @returns {Promise} A promise, which resolves to the persisted object
  */
 const save = async (wordlist, user) => {
-  let { words } = wordlist;
-  const userSentValidArrayOfWords =
-    words && Array.isArray(words) && words.length > 0;
+  let fileInfo
   const logger = config.logger;
+  let words = []
+  const { minWordLength = 1, onlyNewWords = false } = wordlist
 
-  if (userSentValidArrayOfWords) {
-    for (const w of words) {
-      w.name = w.name.toLowerCase();
-    }
+  if (wordlist.base64EncodedFile) {
+    const {fileType, buffer} = __parseBase64EncodedFile(wordlist.base64EncodedFile)
+    var t0 = performance.now()
+    words = await __extractWordsFromBuffer(buffer)
+    var t1 = performance.now()
+    fileInfo = { extractionMs: t1 - t0, extension: fileType, size: buffer.length }
+  } else {
+    words = wordlist.words?.map(({ name }) => name)
   }
+  const isArrayOfWordsValid = words && Array.isArray(words) && words.length > 0;
 
-  if ("onlyNewWords" in wordlist) {
-    if (wordlist.onlyNewWords && userSentValidArrayOfWords) {
+  if (isArrayOfWordsValid) {
+    const uniqueWords = new Set(words.map(__formatWord))
+    words = [...uniqueWords]
+      .filter(name => name.length >= minWordLength)
+      .sort()
+      .map(name => ({ name }))
+
+    if (onlyNewWords) {
       logger.debug(
         `Registering new wordlist for user ${user._id} with ${words.length} words`
       );
@@ -107,10 +123,10 @@ const save = async (wordlist, user) => {
         `Filtered wordlist for user ${user._id} now with ${words.length} words`
       );
     }
-    delete wordlist.onlyNewWords;
   }
 
-  return WordlistDao.create({ ...wordlist, owner: user._id, words });
+  // the attributes that don't fit the schema will be filtered out
+  return WordlistDao.create({ ...wordlist, owner: user._id, words, fileInfo });
 };
 
 /**
@@ -186,6 +202,53 @@ const remove = (id, user) => {
   return WordlistDao.deleteOne({ _id: id, owner: user._id });
 };
 
+
+/**
+ * Checks if a string contains a valid binary file
+ * 
+ * @param {String} base64EncodedFile A base 64 encoded binary file
+ * @returns {{fileType: String, buffer: Buffer}} a object identifying the file type and the buffer
+ */
+const __parseBase64EncodedFile = (base64EncodedFile) => {
+  const logger = config.logger;
+  const regex = /data:(\S+);base64,(\S+)/
+  const isString = typeof base64EncodedFile == 'string'
+
+  if (!isString || !regex.test(base64EncodedFile)) {
+    logger.debug('Invalid base64 encoded file was sent')
+    logger.debug(base64EncodedFile)
+    throw new Error('Invalid file')
+  }
+
+  [, fileType, data] = regex.exec(base64EncodedFile)
+  const buffer = Buffer.from(data, 'base64')
+  return {fileType, buffer}
+} 
+/**
+ * Extract words from a buffer
+ * 
+ * @param {Buffer} buffer A buffer object representing a binary file
+ * @returns {Pomise<Array<String>>} a promise which resolves to a set of words found in the buffer passed as argument
+ */
+const __extractWordsFromBuffer = async (buffer) => {
+  return new Promise((resolve, reject) => {
+
+    //TODO<backend> buffer size should be bigger for paying users
+    const options = { preserveLineBreaks: false, exec: { maxBuffer: 2 * 1024 * 1024 } }
+    textract.fromBufferWithMime(fileType, buffer, options, function (error, text) {
+      if (error) {
+        const logger = config.logger;
+        logger.error(`Error while extracting text from a ${fileType}`, error)
+        reject(error)
+      } else {
+        const allWords = text.toLowerCase().split(/\s+/).map(word => word.trim()).filter(string => string.length > 0)
+        resolve(allWords)
+      }
+    })
+
+  })
+}
+
 /**
  * Makes a binary search of element inside the array.
  *
@@ -210,6 +273,25 @@ function __binarySearch(array, element, start, end, debug = false) {
   } else {
     return array[middle] === element;
   }
+}
+
+/**
+ * Remove non alpha numeric characteres and lower cases the word
+ * 
+ * @param {String} word The word to be formatted
+ */
+const __formatWord = (word) => {
+  if (!word) return '';
+
+  return word
+    .replace(/<\S+[^>]*>/ig, "")
+    .replace(/<\/\S+>/ig, "")
+    .replace(/[[\]#\$(),;{}:."?!_=&]/g, "")
+    .replace(/^'/, "")
+    .replace(/'$/, "")
+    .replace(/^\d+$/g, "") // just numbers? fuck
+    .toLowerCase().trim();
+
 }
 
 const api = {

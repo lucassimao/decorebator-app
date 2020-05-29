@@ -117,6 +117,48 @@ public class WordlistsTest {
     }
 
     @Test
+    public void shouldFilterOutEmptyAndWordsOnlyWithNumbers() {
+        var registration = TestUtils.createRandomUser(signUpEndpoint);
+        var authorization = TestUtils.signIn(registration.getLogin(), registration.getPassword(), signInEndpoint);
+        
+        var words = List.of(new Word(""),new Word("\t"),new Word("   "),new Word("acceptable1"),new Word("1223444333"));
+
+        String resourceUri = TestUtils.createRandomWordlist(authorization, environment.getWordlistEndpoint(), words);
+        String resourceId = resourceUri.substring("/wordlists".length());
+    
+        given()
+            .header("authorization", "bearer " + authorization)
+        .when()
+            .get(resourceId + "/words")
+        .then()
+            .statusCode(200)
+            .body("words.size()",is(1))
+            .body("words.name",hasItems("acceptable1"));
+
+    }    
+
+    @Test
+    public void shouldFilterOutUnwantedChars() {
+        var registration = TestUtils.createRandomUser(signUpEndpoint);
+        var authorization = TestUtils.signIn(registration.getLogin(), registration.getPassword(), signInEndpoint);
+        
+        var words = List.of(new Word("[[](),;:.\"?!_=&"),new Word("out? of the blue"),new Word("123too4$5#6"),new Word("<font color=\"#f00\">xpto</font>"));
+
+        String resourceUri = TestUtils.createRandomWordlist(authorization, environment.getWordlistEndpoint(), words);
+        String resourceId = resourceUri.substring("/wordlists".length());
+    
+        given()
+            .header("authorization", "bearer " + authorization)
+        .when()
+            .get(resourceId + "/words")
+        .then()
+            .statusCode(200)
+            .body("words.size()",is(3))
+            .body("words.name",hasItems("out of the blue","123too456","xpto"));
+
+    }      
+
+    @Test
     public void userShouldBeAbleToCreateWordlistsOnlyWithBrandNewWords() {
         var registration = TestUtils.createRandomUser(signUpEndpoint);
         var authorization = TestUtils.signIn(registration.getLogin(), registration.getPassword(), signInEndpoint);

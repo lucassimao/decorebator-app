@@ -4,9 +4,9 @@
   "private": true,
   "dependencies": {
     "@apollo/react-hooks": "^3.1.5",
-    "@material-ui/core": "^4.9.7",
+    "@material-ui/core": "^4.10.0",
     "@material-ui/icons": "^4.9.1",
-    "@material-ui/lab": "^4.0.0-alpha.46",
+    "@material-ui/lab": "^4.0.0-alpha.54",
     "apollo-boost": "^0.4.7",
     "graphql": "^15.0.0",
     "react": "^16.13.1",
