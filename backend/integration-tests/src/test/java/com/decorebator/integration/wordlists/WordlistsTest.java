@@ -61,8 +61,8 @@ public class WordlistsTest {
         .then()
             .statusCode(400)
             .contentType(ContentType.JSON)
-            .body("name.name",is("ValidatorError"))
-            .body("language.name",is("ValidatorError"));
+            .body("name.kind",is("required"))
+            .body("language.kind",is("required"));
 
     }    
 

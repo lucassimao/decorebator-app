@@ -1,4 +1,4 @@
-FROM node:14.0.0-alpine
+FROM node:14.3.0-alpine
 
 COPY package.json /srv/auth/
 COPY package-lock.json /srv/auth/
