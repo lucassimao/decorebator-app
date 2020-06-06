@@ -1,4 +1,3 @@
-// format: postgres://user:pass@example.com:5432/dbname
 if (!process.env.HTTP_PORT) throw "Http server port must be provided";
 const env = process.env.NODE_ENV || "development";
 
