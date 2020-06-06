@@ -24,12 +24,12 @@ export default class Database {
                 }
             },
         })
-        sequelize.import(__dirname + "/image.ts")
-        sequelize.import(__dirname + "/binaryExtraction.ts")
-        sequelize.import(__dirname + "/user.ts")
-        sequelize.import(__dirname + "/word.ts")
-        sequelize.import(__dirname + "/wordlist.ts")
-        sequelize.import(__dirname + "/youtubeSubtitle.ts")
+        sequelize.import(__dirname + "/image")
+        sequelize.import(__dirname + "/binaryExtraction")
+        sequelize.import(__dirname + "/user")
+        sequelize.import(__dirname + "/word")
+        sequelize.import(__dirname + "/wordlist")
+        sequelize.import(__dirname + "/youtubeSubtitle")
         this.sequelize = sequelize
     }
 

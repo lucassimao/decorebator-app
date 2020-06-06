@@ -1,11 +1,7 @@
-import Database from "./db";
-import { Image } from "./image";
-import { User } from "./user";
-import { Word } from "./word";
-import { Wordlist } from "./wordlist";
-import { YoutubeSubtitle } from "./youtubeSubtitle";
-
-export default {
-    Database,
-    Image, User, Word, Wordlist, YoutubeSubtitle
-}
+export { default as Database } from "./db";
+export { Image } from "./image";
+export { User } from "./user";
+export { Word } from "./word";
+export { Wordlist } from "./wordlist";
+export { YoutubeSubtitle } from "./youtubeSubtitle";
+export { BinaryExtraction } from "./binaryExtraction";
