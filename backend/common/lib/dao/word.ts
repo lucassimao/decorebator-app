@@ -1,5 +1,6 @@
-import { Model, Association, Sequelize, HasManyGetAssociationsMixin, HasManyCountAssociationsMixin, HasManyCreateAssociationMixin } from 'sequelize';
+import { Model, Association, Sequelize, HasManyGetAssociationsMixin, HasManyCountAssociationsMixin, HasManyCreateAssociationMixin, BelongsToGetAssociationMixin } from 'sequelize';
 import { Image } from './image';
+import { Wordlist } from './wordlist';
 
 export class Word extends Model {
     public id?: number;
@@ -11,9 +12,11 @@ export class Word extends Model {
     public countImages!: HasManyCountAssociationsMixin;
     public createImage!: HasManyCreateAssociationMixin<Image>;
 
+    public getWordlist!: BelongsToGetAssociationMixin<Wordlist>
 
     public static associations: {
-        images: Association<Word, Image>
+        images: Association<Word, Image>,
+        wordlist: Association<Word, Wordlist>,
     }
     /**
      * @deprecated use createdAt
@@ -25,9 +28,10 @@ export class Word extends Model {
 
 export default (sequelize: Sequelize, DataTypes: any) => {
     Word.init({
-        name: { type: DataTypes.STRING, allowNull: false }
+        name: { type: DataTypes.STRING, allowNull: false },
     }, { sequelize, updatedAt: false });
 
-    Word.hasMany(Image, { foreignKey: { name: 'word' } })
+    Word.hasMany(Image, { foreignKey: { name: 'wordId' } });
+
     return Word;
 }

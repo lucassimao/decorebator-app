@@ -4,6 +4,7 @@ import { Word } from './word';
 import { BinaryExtraction } from './binaryExtraction';
 
 export class Wordlist extends Model {
+    public id?: number;
     public isPrivate?: boolean;
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
@@ -46,7 +47,8 @@ export default (sequelize: Sequelize, DataTypes: any) => {
         avatarColor: { type: DataTypes.STRING, allowNull: false },
     }, { sequelize, updatedAt: false });
 
-    Wordlist.hasMany(Word, { foreignKey: { name: 'wordId' } })
+    Wordlist.hasMany(Word, { foreignKey: 'wordlistId'  })
+    Word.belongsTo(Wordlist,{foreignKey: 'wordlistId'})
     Wordlist.belongsTo(User, { foreignKey: { allowNull: false, name: 'ownerId' } })
     Wordlist.hasOne(BinaryExtraction, { foreignKey: { name: 'wordlistId' } })
     return Wordlist;
