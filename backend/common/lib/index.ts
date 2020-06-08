@@ -1,2 +1,2 @@
 export {default as config } from './config'
-export * from './dao'
+export {BinaryExtraction,Database,Image,User,Word,Wordlist,YoutubeSubtitle} from './dao'
