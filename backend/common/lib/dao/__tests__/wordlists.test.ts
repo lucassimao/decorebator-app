@@ -24,7 +24,7 @@ test('should be able to create a wordlist with 4 words', async () => {
         language: 'pt-BR',
         name: 'wordlist 123',
         avatarColor: '#fff',
-        userId: user.id
+        ownerId: user.id
     });
 
     const promises = ['it', 'works', 'as', 'expected'].map(name => wordlist.createWord({ name }));
@@ -42,7 +42,7 @@ test('should be able to create a wordlist with binary extraction information', a
         language: 'pt-BR',
         name: 'wordlist 123',
         avatarColor: '#fff',
-        userId: user.id
+        ownerId: user.id
     });
 
     await wordlist.createBinaryExtraction({extension: 'pdf',size: 1024, extractionMs: 2000})
