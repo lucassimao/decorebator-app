@@ -1,4 +1,4 @@
-import { Model, Sequelize } from 'sequelize';
+import { Model, Sequelize, HasManyGetAssociationsMixin, Association } from 'sequelize';
 import { Wordlist } from './wordlist';
 import { Word } from './word';
 
@@ -11,6 +11,9 @@ export class User extends Model {
 
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
+
+    public getWordlists!: HasManyGetAssociationsMixin<Wordlist>;
+
 
     public async getAllWords(): Promise<String[]> {
         const words = await Word.findAll({
@@ -30,6 +33,10 @@ export class User extends Model {
         // @ts-ignore
         return words.map(({word_name}) => word_name )
     }
+
+    public static associations: {
+        wordlist: Association<User, Wordlist>,
+    }    
 
     /**
      * @deprecated use createdAt

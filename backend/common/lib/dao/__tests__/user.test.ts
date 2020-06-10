@@ -62,3 +62,23 @@ test('should be able to bring all user words from all wordlists', async() => {
     expect(allWords).toEqual(['Word 1','Word 2','Word 3', 'Word 4', 'Word 5'])
 
 })
+
+test('should be able to retrieve all wordlists using getWordlists', async()=>{
+    const user = await User.create({name:'Lucas',email: 'xpto@gmail.com',country: 'BR', encryptedPassword: '123'})
+    const user2 = await User.create({name:'another user',email: 'xpto2@gmail.com',country: 'BR', encryptedPassword: '123'})
+
+    const wordlist1 = await Wordlist.create({
+        isPrivate: true,
+        description: 'xpto',
+        language: 'pt-BR',
+        name: 'wordlist 123',
+        avatarColor: '#fff',
+        ownerId: user.id
+    });
+
+    const userWordlists = await user.getWordlists()
+    expect(userWordlists).toHaveLength(1)
+    expect(userWordlists[0].id).toEqual(wordlist1.id)
+    
+    expect(await user2.getWordlists()).toHaveLength(0)
+})

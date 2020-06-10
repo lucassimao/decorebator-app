@@ -50,6 +50,7 @@ export default (sequelize: Sequelize, DataTypes: any) => {
     Wordlist.hasMany(Word, { foreignKey: 'wordlistId'  })
     Word.belongsTo(Wordlist,{foreignKey: 'wordlistId'})
     Wordlist.belongsTo(User, { foreignKey: { allowNull: false, name: 'ownerId' } })
+    User.hasMany(Wordlist,{foreignKey: 'ownerId'})
     Wordlist.hasOne(BinaryExtraction, { foreignKey: { name: 'wordlistId' } })
     return Wordlist;
 }
