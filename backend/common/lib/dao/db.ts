@@ -10,12 +10,20 @@ const pool = {
 }
 
 export default class Database {
-    private sequelize?: Sequelize
+    private static _instance: Database
+
+    private constructor(private sequelize: Sequelize){}
+
+    
+    public static get instance() : Database {
+        return this._instance
+    }
+    
 
     /**
-     * connect
+     * Used to construct a singleton instance of the Database class
      */
-    public connect(dbUrl: string) {
+    public static connect(dbUrl: string) : Database {
         const sequelize = new Sequelize(dbUrl, {
             pool, dialectOptions: {
                 options: {
@@ -30,7 +38,8 @@ export default class Database {
         sequelize.import(__dirname + "/word")
         sequelize.import(__dirname + "/wordlist")
         sequelize.import(__dirname + "/youtubeSubtitle")
-        this.sequelize = sequelize
+        Database._instance = new Database(sequelize)
+        return Database._instance
     }
 
     /**
@@ -39,6 +48,13 @@ export default class Database {
     public async disconnect() {
         if (this.sequelize)
             return this.sequelize?.close()
+    }
+
+    /**
+     * transact
+     */
+    public doInsideTransaction(operation: () => Promise<void> )  {
+        return this.sequelize.transaction(operation)
     }
 
     

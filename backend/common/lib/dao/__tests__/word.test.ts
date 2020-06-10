@@ -3,16 +3,13 @@ import { Word } from "../word";
 import { Image } from "../image";
 import { User, Wordlist } from "..";
 
-let database: Database
-
 beforeEach(async () => {
-    database = new Database()
-    database.connect('sqlite::memory:')
-    await database.createDatabase()
+    Database.connect('sqlite::memory:')
+    await Database.instance.createDatabase()
 })
 
 afterEach(async () => {
-    await database.disconnect()
+    await Database.instance.disconnect()
 })
 
 test('should be able to create a word with 3 images', async () => {
