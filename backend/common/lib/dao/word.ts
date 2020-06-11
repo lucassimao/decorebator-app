@@ -29,7 +29,7 @@ export class Word extends Model {
 export default (sequelize: Sequelize, DataTypes: any) => {
     Word.init({
         name: { type: DataTypes.STRING, allowNull: false },
-    }, { sequelize, updatedAt: false });
+    }, { sequelize, updatedAt: false,name: {singular: 'word',plural: 'words'} });
 
     Word.hasMany(Image, { foreignKey: { name: 'wordId' } });
 
