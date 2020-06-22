@@ -1,7 +1,7 @@
-import { Association, Model, Sequelize, HasManyCreateAssociationMixin, HasManyCountAssociationsMixin, HasManyGetAssociationsMixin, HasOneGetAssociationMixin, HasOneCreateAssociationMixin, BelongsToGetAssociationMixin, BelongsToSetAssociationMixin } from 'sequelize';
+import { Association, BelongsToGetAssociationMixin, BelongsToSetAssociationMixin, HasManyCountAssociationsMixin, HasManyCreateAssociationMixin, HasManyGetAssociationsMixin, HasOneCreateAssociationMixin, HasOneGetAssociationMixin, Model, Sequelize } from 'sequelize';
+import { BinaryExtraction } from './binaryExtraction';
 import { User } from "./user";
 import { Word } from './word';
-import { BinaryExtraction } from './binaryExtraction';
 
 export class Wordlist extends Model {
     public id?: number;
@@ -23,7 +23,6 @@ export class Wordlist extends Model {
 
     public getOwner!: BelongsToGetAssociationMixin<User>
     public setOwner!: BelongsToSetAssociationMixin<User, number>
-
 
     /**
      * @deprecated use createdAt
@@ -47,10 +46,10 @@ export default (sequelize: Sequelize, DataTypes: any) => {
         avatarColor: { type: DataTypes.STRING, allowNull: false },
     }, { sequelize, updatedAt: false });
 
-    Wordlist.hasMany(Word, { foreignKey: 'wordlistId'  })
-    Word.belongsTo(Wordlist,{foreignKey: 'wordlistId'})
+    Wordlist.hasMany(Word, { foreignKey: 'wordlistId', onDelete: 'CASCADE' })
+    Word.belongsTo(Wordlist, { foreignKey: 'wordlistId' })
     Wordlist.belongsTo(User, { foreignKey: { allowNull: false, name: 'ownerId' } })
-    User.hasMany(Wordlist,{foreignKey: 'ownerId'})
+    User.hasMany(Wordlist, { foreignKey: 'ownerId' })
     Wordlist.hasOne(BinaryExtraction, { foreignKey: { name: 'wordlistId' } })
     return Wordlist;
 }

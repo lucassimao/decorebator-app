@@ -1,4 +1,4 @@
-import Database from "../db";
+import Database from "../../db";
 import { Image } from "../image";
 
 

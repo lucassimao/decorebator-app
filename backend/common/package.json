@@ -1,6 +1,6 @@
 {
   "name": "@lucassimao/decorabator-common",
-  "version": "2.0.1",
+  "version": "3.2.0",
   "description": "Decorabator base classes and utilities",
   "scripts": {
     "test": "rm -rf ./dist && jest --coverage",
@@ -9,7 +9,7 @@
   },
   "main": "dist/lib/index.js",
   "engines": {
-    "node": ">=12"
+    "node": ">=14"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
@@ -37,11 +37,10 @@
     "@babel/preset-typescript": "^7.10.1",
     "@types/bluebird": "^3.5.32",
     "@types/jest": "^25.2.3",
-    "@types/node": "^14.0.11",
+    "@types/node": "^14.0.13",
     "@types/validator": "^13.0.0",
     "babel-jest": "^26.0.1",
     "jest": "^26.0.1",
-    "sequelize": "^5.21.12",
     "sqlite3": "^4.2.0",
     "ts-jest": "^26.1.0",
     "typescript": "^3.9.5"
@@ -49,8 +48,9 @@
   "dependencies": {
     "pg": "^8.2.1",
     "pg-hstore": "^2.3.3",
+    "sequelize": "^5.21.12",
     "winston": "^3.2.1",
-    "winston-daily-rotate-file": "^4.4.2"
+    "winston-daily-rotate-file": "^4.5.0"
   },
   "peerDependencies": {
     "sequelize": "^5.x"

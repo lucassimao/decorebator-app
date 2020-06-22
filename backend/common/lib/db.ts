@@ -1,4 +1,4 @@
-import { Sequelize, Model, ModelCtor } from "sequelize";
+import { Sequelize, Model, ModelCtor, Transaction } from "sequelize";
 
 const pool = {
     max: 5,
@@ -32,12 +32,12 @@ export default class Database {
                 }
             },
         })
-        sequelize.import(__dirname + "/image")
-        sequelize.import(__dirname + "/binaryExtraction")
-        sequelize.import(__dirname + "/user")
-        sequelize.import(__dirname + "/word")
-        sequelize.import(__dirname + "/wordlist")
-        sequelize.import(__dirname + "/youtubeSubtitle")
+        sequelize.import(__dirname + "/entities/image")
+        sequelize.import(__dirname + "/entities/binaryExtraction")
+        sequelize.import(__dirname + "/entities/user")
+        sequelize.import(__dirname + "/entities/word")
+        sequelize.import(__dirname + "/entities/wordlist")
+        sequelize.import(__dirname + "/entities/youtubeSubtitle")
         Database._instance = new Database(sequelize)
         return Database._instance
     }
@@ -53,7 +53,7 @@ export default class Database {
     /**
      * transact
      */
-    public doInsideTransaction(operation: () => Promise<void> )  {
+    public doInsideTransaction<T>(operation: (t: Transaction) => Promise<T> )  {
         return this.sequelize.transaction(operation)
     }
 

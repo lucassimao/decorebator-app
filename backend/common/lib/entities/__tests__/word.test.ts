@@ -1,7 +1,8 @@
-import Database from "../db";
-import { Word } from "../word";
+import Database from "../../db";
 import { Image } from "../image";
-import { User, Wordlist } from "..";
+import { User } from "../user";
+import { Word } from "../word";
+import { Wordlist } from "../wordlist";
 
 beforeEach(async () => {
     Database.connect('sqlite::memory:')

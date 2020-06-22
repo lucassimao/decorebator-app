@@ -1,4 +1,4 @@
-import { Model, Association, Sequelize, HasManyGetAssociationsMixin, HasManyCountAssociationsMixin, HasManyCreateAssociationMixin, BelongsToGetAssociationMixin } from 'sequelize';
+import { Association, BelongsToGetAssociationMixin, HasManyCountAssociationsMixin, HasManyCreateAssociationMixin, HasManyGetAssociationsMixin, Model, Sequelize, HasManyRemoveAssociationMixin } from 'sequelize';
 import { Image } from './image';
 import { Wordlist } from './wordlist';
 
@@ -11,6 +11,8 @@ export class Word extends Model {
     public getImages!: HasManyGetAssociationsMixin<Image>;
     public countImages!: HasManyCountAssociationsMixin;
     public createImage!: HasManyCreateAssociationMixin<Image>;
+    public deleteImage!: HasManyRemoveAssociationMixin<Image,number>;
+
 
     public getWordlist!: BelongsToGetAssociationMixin<Wordlist>
 
@@ -26,10 +28,12 @@ export class Word extends Model {
     }
 }
 
+
+
 export default (sequelize: Sequelize, DataTypes: any) => {
     Word.init({
         name: { type: DataTypes.STRING, allowNull: false },
-    }, { sequelize, updatedAt: false,name: {singular: 'word',plural: 'words'} });
+    }, { sequelize, updatedAt: false, name: { singular: 'word', plural: 'words' } });
 
     Word.hasMany(Image, { foreignKey: { name: 'wordId' } });
 

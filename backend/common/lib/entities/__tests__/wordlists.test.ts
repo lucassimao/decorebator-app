@@ -1,8 +1,8 @@
-import Database from "../db";
-import { Wordlist } from "../wordlist";
-import { Word } from "../word";
-import { User } from "../user";
 import { BinaryExtraction } from "../binaryExtraction";
+import Database from "../../db";
+import { User } from "../user";
+import { Word } from "../word";
+import { Wordlist } from "../wordlist";
 
 beforeEach(async () => {
     Database.connect('sqlite::memory:')

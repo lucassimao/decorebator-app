@@ -1,6 +1,6 @@
-import { Wordlist } from "..";
-import Database from "../db";
+import Database from "../../db";
 import { User } from "../user";
+import { Wordlist } from "../wordlist";
 
 
 beforeEach(async () => {
