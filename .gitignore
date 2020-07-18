@@ -1,4 +1,5 @@
 **/node_modules/*
+**/.env
 **/*.log
 **/*-audit.json*.log.gz
 **/*.log.gz
