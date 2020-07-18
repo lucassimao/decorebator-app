@@ -21,12 +21,12 @@ export class WordlistQueryBuilder {
             throw new Error("Either include words or wordsCount. Both are not supported");
         }
 
-        this.include = [{ model: Word, attributes: [] }]
         this.additionalAttrs = {
             include: [
-                [sequelize.fn('COUNT', sequelize.col('words.id')), 'wordsCount']
+                [sequelize.literal('(SELECT COUNT("Words"."id") FROM "Words" WHERE "Words"."wordlistId" = "Wordlist"."id")'), 'wordsCount']
             ]
         }
+
         this.isIncludingWordsCount=true
         return this
     }

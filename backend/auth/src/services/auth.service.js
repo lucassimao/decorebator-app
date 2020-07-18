@@ -1,7 +1,5 @@
-const bcrypt = require("bcrypt");
-const jwtBuilder = require("jwt-builder");
-const UserDao = require("../dao/user.dao");
-const config = require("../config");
+const  {UserRepository} = require('@lucassimao/decorabator-common')
+const isStringEmpty = string => !string || string.trim().length == 0;
 
 /**
  *
@@ -16,15 +14,7 @@ const register = (name, country, email, password) => {
   if (isStringEmpty(password)) {
     return Promise.reject("A password must be provided");
   }
-
-  return new Promise((resolve, reject) => {
-    bcrypt.hash(password, 10, function(err, hash) {
-      if (err) reject(err);
-      else resolve(hash);
-    });
-  }).then(encrypted_password =>
-    UserDao.create({ name, country, email, encrypted_password })
-  );
+  return UserRepository.register(name,country,email,password)
 };
 
 /**
@@ -38,39 +28,10 @@ const doLogin = (email, password) => {
   if (isStringEmpty(email) || isStringEmpty(password)) {
     return Promise.reject("Login and password must be provided");
   }
-
-  return UserDao.findOne({ email }, "encrypted_password")
-    .exec()
-    .then(user => {
-      if (!user) {
-        throw "user not found";
-      }
-      const doesMatch = bcrypt.compareSync(password, user.encrypted_password);
-      if (doesMatch) {
-        return user;
-      } else {
-        throw "wrong password";
-      }
-    })
-    .then(user => {
-      return jwtBuilder({
-        algorithm: "HS256",
-        secret: config.jwtSecretKey,
-        iat: true,
-        nbf: true,
-        exp: config.jwtExpiration,
-        iss: config.domain,
-        userId: user._id,
-        claims: {
-          role: "user"
-        }
-      });
-    });
+  return UserRepository.login(email, password)
 };
 
-// TODO use validator library
-const isStringEmpty = string => !string || string.trim().length == 0;
 
-const removeAccount = email => UserDao.deleteMany({ email });
+const removeAccount = email => UserRepository.removeAccount(email);
 
 module.exports = { register, doLogin, removeAccount };

@@ -1,7 +1,7 @@
 import Database from '../../db'
 import WordDTO from '../../dto/word.dto'
 import WordlistDTO from '../../dto/wordlist.dto'
-import user, { User } from '../../entities/user'
+import { User } from '../../entities/user'
 import { Wordlist } from '../../entities/wordlist'
 import WordlistRepository from '../wordlist.repository'
 import { WordlistQueryBuilder } from '../wordlistQueryBuilder'
@@ -74,8 +74,8 @@ it('user be able to update their own wordlists', async () => {
     const user1 = await User.findOne({where: {email: 'user1@gmail.com'}})
     const wordlist = await Wordlist.findOne()
 
-    const nModified = await WordlistRepository.update({name: 'NEW NAME'}, wordlist?.id!, user1?.id!)
-    expect(nModified).toBe(1)
+    const status = await WordlistRepository.update({name: 'NEW NAME'}, wordlist?.id!, user1?.id!)
+    expect(status).toBeTruthy()
 })
 
 it('user should not be able to update others wordlists', async () => {
@@ -91,8 +91,8 @@ it('user should not be able to update others wordlists', async () => {
 
     expect(user2Wordlist.id).toBeTruthy()
     expect(user1?.id).toBeTruthy()
-    const nModified = await WordlistRepository.update({name: 'HACKED'}, user2Wordlist.id!, user1?.id!)
-    expect(nModified).toBe(0)
+    const status = await WordlistRepository.update({name: 'HACKED'}, user2Wordlist.id!, user1?.id!)
+    expect(status).toBeFalsy()
 })
 
 
@@ -100,8 +100,8 @@ it('user be able to DELETE their own wordlists', async () => {
     const user1 = await User.findOne({where: {email: 'user1@gmail.com'}})
     const wordlist = await Wordlist.findOne()
 
-    const nDeleted = await WordlistRepository.delete(wordlist?.id!, user1?.id!)
-    expect(nDeleted).toBe(1)
+    const status = await WordlistRepository.delete(wordlist?.id!, user1?.id!)
+    expect(status).toBeTruthy()
     expect(await Wordlist.count({where: {ownerId: user1?.id!}})).toBe(0)
     expect(await Word.count()).toBe(0)
 
@@ -119,6 +119,6 @@ it('user should not be able to DELETE others wordlists', async () => {
 
     expect(user2Wordlist.id).toBeTruthy()
     expect(user1?.id).toBeTruthy()
-    const nDeleted = await WordlistRepository.delete(user2Wordlist.id!, user1?.id!)
-    expect(nDeleted).toBe(0)
+    const status = await WordlistRepository.delete(user2Wordlist.id!, user1?.id!)
+    expect(status).toBeFalsy()
 })

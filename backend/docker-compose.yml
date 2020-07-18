@@ -1,17 +1,20 @@
 version: '3'
 services:
   auth:
-    environment: 
+    environment:
+      - GITHUB_TOKEN
+      - DB_URL
       - TEST_CONTAINERS
       - IGNORE_REQUEST_LIMIT
       - NODE_ENV
       - JWT_SECRET_KEY
-      - MONGO_DB_URL
       - HTTP_PORT=3000
     depends_on: 
-      - db
+      - postgres
     build:
       context: auth/
+      args: 
+        - GITHUB_TOKEN      
     ports: 
       - "3001:3000" 
   wordlists:
@@ -21,49 +24,60 @@ services:
       - NODE_ENV
       - YOUTUBE_SERVICE_URL
       - JWT_SECRET_KEY
-      - MONGO_DB_URL    
       - HTTP_PORT=3000
+      - DB_URL
+      - GITHUB_TOKEN
     depends_on: 
-      - db
+      - postgres
     build:
       context: wordlists/
+      args: 
+        - GITHUB_TOKEN
     ports:
     - "3002:3000"
     volumes: 
       - $HOME/.aws/:/root/.aws/:ro
-  quizzes:
-    environment: 
-      - TEST_CONTAINERS
-      - NODE_ENV
-      - JWT_SECRET_KEY
-      - MONGO_DB_URL
-      - HTTP_PORT=4000
-    depends_on: 
-      - db
-      - auth
-    build:
-      context: quizzes/
-    ports: 
-      - "3003:4000" 
+  # quizzes:
+  #   environment: 
+  #     - TEST_CONTAINERS
+  #     - NODE_ENV
+  #     - JWT_SECRET_KEY
+  #     - DB_URL
+  #     - HTTP_PORT=4000
+  #     - GITHUB_TOKEN
+  #   depends_on: 
+  #     - postgres
+  #     - auth
+  #   build:
+  #     context: quizzes/
+  #     args: 
+  #       - GITHUB_TOKEN      
+  #   ports: 
+  #     - "3003:4000" 
   youtube:
     environment: 
       - TEST_CONTAINERS
       - NODE_ENV
+      - DB_URL
       - SHOW_LOG_ON_STDOUT
       - JWT_SECRET_KEY
-      - MONGO_DB_URL
       - HTTP_PORT=4000
     depends_on: 
-      - db
+      - postgres
     build:
       context: youtube/
+      args: 
+        - GITHUB_TOKEN        
     ports: 
       - "3004:4000"      
-  db:
-    image: mongo:4.2 
-    volumes: 
-      - "mongodb_data:/data/db"
-    ports:
-      - "27017:27017"
+  postgres:
+    environment: 
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB    
+    image: postgres:10-alpine
+    ports: 
+      - "5432:5432"
+    volumes:
+      - "postgres_data:/var/lib/postgresql/data"
 volumes: 
-  mongodb_data:
+  postgres_data:

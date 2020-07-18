@@ -1,38 +1,18 @@
-import { Model, Sequelize, HasManyGetAssociationsMixin, Association } from 'sequelize';
+import fs from "fs";
+import { Association, HasManyGetAssociationsMixin, Model, Sequelize } from 'sequelize';
 import { Wordlist } from './wordlist';
-import { Word } from './word';
 
 export class User extends Model {
     public id?: number;
-    public name?: String;
-    public email?: String;
-    public country?: String;
-    public encryptedPassword?: String;
+    public name?: string;
+    public email?: string;
+    public country?: string;
+    public encryptedPassword?: string;
 
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
 
     public getWordlists!: HasManyGetAssociationsMixin<Wordlist>;
-
-
-    public async getAllWords(): Promise<String[]> {
-        const words = await Word.findAll({
-            attributes: [[Sequelize.fn('DISTINCT', Sequelize.col('Word.name')), 'word_name']],
-            order: [['name','ASC']],
-            include: [
-                {
-                    model: Wordlist,
-                    attributes: [],
-                    where: { ownerId: this.id! }
-                }
-            ],
-            group:['word_name'],
-            raw:true
-        })
-
-        // @ts-ignore
-        return words.map(({word_name}) => word_name )
-    }
 
     public static associations: {
         wordlist: Association<User, Wordlist>,
@@ -46,11 +26,18 @@ export class User extends Model {
     }
 }
 
+type Country = {
+    "alpha-2": string
+}
+var countryCodes = JSON.parse(
+    fs.readFileSync(__dirname + "/../resources/countries.json", "utf8")
+  ).map((country: Country) => country["alpha-2"]);
+
 export default (sequelize: Sequelize, DataTypes: any) => {
     User.init({
         name: { type: DataTypes.STRING, allowNull: false },
         encryptedPassword: { type: DataTypes.STRING, allowNull: false },
-        country: { type: DataTypes.STRING, allowNull: false },
+        country: { type: DataTypes.ENUM, allowNull: false,values: countryCodes, validate: {isIn: [countryCodes]} },
         email: { type: DataTypes.STRING, allowNull: false, validate: { isEmail: true }, unique: true }
     }, { sequelize });
     return User;

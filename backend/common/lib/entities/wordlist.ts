@@ -44,7 +44,7 @@ export default (sequelize: Sequelize, DataTypes: any) => {
         description: { type: DataTypes.TEXT, allowNull: true },
         language: { type: DataTypes.STRING, allowNull: false },
         avatarColor: { type: DataTypes.STRING, allowNull: false },
-    }, { sequelize, updatedAt: false });
+    }, { sequelize, updatedAt: false, indexes: [{fields: ['ownerId','id']}] });
 
     Wordlist.hasMany(Word, { foreignKey: 'wordlistId', onDelete: 'CASCADE' })
     Word.belongsTo(Wordlist, { foreignKey: 'wordlistId' })

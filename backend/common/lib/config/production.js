@@ -18,5 +18,6 @@ const logger = winston.createLogger({
 
 module.exports = {
   httpDomain: `https://decorebator.com`,
-  logger
+  logger,
+  jwtExpiration: 3600, // 1 hour
 };

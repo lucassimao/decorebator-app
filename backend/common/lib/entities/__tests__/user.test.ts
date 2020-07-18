@@ -1,6 +1,7 @@
 import Database from "../../db";
 import { User } from "../user";
 import { Wordlist } from "../wordlist";
+import { UserRepository } from "../..";
 
 
 beforeEach(async () => {
@@ -12,6 +13,9 @@ afterEach(async () => {
     await Database.instance.disconnect()
 })
 
+test('should not accept a invalid country code',async ()=> {
+    await expect(User.create({ email: 'abc@gmail.com', name: 'lucas', country: 'inexisting', encryptedPassword: '123' })).rejects.toThrow('Validation error');
+}) 
 test("shouldn't accept a invalid email", async () => {
     await expect(User.create({ email: 'Invalid email', name: 'lucas', country: 'BR', encryptedPassword: '123' })).rejects.toThrow('Validation error');
 })
@@ -55,7 +59,7 @@ test('should be able to bring all user words from all wordlists', async() => {
     await wordlist2.createWord({name: 'Word 4'})    
     await wordlist2.createWord({name: 'Word 5'})    
 
-    const allWords = await user.getAllWords()
+    const allWords = await UserRepository.getAllWords(user.id!)
     expect(allWords).toEqual(['Word 1','Word 2','Word 3', 'Word 4', 'Word 5'])
 
 })

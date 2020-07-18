@@ -2,52 +2,61 @@ const Router = require("express").Router;
 const wordRouter = require("./word.router");
 const wordlistRouter = require("./wordlist.router");
 const imageRouter = require("./image.router");
-const { logger } = require("../config");
 const wordlistService = require("../services/wordlist.service");
+const wordService = require("../services/word.service");
+
+const { config: { logger } } = require('@lucassimao/decorabator-common')
 
 const root = Router();
 
+
 /**
  * This express midleware is only called in the situation in which the default
- * midleware is not able to successfull process the request
+ * midleware is not able to successfull process the request 
  *
  */
-const resolveStatus = async (req, res) => {
-  const regex = /\/wordlists\/(\w+)(\/words\/(\w+)(\/images\/(\w+))?)?/;
-  const [, idWordlist, , idWord, , idImage] = regex.exec(req.baseUrl + req.url);
+const resolveStatus = async (req, res, next) => {
+  const url = req.baseUrl + req.url;
 
-  const msg = `No suitable route for ${req.baseUrl + req.url} ... resolving status`;
-  logger.warn(msg);
+  try {
+    logger.warn(`Resolving status for ${url} ...`);
 
-  const wordlist = await wordlistService.getWithWords(idWordlist);
+    const regex = /\/wordlists\/(\d+)(\/words\/(\d+)(\/images\/(\d+))?)?/;
+    const [, idWordlist, , idWord, , idImage] = regex.exec(url);
 
-  if (!wordlist) {
-    res.status(404).send("wordlist not found");
-    return;
-  }
+    const wordlist = await wordlistService.get(idWordlist);
 
-  if (String(wordlist.owner) != String(req.user._id)) {
-    res.sendStatus(403);
-    return;
-  }
-
-  if (idWord) {
-    const word = wordlist.words.find(w => String(w._id) == String(idWord));
-    if (!word) {
-      res.status(404).send("word not found");
+    if (!wordlist) {
+      res.status(404).send("wordlist not found");
       return;
     }
 
-    if (idImage) {
-      const image = word.images.find(img => String(img._id) == idImage);
-      if (!image) {
-        res.status(404).send("image not found");
+    if (parseInt(wordlist.ownerId) != parseInt(req.user.id)) {
+      res.sendStatus(403);
+      return;
+    }
+
+    if (idWord) {
+      const word = await wordService.getWithImages(idWordlist, idWord, req.user)
+      if (!word) {
+        res.status(404).send("word not found");
         return;
       }
-    }
-  }
 
-  res.sendStatus(404);
+      if (idImage) {
+        const image = word.images?.find(img => parseInt(img.id) == idImage);
+        if (!image) {
+          res.status(404).send("image not found");
+          return;
+        }
+      }
+    }
+
+    res.sendStatus(404);
+  } catch (error) {
+    logger.error(`Error while resolving ${url}`)
+    next(error)
+  }
 };
 
 root

@@ -1,4 +1,4 @@
-import { Model, Sequelize } from 'sequelize';
+import { Model, Sequelize, ModelValidateOptions } from 'sequelize';
 
 export class Image extends Model {
   public id?: number;
@@ -11,7 +11,7 @@ export class Image extends Model {
 
 export default (sequelize: Sequelize, DataTypes: any) => {
   Image.init({
-    url: { type: DataTypes.STRING, allowNull: false, validate: { isUrl: true } },
+    url: { type: DataTypes.STRING, allowNull: false, validate: {isUrl: true} },
     description: { type: DataTypes.TEXT, allowNull: true }
   }, { sequelize, updatedAt: false });
   return Image;

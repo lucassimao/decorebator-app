@@ -1,6 +1,8 @@
+import { FindOptions } from "sequelize/types"
+import WordDTO from "../dto/word.dto"
+import { Image } from "../entities/image"
 import { Word } from "../entities/word"
 import { Wordlist } from "../entities/wordlist"
-import WordDTO from "../dto/word.dto"
 
 type PaginationArgs = { offset: number, limit: number }
 
@@ -15,13 +17,34 @@ const WordRepository = {
         }
     },
 
-    async getAllWordsFromWordlist(wordlistId: number, userId: number, paginationArgs?: PaginationArgs): Promise<WordDTO[] | undefined> {
-        const { offset, limit } = paginationArgs ?? {}
-        const words = await Word.findAll({
+    async getByIdWithImages(wordlistId: number, wordId: number, userId: number): Promise<WordDTO | undefined> {
+        const word = await Word.findOne({
+            where: { wordlistId, id: wordId, '$Wordlist.ownerId$': userId },
+            include: [{ model: Wordlist, attributes: [] }, { model: Image }]
+        })
+
+        if (word) {
+            return {
+                id: word.get('id'), 
+                createdAt: word.get('createdAt').toISOString(),
+                images: await word.getImages(),
+                name: word.get('name'),
+                wordlistId: word.get('wordlistId')
+            } as WordDTO
+        }
+    },
+
+    async getWordsFromWordlist(wordlistId: number, userId: number, paginationArgs?: PaginationArgs): Promise<WordDTO[] | undefined> {
+        let options: FindOptions = {
             attributes: ['id', 'name', 'wordlistId', 'createdAt'],
             where: { wordlistId, '$Wordlist.ownerId$': userId },
-            offset, limit, include: [{ model: Wordlist, attributes: [] }]
-        })
+            include: [{ model: Wordlist, attributes: [] }]
+        }
+        if (paginationArgs) {
+            const { offset, limit } = paginationArgs
+            options = { ...options, offset, limit }
+        }
+        const words = await Word.findAll(options)
         return words?.map(w => w.get({ plain: true }) as WordDTO)
     },
 

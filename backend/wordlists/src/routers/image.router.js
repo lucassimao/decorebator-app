@@ -1,35 +1,34 @@
 const express = require("express");
 const service = require("../services/image.service");
-const { logger } = require("../config");
+const wordService = require("../services/word.service");
 
 const router = express.Router({ mergeParams: true });
-const wrapAsync = asyncMiddleware => {
-  return (req, res, next) =>
-    asyncMiddleware(req, res, next).catch(e => {
-      logger.error(e);
-      next(e);
-    });
-};
+const wrapAsync = (asyncMiddleware) => (req, res, next) => asyncMiddleware(req, res, next).catch(next);
 
 router
+  .get('/', wrapAsync(async (req, res, next) => {
+    const { idWordlist, idWord } = req.params;
+    const word = await wordService.getWithImages(idWordlist, idWord, req.user)
+    if (word) {
+      res.status(200).send(word.images)
+      return
+    } else {
+      next()
+    }
+  }))
   .post(
     "/",
     express.json({ limit: "2MB" }),
     wrapAsync(async (req, res, next) => {
-      const wordlist = await service.addImage(
+      const newImage = await service.addImage(
         req.params.idWordlist,
         req.params.idWord,
         req.body,
         req.user
       );
 
-      if (wordlist) {
-        const word = wordlist.words.find(
-          word => String(word._id) == req.params.idWord
-        );
-        const newImage = word.images[word.images.length - 1];
-
-        res.set("Link", `${req.baseUrl}/${newImage._id}`);
+      if (newImage) {
+        res.set("Link", `${req.baseUrl}/${newImage.id}`);
         res.sendStatus(201);
       } else {
         next();
@@ -40,7 +39,7 @@ router
     "/:idImage",
     express.json({ limit: "2MB" }),
     wrapAsync(async (req, res, next) => {
-      const { nModified, ok } = await service.patchImage(
+      const status = await service.patchImage(
         req.params.idWordlist,
         req.params.idWord,
         req.params.idImage,
@@ -48,7 +47,7 @@ router
         req.user
       );
 
-      if (nModified === 1 && ok === 1) {
+      if (status) {
         res.sendStatus(204);
       } else {
         next();
@@ -58,14 +57,14 @@ router
   .delete(
     "/:idImage",
     wrapAsync(async (req, res, next) => {
-      const { nModified, ok } = await service.deleteImage(
+      const status = await service.deleteImage(
         req.params.idWordlist,
         req.params.idWord,
         req.params.idImage,
         req.user
       );
 
-      if (nModified === 1 && ok === 1) {
+      if (status) {
         res.sendStatus(204);
       } else {
         next();

@@ -1,91 +1,75 @@
-const mongoose = require("mongoose");
-const config = require("../config");
-const WordlistDao = require("../dao/wordlist.dao");
 const textract = require('textract')
 const { performance } = require('perf_hooks');
+
+const { WordlistQueryBuilder, WordlistRepository,config, UserRepository } = require("@lucassimao/decorabator-common")
+
 
 
 /**
  * Returns user's wordlists
  *
  * @param {number} pageSize The amount of wordlists to be returned
- * @param {String} filter A search key to use as filter to the field name of the wordlists
  * @param {number} page As the data set is seen as a set of pages, this param represents the requested page
- * @param {object} user The authenticated user
- * @param {mongoose.Types.ObjectId} user._id The user id
+ * @param {String} filter A search key to use as filter to the field name of the wordlists
+ * @param {User} user The authenticated user
  *
  * @returns {Promise} A promise, which resolves to an array of wordlists
  */
-const list = (
-  { pageSize = config.defaultPageSize, page = 0, filter },
-  user
-) => {
-  const skip = page > 0 ? page * pageSize : 0;
-  const query = { owner: user._id };
+const list = ({ pageSize = config.defaultPageSize, page = 0, filter }, user) => {
+  const queryBuilder = new WordlistQueryBuilder()
+  queryBuilder.owner(user).paginate(pageSize, page).orderedByIdDesc()
+
   if (filter) {
-    query.name = new RegExp(filter, "i");
+    queryBuilder.nameIlike(filter)
   }
-  return WordlistDao.find(query, null, {
-    lean: true,
-    limit: pageSize,
-    skip,
-    sort: { _id: -1 }
-  });
+  return WordlistRepository.filter(queryBuilder)
 };
 
 /**
  * Returns public wordlists
  *
  * @param {number} pageSize The amount of wordlists to be returned
- * @param {String} filter A search key to use as filter to the field name of the wordlists
  * @param {number} page As the data set is seen as a set of pages, this param represents the requested page
- * @param {object} user The authenticated user
- * @param {mongoose.Types.ObjectId} user._id The user id
+ * @param {String} filter A search key to use as filter to the field name of the wordlists
+ * @param {User} user The authenticated user
  *
  * @returns {Promise} A promise, which resolves to an array of wordlists
  */
-const listPublic = (
-  { pageSize = config.defaultPageSize, page = 0, filter },
-  user
-) => {
-  const skip = page > 0 ? page * pageSize : 0;
-  const query = { owner: { $ne: user._id }, isPrivate: false };
-  if (filter) {
-    query.name = new RegExp(filter, "i");
-  }
-  return WordlistDao.find(query, null, {
-    limit: pageSize,
-    lean: true,
-    skip,
-    sort: { _id: -1 }
-  });
-};
+const listPublic = ({ pageSize = config.defaultPageSize, page = 0, filter }, user) => {
+  const queryBuilder = new WordlistQueryBuilder()
+  queryBuilder.notOwnedBy(user).private(false)
+    .paginate(pageSize, page).orderedByIdDesc()
 
+  if (filter) {
+    queryBuilder.nameIlike(filter)
+  }
+  return WordlistRepository.filter(queryBuilder)
+};
 
 
 /**
  * Register a new wordlist
  *
  * @param {object} wordlist the wordlist to be persisted
- * @param {object} user The authenticated user, owner of the new wordlist
- * @param {mongoose.Types.ObjectId} user._id The user id
+ * @param {User} user The authenticated user, owner of the new wordlist
  *
  * @returns {Promise} A promise, which resolves to the persisted object
  */
 const save = async (wordlist, user) => {
-  let fileInfo
   const logger = config.logger;
-  let words = []
   const { minWordLength = 1, onlyNewWords = false } = wordlist
+  let fileInfo
+  let words = []
 
   if (wordlist.base64EncodedFile) {
-    const {fileType, buffer} = __parseBase64EncodedFile(wordlist.base64EncodedFile)
+    const { fileType, buffer } = __parseBase64EncodedFile(wordlist.base64EncodedFile)
     var t0 = performance.now()
     words = await __extractWordsFromBuffer(buffer)
     var t1 = performance.now()
+
     fileInfo = { extractionMs: t1 - t0, extension: fileType, size: buffer.length }
-  } else {
-    words = wordlist.words?.map(({ name }) => name)
+  } else if (Array.isArray(wordlist.words)) {
+    words = wordlist.words.map(({ name }) => name)
   }
   const isArrayOfWordsValid = words && Array.isArray(words) && words.length > 0;
 
@@ -97,110 +81,87 @@ const save = async (wordlist, user) => {
       .map(name => ({ name }))
 
     if (onlyNewWords) {
-      logger.debug(
-        `Registering new wordlist for user ${user._id} with ${words.length} words`
-      );
+      logger.debug(`Registering new wordlist for user ${user.id} with ${words.length} words`);
 
-      // extracting all user's wordlist terms
-      const existingWords = await WordlistDao.aggregate([
-        { $match: { owner: user._id } },
-        { $project: { words: 1, _id: 0 } },
-        { $unwind: "$words" },
-        { $replaceWith: "$words" },
-        { $group: { _id: "$name" } },
-        { $sort: { _id: 1 } }
-      ]);
-      const existingNames = existingWords.map(w => w._id);
-      logger.debug(
-        `User ${user._id} has ${existingNames.length} words already`
-      );
+      const existingNames = await UserRepository.getAllWords(user.id);
+      logger.debug(`User ${user.id} has ${existingNames.length} words already`);
 
       words = words.filter(
-        ({ name }) =>
-          !__binarySearch(existingNames, name, 0, existingNames.length)
+        ({ name }) => !__binarySearch(existingNames, name, 0, existingNames.length)
       );
-      logger.debug(
-        `Filtered wordlist for user ${user._id} now with ${words.length} words`
-      );
+      logger.debug(`Filtered wordlist for user ${user.id} now with ${words.length} words`);
     }
   }
 
-  // the attributes that don't fit the schema will be filtered out
-  return WordlistDao.create({ ...wordlist, owner: user._id, words, fileInfo });
+  return WordlistRepository.save(wordlist, user.id, words, fileInfo)
 };
 
 /**
- * Search the database for a wordlist with an _id, returning all fields but words
+ * Search the database for a wordlist with an id, returning all fields but words
  *
- * @param {string|mongoose.Types.ObjectId} id the wordlist id
- * @param {object} user The authenticated user, owner of the wordlist
- * @param {mongoose.Types.ObjectId} user._id The user id
+ * @param {number} id the wordlist id
+ * @param {User} user The authenticated user, owner of the wordlist
  *
  * @returns {Promise} A promise, which resolves to the persisted object, if found
  */
 const get = async (id, user) => {
-  var ObjectId = mongoose.Types.ObjectId;
-
-  const query = { _id: id instanceof ObjectId ? id : ObjectId(id) };
-  if (user) {
-    query.owner = user._id instanceof ObjectId ? user._id : ObjectId(user._id);
+  const queryBuilder = new WordlistQueryBuilder()
+  queryBuilder.id(id).includeWordsCount()
+  if (user){
+    queryBuilder.ownerId(user.id)
   }
 
-  const result = await WordlistDao.aggregate([
-    { $match: query },
-    { $addFields: { wordsCount: { $size: "$words" } } },
-    { $project: { words: 0 } },
-    { $limit: 1 }
-  ]);
-  if (Array.isArray(result) && result.length === 1) {
-    return result[0];
-  } else {
-    return null;
+  const result = await WordlistRepository.filter(queryBuilder)
+  if (result?.length === 1) {
+    return result[0]
   }
 };
 
 /**
  * Search the database for a wordlist with an _id, returning all fields
  *
- * @param {string|mongoose.Types.ObjectId} id the wordlist id
- * @param {object} user The authenticated user, owner of the wordlist
- * @param {mongoose.Types.ObjectId} user._id The user id
+ * @param {number} id the wordlist id
+ * @param {User} user The authenticated user, owner of the wordlist
+ * @param {number} user.id The user id
  *
  * @returns {Promise} A promise, which resolves to the persisted object, if found
  */
-const getWithWords = (id, user) => {
-  const query = { _id: id };
-  if (user) {
-    query.owner = user._id;
+const getWithWords = async (id, user) => {
+  const queryBuilder = new WordlistQueryBuilder()
+  queryBuilder.ownerId(user.id).id(id).includeWords()
+
+  const result = await WordlistRepository.filter(queryBuilder)
+  if (result?.length === 1) {
+    return result[0]
   }
-  return WordlistDao.findOne(query, null, { lean: true });
 };
 
 /**
  * Updates a existing wordlist
  *
- * @param {string|mongoose.Types.ObjectId} id The id of the object to be updated
- * @param {object} user The authenticated user, owner of the wordlist
- * @param {mongoose.Types.ObjectId} user._id The user id
+ * @param {number} id The id of the object to be updated
+ * @param {User} user The authenticated user, owner of the wordlist
+ * @param {number} user.id The user id
  *
  * @returns {Promise} A promise, which resolves to an operation info object from MongoDB
  */
-const update = (id, updateObj, user) => {
-  return WordlistDao.updateOne({ _id: id, owner: user._id }, updateObj);
+const update = async (id, updateObj, user) => {
+  return WordlistRepository.update(updateObj, id, user.id)
 };
 
 /**
  * removes an existing wordlist
  *
- * @param {string|mongoose.Types.ObjectId} id The id of the object to be updated
- * @param {object} user The authenticated user, owner of the wordlist
- * @param {mongoose.Types.ObjectId} user._id The user id
+ * @param {number} id The id of the wordlist to be removed
+ * @param {User} user The authenticated user, owner of the wordlist
+ * @param {number} user.id The user id
  *
  * @returns {Promise} A promise, which resolves to an operation info object from MongoDB
  */
-const remove = (id, user) => {
-  return WordlistDao.deleteOne({ _id: id, owner: user._id });
+const remove = async (id, user) => {
+  return WordlistRepository.delete(id, user.id)
 };
+
 
 
 /**
@@ -222,8 +183,8 @@ const __parseBase64EncodedFile = (base64EncodedFile) => {
 
   [, fileType, data] = regex.exec(base64EncodedFile)
   const buffer = Buffer.from(data, 'base64')
-  return {fileType, buffer}
-} 
+  return { fileType, buffer }
+}
 /**
  * Extract words from a buffer
  * 

@@ -1,6 +1,5 @@
 const express = require("express");
-const db = require("./db");
-const config = require("./config");
+const { config, Database } = require("@lucassimao/decorabator-common");
 const rootRouter = require("./routers");
 const rateLimit = require("express-rate-limit");
 const cors = require("cors");
@@ -11,7 +10,8 @@ const limiter = rateLimit({
   max: 50 // 50 requests per windowMs
 });
 
-db.connect()
+Database.connect(process.env.DB_URL)
+  .createDatabase()
   .then(() => {
     const app = express();
 
@@ -23,8 +23,16 @@ db.connect()
       config.isDev ? morgan("dev", { immediate: true }) : morgan("combined")
     );
     app.use("/", rootRouter);
-    app.listen(config.port);
+    const server = app.listen(config.port);
 
     config.logger.info(`auth is listenning at ${process.env.HTTP_PORT}`);
+
+    process.once("SIGUSR2", async () => {
+      await Database.instance.disconnect()
+      if (server) {
+        server.close()
+      }
+    });
+
   })
   .catch(config.logger.error);

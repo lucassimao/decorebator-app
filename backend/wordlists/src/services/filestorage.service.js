@@ -4,7 +4,7 @@ const path = require("path");
 const shortid = require("shortid");
 const fsPromises = require("fs").promises;
 const AWS = require("aws-sdk");
-const config = require("../config");
+const { config } = require("@lucassimao/decorabator-common")
 
 const s3 = new AWS.S3({ apiVersion: "2006-03-01" });
 
@@ -26,7 +26,7 @@ const store = async (user, fileName, base64EncodedFile) => {
     const localPath = path.join(os.tmpdir(), shortid.generate() + ext);
 
     await fsPromises.writeFile(localPath, buffer);
-    return localPath;
+    return `https://www.decorebator.com/${localPath}`;
   } else {
     return await storeOnAmazonS3(ext, buffer);
   }
@@ -73,7 +73,7 @@ async function removeS3File(uri) {
   };
 
   return new Promise((resolve, reject) => {
-    s3.deleteObject(params, function(err, data) {
+    s3.deleteObject(params, function (err, data) {
       if (err) {
         reject(err);
       } else {

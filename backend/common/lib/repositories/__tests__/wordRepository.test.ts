@@ -2,7 +2,8 @@ import Database from '../../db'
 import { User } from '../../entities/user'
 import { Word } from '../../entities/word'
 import { Wordlist } from '../../entities/wordlist'
-import WordService from '../word.repository'
+import WordRepository from '../word.repository'
+import { UserRepository } from '../..'
 
 beforeEach(async () => {
     Database.connect('sqlite::memory:')
@@ -18,7 +19,12 @@ beforeEach(async () => {
         ownerId: user.id
     });
 
-    const promises = ['it', 'works', 'as', 'expected'].map(name => wordlist.createWord({ name }));
+    const promises = ['it', 'works', 'as', 'expected'].map(async (name,index) => {
+        const word = await wordlist.createWord({ name })
+        const imgAttrs = { url: `http://foo-cdn.com/decorebator/${index}`, description: `Image for ${name}` }
+        await word.createImage(imgAttrs)
+        return word
+    });
 
     const user2 = await User.create({ name: 'Lucas 2', email: 'user2@gmail.com', country: 'BR', encryptedPassword: '123' })
     const wordlist2 = await Wordlist.create({
@@ -44,33 +50,43 @@ test('test getById', async () => {
     const word = await Word.findOne({ where: { name: 'expected' } })
 
     //@ts-ignore
-    const result = await WordService.getById(wordlist?.id, word?.id, user?.id)
+    const result = await WordRepository.getById(wordlist?.id, word?.id, user?.id)
     expect(Object.keys(result ?? {})).toHaveLength(4)
     expect(Object.keys(result ?? {})).toEqual(expect.arrayContaining(['id', 'name', 'wordlistId', 'createdAt']))
     //@ts-ignore
     expect(result.name).toEqual('expected')
 })
 
-test('test getAllWordsFromWordlist', async () => {
+test('test getByIdWithImage', async () => {
+    const user = await User.findOne({ where: { email: 'user1@gmail.com' } })
+    const wordlist = await Wordlist.findOne({where: {name: 'wordlist 123'}})
+    const word = await Word.findOne({ where: { name: 'expected', wordlistId: wordlist?.id! } })
+
+    const result = await WordRepository.getByIdWithImages(wordlist?.id!,word?.id!,user?.id!)
+    expect(result?.images).toHaveLength(1)
+    expect(result?.images![0].description).toEqual(`Image for expected`)
+})
+
+test('test getWordsFromWordlist', async () => {
     const user = await User.findOne({ where: { email: 'user2@gmail.com' } })
     const wordlist = (await user?.getWordlists() ?? [])[0]
 
     //@ts-ignore
-    const results = await WordService.getAllWordsFromWordlist(wordlist?.id, user?.id) ?? []
+    const results = await WordRepository.getWordsFromWordlist(wordlist?.id, user?.id) ?? []
     expect(results).toHaveLength(4)
     //@ts-ignore
     expect(results.map(({ name }) => name)).toEqual(expect.arrayContaining(['never', 'bet', 'against', 'america']))
 })
 
 
-test('test getAllWordsFromWordlist using  wrong owner ', async () => {
+test('test getWordsFromWordlist using  wrong owner ', async () => {
     const user1 = await User.findOne({ where: { email: 'user1@gmail.com' } })
     const user2 = await User.findOne({ where: { email: 'user2@gmail.com' } })
 
     const wordlist = (await user1?.getWordlists() ?? [])[0]
 
     //@ts-ignore
-    const results = await WordService.getAllWordsFromWordlist(wordlist?.id, user2?.id)
+    const results = await WordRepository.getWordsFromWordlist(wordlist?.id, user2?.id)
     expect(results).toHaveLength(0)
 })
 
@@ -79,8 +95,8 @@ test('test createWord', async () => {
     const wordlist = (await user?.getWordlists() ?? [])[0]
 
     //@ts-ignore
-    await WordService.createWord(wordlist?.id, 'awesome', user?.id)
-    expect(await user?.getAllWords()).toEqual(['against', 'america', 'awesome', 'bet', 'never'])
+    await WordRepository.createWord(wordlist?.id, 'awesome', user?.id)
+    expect(await UserRepository.getAllWords(user?.id!)).toEqual(['against', 'america', 'awesome', 'bet', 'never'])
 })
 
 test('test createWord with wrong user', async () => {
@@ -89,8 +105,8 @@ test('test createWord with wrong user', async () => {
     const wordlist = (await user1?.getWordlists() ?? [])[0]
 
     //@ts-ignore
-    await WordService.createWord(wordlist?.id, 'awesome', user2?.id)
-    expect(await user1?.getAllWords()).toEqual(['as', 'expected', 'it', 'works'])
+    await WordRepository.createWord(wordlist?.id, 'awesome', user2?.id)
+    expect(await UserRepository.getAllWords(user1?.id!)).toEqual(['as', 'expected', 'it', 'works'])
 })
 
 
@@ -101,8 +117,8 @@ test('test updateWord', async () => {
     const word = words.find(({ name }) => name === 'america')
 
     //@ts-ignore
-    await WordService.updateWord('AMERICA', wordlist.id, word.id, user.id)
-    expect(await user?.getAllWords()).toEqual(['AMERICA', 'against', 'bet', 'never'])
+    await WordRepository.updateWord('AMERICA', wordlist.id, word.id, user.id)
+    expect(await UserRepository.getAllWords(user?.id!)).toEqual(['AMERICA', 'against', 'bet', 'never'])
 })
 
 test('test updateWord with wrong user', async () => {
@@ -113,8 +129,8 @@ test('test updateWord with wrong user', async () => {
     const word = words.find(({ name }) => name === 'america')
 
     //@ts-ignore
-    await WordService.updateWord('AMERICA', wordlist.id, word.id, user1.id)
-    expect(await user2?.getAllWords()).toEqual(['against', 'america', 'bet', 'never'])
+    await WordRepository.updateWord('AMERICA', wordlist.id, word.id, user1.id)
+    expect(await UserRepository.getAllWords(user2?.id!)).toEqual(['against', 'america', 'bet', 'never'])
 })
 
 test('test deleteWord', async () => {
@@ -124,8 +140,8 @@ test('test deleteWord', async () => {
     const word = words.find(({ name }) => name === 'bet')
 
     //@ts-ignore
-    await WordService.deleteWord(wordlist.id, word?.id, user?.id)
-    expect(await user?.getAllWords()).toEqual(['against', 'america', 'never'])
+    await WordRepository.deleteWord(wordlist.id, word?.id, user?.id)
+    expect(await UserRepository.getAllWords(user?.id!)).toEqual(['against', 'america', 'never'])
 })
 
 test('test deleteWord with wrong user', async () => {
@@ -136,6 +152,6 @@ test('test deleteWord with wrong user', async () => {
     const word = words.find(({ name }) => name === 'bet')
 
     //@ts-ignore
-    await WordService.deleteWord(wordlist.id, word?.id, user1?.id)
-    expect(await user2?.getAllWords()).toEqual(['against', 'america', 'bet', 'never'])
+    await WordRepository.deleteWord(wordlist.id, word?.id, user1?.id)
+    expect(await UserRepository.getAllWords(user2?.id!)).toEqual(['against', 'america', 'bet', 'never'])
 })

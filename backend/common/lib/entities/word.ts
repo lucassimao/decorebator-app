@@ -1,4 +1,4 @@
-import { Association, BelongsToGetAssociationMixin, HasManyCountAssociationsMixin, HasManyCreateAssociationMixin, HasManyGetAssociationsMixin, Model, Sequelize, HasManyRemoveAssociationMixin } from 'sequelize';
+import { Association, BelongsToGetAssociationMixin, HasManyCountAssociationsMixin, HasManyCreateAssociationMixin, HasManyGetAssociationsMixin, Model, Sequelize } from 'sequelize';
 import { Image } from './image';
 import { Wordlist } from './wordlist';
 
@@ -11,8 +11,6 @@ export class Word extends Model {
     public getImages!: HasManyGetAssociationsMixin<Image>;
     public countImages!: HasManyCountAssociationsMixin;
     public createImage!: HasManyCreateAssociationMixin<Image>;
-    public deleteImage!: HasManyRemoveAssociationMixin<Image,number>;
-
 
     public getWordlist!: BelongsToGetAssociationMixin<Wordlist>
 

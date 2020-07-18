@@ -1,5 +1,9 @@
-if (!process.env.HTTP_PORT) throw "Http server port must be provided";
+import winston from "winston";
+
 const env = process.env.NODE_ENV || "development";
+if (env != 'test' && !process.env.HTTP_PORT){
+  throw "Http server port must be provided";
+}
 
 const baseConfig = {
   isDev: env == "development",
@@ -8,9 +12,11 @@ const baseConfig = {
   defaultPageSize: 10,
   domain: "https://decorebator.com",
   jwtSecretKey: process.env.JWT_SECRET_KEY || "112358132134",
+  jwtExpiration: 60 * 60 * 24 * 365, // 1 year
   dbOptions: {},
   dbUrl: process.env.DB_URL,
   port: process.env.HTTP_PORT,
+  logger: winston.createLogger(),
   httpOptions: {
     enableCompression: process.env.ENABLE_COMPRESSION == "true"
   }

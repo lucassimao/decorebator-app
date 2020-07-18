@@ -1,6 +1,6 @@
 const express = require("express");
 const service = require("../services/wordlist.service");
-const { logger } = require("../config");
+const { config: {logger},RepositoryException } = require('@lucassimao/decorabator-common')
 
 const router = express.Router();
 
@@ -50,14 +50,13 @@ router
     express.json({ limit: 2 * 1024 * 1024 }), // //TODO<backend> buffer size should be bigger for paying users
     wrapAsync(async (req, res) => {
       try {
-        let wordlist = req.body;
-        wordlist = await service.save(wordlist, req.user);
-        res.set("Link", `/wordlists/${wordlist._id}`);
+        const wordlist = await service.save(req.body, req.user);
+        res.set("Link", `/wordlists/${wordlist.id}`);
         res.status(201).end();
       } catch (error) {
-        if (error.name == "ValidationError") {
-          logger.error(error);
-          res.status(400).send(error.errors);
+        if (error instanceof RepositoryException && error.isValidationError) {
+          logger.error(error)
+          res.status(400).send(error.validationErrors);
         } else {
           throw error;
         }
@@ -67,9 +66,8 @@ router
   .delete(
     "/:id",
     wrapAsync(async (req, res, next) => {
-      const dbResponse = await service.delete(req.params.id, req.user);
-
-      if (dbResponse.ok === 1 && dbResponse.deletedCount === 1) {
+      const success = await service.delete(req.params.id, req.user);
+      if (success) {
         res.status(204).end();
       } else {
         next();
@@ -80,13 +78,13 @@ router
     "/:id",
     express.json(),
     wrapAsync(async (req, res, next) => {
-      const updateResult = await service.update(
+      const success = await service.update(
         req.params.id,
         req.body,
         req.user
       );
 
-      if (updateResult.ok === 1 && updateResult.nModified === 1) {
+      if (success) {
         res.set("Link", `/wordlists/${req.params.id}`);
         res.status(204).end();
       } else {
