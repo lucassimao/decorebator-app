@@ -6,14 +6,12 @@ const { Database, config: { logger, port, isDev,isProduction,dbUrl } } = require
 
 Database.connect(dbUrl)
   .then(() => {
-    const origin = isProduction ? ['decorebator.com','decorebator.web.app'] : '*'
-
     const server = new ApolloServer({
       typeDefs,
       resolvers,
       logger,
       context: contextFunction,
-      cors:{origin,allowedHeaders:'*',exposedHeaders:'*',credentials:true}
+      cors:{origin:'*',allowedHeaders:'*',exposedHeaders:'*',credentials:true}
     });
     server.listen({ port }).then(({ url }) => {
       logger.info(`🚀 Server ready at ${url}`);
