@@ -85,7 +85,7 @@ function Screen(props) {
   const createNewWordlist = async () => {
     try {
 
-      const { url, subtitle: { language, downloadUrl }, minWordLength } = state;
+      const { url, subtitle: { languageName, downloadUrl }, minWordLength } = state;
 
       showProgressModal("Wait ...", "Obtaining video details ...");
       const { title, description } = await youtubeService.getVideoDetails(url);
@@ -102,7 +102,7 @@ function Screen(props) {
         name: title,
         description,
         words,
-        language: language.name,
+        language: languageName,
         isPrivate: true,
         minWordLength,
         onlyNewWords: state.onlyNewWords

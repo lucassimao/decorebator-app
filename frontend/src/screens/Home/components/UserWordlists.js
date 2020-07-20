@@ -37,8 +37,8 @@ function Wordlists(props) {
       {wordlists.map(w => (
         <ListItem
           className={classes.listItem}
-          key={w._id}
-          to={`/wordlists/${w._id}`}
+          key={w.id}
+          to={`/wordlists/${w.id}`}
           button
           component={WordlistLink}
         >

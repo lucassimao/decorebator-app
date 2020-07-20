@@ -43,7 +43,7 @@ function Component({
     await service.deleteWord(wordlistId, wordId);
 
     if (rootElementRef.current) {
-      setWords(words.filter(w => w._id !== wordId));
+      setWords(words.filter(w => w.id !== wordId));
       hideProgressModal();
     }
 
@@ -57,7 +57,7 @@ function Component({
       await service.updateWord(wordlistId, wordId, newName);
       if (rootElementRef.current) {
         setWords(currentWords =>
-          currentWords.map(w => (w._id === wordId ? { _id: wordId, name: newName } : w))
+          currentWords.map(w => (w.id === wordId ? { id: wordId, name: newName } : w))
         );
       }
     } catch (error) {
@@ -111,7 +111,7 @@ Component.propTypes = {
   onSuccess: PropTypes.func,
   onWordExcluded: PropTypes.func,
   wordsCount: PropTypes.number,
-  wordlistId : PropTypes.string
+  wordlistId : PropTypes.number
 }
 
 

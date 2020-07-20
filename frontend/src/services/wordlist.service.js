@@ -126,7 +126,7 @@ const getWords = async (wordlistId, skip, stopIdx) => {
     headers: DEFAULT_HEADERS
   });
 
-  const { words } = await response.json();
+  const words = await response.json();
   return words;
 };
 
