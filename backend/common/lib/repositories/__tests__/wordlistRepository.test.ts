@@ -66,6 +66,8 @@ it('should be able to add the wordsCount field', async () => {
 
     expect(result.words).toBeFalsy()
     expect(result.wordsCount).toEqual(4)
+    expect(typeof result.wordsCount).toEqual('number')
+
 })
 
 it('user be able to update their own wordlists', async () => {

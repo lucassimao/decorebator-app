@@ -8,7 +8,7 @@ services:
       - IGNORE_REQUEST_LIMIT
       - NODE_ENV
       - JWT_SECRET_KEY
-      - HTTP_PORT=3000
+      - PORT=3000
     depends_on: 
       - postgres
     build:
@@ -23,7 +23,7 @@ services:
       - IGNORE_REQUEST_LIMIT
       - NODE_ENV
       - JWT_SECRET_KEY
-      - HTTP_PORT=3000
+      - PORT=3000
       - DB_URL
       - GITHUB_TOKEN
     depends_on: 
@@ -42,7 +42,7 @@ services:
   #     - NODE_ENV
   #     - JWT_SECRET_KEY
   #     - DB_URL
-  #     - HTTP_PORT=4000
+  #     - PORT=4000
   #     - GITHUB_TOKEN
   #   depends_on: 
   #     - postgres
@@ -60,7 +60,7 @@ services:
       - DB_URL
       - SHOW_LOG_ON_STDOUT
       - JWT_SECRET_KEY
-      - HTTP_PORT=4000
+      - PORT=4000
     depends_on: 
       - postgres
     build:
