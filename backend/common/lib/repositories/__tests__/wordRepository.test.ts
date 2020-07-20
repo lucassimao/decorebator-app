@@ -51,8 +51,8 @@ test('test getById', async () => {
 
     //@ts-ignore
     const result = await WordRepository.getById(wordlist?.id, word?.id, user?.id)
-    expect(Object.keys(result ?? {})).toHaveLength(4)
-    expect(Object.keys(result ?? {})).toEqual(expect.arrayContaining(['id', 'name', 'wordlistId', 'createdAt']))
+    expect(Object.keys(result ?? {})).toHaveLength(3)
+    expect(Object.keys(result ?? {})).toEqual(expect.arrayContaining(['id', 'name', 'wordlistId']))
     //@ts-ignore
     expect(result.name).toEqual('expected')
 })

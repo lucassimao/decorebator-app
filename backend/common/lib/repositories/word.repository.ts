@@ -9,7 +9,7 @@ type PaginationArgs = { offset: number, limit: number }
 const WordRepository = {
     async getById(wordlistId: number, wordId: number, userId: number): Promise<WordDTO | undefined> {
         const word = await Word.findOne({
-            attributes: ['id', 'name', 'wordlistId', 'createdAt'], where: { wordlistId, id: wordId, '$Wordlist.ownerId$': userId },
+            attributes: ['id', 'name', 'wordlistId'], where: { wordlistId, id: wordId, '$Wordlist.ownerId$': userId },
             include: [{ model: Wordlist, attributes: [] }]
         })
         if (word) {
@@ -26,7 +26,6 @@ const WordRepository = {
         if (word) {
             return {
                 id: word.get('id'), 
-                createdAt: word.get('createdAt').toISOString(),
                 images: await word.getImages(),
                 name: word.get('name'),
                 wordlistId: word.get('wordlistId')
@@ -36,7 +35,7 @@ const WordRepository = {
 
     async getWordsFromWordlist(wordlistId: number, userId: number, paginationArgs?: PaginationArgs): Promise<WordDTO[] | undefined> {
         let options: FindOptions = {
-            attributes: ['id', 'name', 'wordlistId', 'createdAt'],
+            attributes: ['id', 'name', 'wordlistId'],
             where: { wordlistId, '$Wordlist.ownerId$': userId },
             include: [{ model: Wordlist, attributes: [] }]
         }

@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/lucassimao/decorebator-app#readme",
   "dependencies": {
-    "@lucassimao/decorabator-common": "^4.2.0",
+    "@lucassimao/decorabator-common": "^4.3.0",
     "apollo-server": "^2.16.0",
     "graphql": "^15.3.0",
     "jsonwebtoken": "^8.5.1",
