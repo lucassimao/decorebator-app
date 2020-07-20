@@ -5,9 +5,9 @@ const DEFAULT_HEADERS = {
 };
 
 // TODO remove this when signup and signin become available
-if (process.env.NODE_ENV === "development") {
+// if (process.env.NODE_ENV === "development") {
   DEFAULT_HEADERS.authorization = `Bearer ${process.env.REACT_APP_AUTH_TOKEN}`;
-}
+// }
 
 /**
  *
@@ -126,7 +126,7 @@ const getWords = async (wordlistId, skip, stopIdx) => {
     headers: DEFAULT_HEADERS
   });
 
-  const { words } = await response.json();
+  const words = await response.json();
   return words;
 };
 

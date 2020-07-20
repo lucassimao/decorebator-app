@@ -114,7 +114,7 @@ function _getXmlDocumentFromString(xmlString) {
  */
 function _extractVideoIdFromUrl(url) {
   const youtubeUrl = new URL(url);
-  const videoId = youtubeUrl.searchParams.get("v");
+  const videoId = (youtubeUrl.host === 'youtu.be') ? youtubeUrl.pathname.slice(1) : youtubeUrl.searchParams.get("v");
   return videoId;
 }
 

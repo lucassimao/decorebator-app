@@ -42,9 +42,9 @@ const WordlistRow = ({ index, style, deleteWord, updateWord, word }) => {
     return (
       <ListItem style={style}>
         <div>
-          <InputHOC updateWord={updateWord} wordId={word._id} defaultValue={word.name} />
+          <InputHOC updateWord={updateWord} wordId={word.id} defaultValue={word.name} />
           <ListItemSecondaryAction>
-            <IconButton onClick={() => deleteWord(word._id)} edge="end" className={classes.icon}>
+            <IconButton onClick={() => deleteWord(word.id)} edge="end" className={classes.icon}>
               <DeleteIcon />
             </IconButton>
           </ListItemSecondaryAction>
@@ -68,7 +68,7 @@ WordlistRow.propTypes = {
 };
 
 InputHOC.propTypes = {
-  defaultValue: PropTypes.string, updateWord: PropTypes.func, wordId: PropTypes.string
+  defaultValue: PropTypes.string, updateWord: PropTypes.func, wordId: PropTypes.number
 };
 
 export default WordlistRow;

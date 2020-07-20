@@ -1,14 +1,8 @@
-let environment = { api: {} };
-
-switch (process.env.NODE_ENV) {
-  case "production":
-    break;
-  case "development":
-      environment.api.auth = "http://localhost:3001/auth";
-    environment.api.wordlists = "http://localhost:3002/wordlists";
-    break;
-  default:
-    throw new Error("Unknown environment: " + process.env.NODE_ENV);
-}
+let environment = {
+  api: {
+    auth: process.env.REACT_APP_AUTH_SERVICE_URL,
+    wordlists: process.env.REACT_APP_WORDLISTS_SERVICE_URL
+  }
+};
 
 export default environment;

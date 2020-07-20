@@ -25,15 +25,16 @@ const useStyles = makeStyles(theme => ({
 
 export const client = new ApolloClient({
     uri: process.env.REACT_APP_YOUTUBE_SERVICE_URL,
+    headers:{
+        authorization: process.env.REACT_APP_AUTH_TOKEN
+    }
 });
 
 export const YOUTUBE_SUBTITLES_QUERY = gql`
     query getSubtitles($url: String!){
         subtitles: getAvailableVideoSubtitles(url: $url){
-            language{
-                code
-                name
-            }
+            languageCode
+            languageName
             isAutomatic
             downloadUrl
         }
@@ -98,8 +99,8 @@ function Form(props) {
                         defaultValue='0'
                         onChange={onLanguageChange}>
                         {data.subtitles.filter(({ isAutomatic }) => !isAutomatic || allowAsr).map((subtitle, index) => (
-                            <option value={index} key={subtitle.language.name}>
-                                {subtitle.language.name}
+                            <option value={index} key={subtitle.languageName}>
+                                {subtitle.languageName}
                             </option>
                         ))}
                     </NativeSelect>

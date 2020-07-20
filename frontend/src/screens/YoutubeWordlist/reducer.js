@@ -11,8 +11,8 @@ export function reducer(state, action) {
         case 'SET_URL':
             return { ...state, url: action.url }
         case 'SET_SUBTITLE': {
-            const { subtitle: { language: { code, name }, isAutomatic: isASR, downloadUrl } } = action;
-            return { ...state, subtitle: { language: { code, name }, isASR, downloadUrl } }
+            const { subtitle: { languageCode, languageName, isAutomatic: isASR, downloadUrl } } = action;
+            return { ...state, subtitle: { languageCode, languageName, isASR, downloadUrl } }
         }
         case 'SET_MIN_WORD_LENGTH':
             return { ...state, minWordLength: action.minWordLength }

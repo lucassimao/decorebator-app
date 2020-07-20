@@ -70,7 +70,7 @@ function Screen(props) {
 
       const wordlist = await service.get(wordlistId);
       setWordlist(wordlist);
-      setWordsCount(wordlist.wordsCount);
+      setWordsCount(parseInt(wordlist.wordsCount));
     } catch (error) {
       onError(error.message);
       console.error(error);
@@ -100,7 +100,7 @@ function Screen(props) {
 
   const deleteWordlist = async () => {
     showProgressModal("Wait", "Deleting wordlist ...");
-    await service.deleteWordlist(wordlist._id);
+    await service.deleteWordlist(wordlist.id);
     hideProgressModal();
     history.push("/");
   };
@@ -159,7 +159,7 @@ function Screen(props) {
           <Wordlist
             onWordExcluded={onWordExcludedListener}
             wordsCount={wordsCount}
-            wordlistId={wordlist._id}
+            wordlistId={wordlist.id}
           />
         </Grid>
       </Grid>
