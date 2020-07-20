@@ -4,17 +4,13 @@ import Database from '../../db'
 import WordDTO from '../../dto/word.dto'
 import WordlistDTO from '../../dto/wordlist.dto'
 import { User } from '../../entities/user'
-import { Wordlist } from '../../entities/wordlist'
-import WordlistRepository from '../wordlist.repository'
-import { WordlistQueryBuilder } from '../wordlistQueryBuilder'
 import { Word } from '../../entities/word'
-import WordRepository from '../word.repository'
 import ImageRepository from '../image.repository'
+import WordlistRepository from '../wordlist.repository'
 
 
 beforeEach(async () => {
-    Database.connect('sqlite::memory:')
-    await Database.instance.createDatabase()
+    await Database.connect('sqlite::memory:')
 
     const user = await User.create({ name: 'Lucas', email: 'user1@gmail.com', country: 'BR', encryptedPassword: '123' })
     const dto: WordlistDTO = {

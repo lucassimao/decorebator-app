@@ -6,7 +6,6 @@ const { Database, config: { logger, port, isDev } } = require('@lucassimao/decor
 
 
 Database.connect(process.env.DB_URL)
-  .createDatabase()
   .then(() => {
 
     const server = new ApolloServer({

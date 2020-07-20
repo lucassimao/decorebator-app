@@ -3,7 +3,6 @@ const app = require("./app");
 const { Database, config: {port,logger} } = require('@lucassimao/decorabator-common')
 
 Database.connect(process.env.DB_URL)
-  .createDatabase()
   .then(() => {
     const server = app.listen(port);
 

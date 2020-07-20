@@ -22,7 +22,6 @@ services:
       - TEST_CONTAINERS
       - IGNORE_REQUEST_LIMIT
       - NODE_ENV
-      - YOUTUBE_SERVICE_URL
       - JWT_SECRET_KEY
       - HTTP_PORT=3000
       - DB_URL
@@ -74,7 +73,7 @@ services:
     environment: 
       - POSTGRES_PASSWORD
       - POSTGRES_DB    
-    image: postgres:10-alpine
+    image: postgres:12-alpine
     ports: 
       - "5432:5432"
     volumes:

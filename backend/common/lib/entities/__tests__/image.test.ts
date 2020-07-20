@@ -3,8 +3,7 @@ import { Image } from "../image";
 
 
 beforeEach(async () => {
-    Database.connect('sqlite::memory:')
-    await Database.instance.createDatabase()
+    await Database.connect('sqlite::memory:')
 })
 
 afterEach(async () => {

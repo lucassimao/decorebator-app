@@ -1,4 +1,4 @@
-import { Sequelize, Model, ModelCtor, Transaction } from "sequelize";
+import { Sequelize, Model, ModelCtor, Transaction, SyncOptions } from "sequelize";
 
 const pool = {
     max: 5,
@@ -23,12 +23,13 @@ export default class Database {
     /**
      * Used to construct a singleton instance of the Database class
      */
-    public static connect(dbUrl: string) : Database {
+    public static async  connect(dbUrl: string) : Promise<Database> {
+
         const sequelize = new Sequelize(dbUrl, {
             pool, dialectOptions: {
                 options: {
                     connectTimeout: 3000,
-                    requestTimeout: 3000
+                    requestTimeout: 3000,
                 }
             },
         })
@@ -39,6 +40,11 @@ export default class Database {
         sequelize.import(__dirname + "/entities/wordlist")
         sequelize.import(__dirname + "/entities/youtubeSubtitle")
         Database._instance = new Database(sequelize)
+
+        if (process.env.NODE_ENV === 'test'){
+            let syncOptions : SyncOptions  = {force:true}
+            await sequelize.sync(syncOptions)
+        }
         return Database._instance
     }
 
@@ -63,18 +69,7 @@ export default class Database {
       }  {
         return this.sequelize?.models ?? {}
     }
-    
 
-    /**
-     * createDatabase
-     */
-    public async createDatabase() {
-        if (!this.sequelize){
-            return false
-        }
-        await this.sequelize.sync()
-        return true;
-    }
 }
 
 

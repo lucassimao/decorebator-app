@@ -6,8 +6,7 @@ import WordRepository from '../word.repository'
 import { UserRepository } from '../..'
 
 beforeEach(async () => {
-    Database.connect('sqlite::memory:')
-    await Database.instance.createDatabase()
+    await Database.connect('sqlite::memory:')
 
     const user = await User.create({ name: 'Lucas', email: 'user1@gmail.com', country: 'BR', encryptedPassword: '123' })
     const wordlist = await Wordlist.create({

@@ -11,9 +11,7 @@ import { Word } from '../../entities/word'
 
 
 beforeEach(async () => {
-    Database.connect('sqlite::memory:')
-    await Database.instance.createDatabase()
-
+    await Database.connect('sqlite::memory:')
     const user = await User.create({ name: 'Lucas', email: 'user1@gmail.com', country: 'BR', encryptedPassword: '123' })
     const dto: WordlistDTO = {
         isPrivate: true,

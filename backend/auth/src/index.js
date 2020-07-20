@@ -11,7 +11,6 @@ const limiter = rateLimit({
 });
 
 Database.connect(process.env.DB_URL)
-  .createDatabase()
   .then(() => {
     const app = express();
 
