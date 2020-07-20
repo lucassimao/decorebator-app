@@ -6,6 +6,7 @@ import { UserRepository } from "../..";
 
 beforeEach(async () => {
     await Database.connect('sqlite::memory:')
+    await Database.instance.sync()
 })
 
 afterEach(async () => {

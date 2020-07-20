@@ -13,7 +13,7 @@ RUN npm install -g nodemon
 RUN apk del git
 
 COPY src /srv/youtube/src
-EXPOSE ${HTTP_PORT}
+EXPOSE ${PORT}
 
 CMD ["npm", "start" ]
 

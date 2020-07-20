@@ -4,6 +4,7 @@ import { Image } from "../image";
 
 beforeEach(async () => {
     await Database.connect('sqlite::memory:')
+    await Database.instance.sync()
 })
 
 afterEach(async () => {

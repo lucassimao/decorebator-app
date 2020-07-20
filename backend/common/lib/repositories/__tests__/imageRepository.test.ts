@@ -11,6 +11,7 @@ import WordlistRepository from '../wordlist.repository'
 
 beforeEach(async () => {
     await Database.connect('sqlite::memory:')
+    await Database.instance.sync()
 
     const user = await User.create({ name: 'Lucas', email: 'user1@gmail.com', country: 'BR', encryptedPassword: '123' })
     const dto: WordlistDTO = {

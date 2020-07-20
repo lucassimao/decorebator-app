@@ -1,7 +1,7 @@
 import winston from "winston";
 
 const env = process.env.NODE_ENV || "development";
-if (env != 'test' && !process.env.HTTP_PORT){
+if (env != 'test' && !process.env.PORT){
   throw "Http server port must be provided";
 }
 
@@ -15,7 +15,7 @@ const baseConfig = {
   jwtExpiration: 60 * 60 * 24 * 365, // 1 year
   dbOptions: {},
   dbUrl: process.env.DB_URL,
-  port: process.env.HTTP_PORT,
+  port: process.env.PORT,
   logger: winston.createLogger(),
   httpOptions: {
     enableCompression: process.env.ENABLE_COMPRESSION == "true"

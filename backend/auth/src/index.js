@@ -10,7 +10,8 @@ const limiter = rateLimit({
   max: 50 // 50 requests per windowMs
 });
 
-Database.connect(process.env.DB_URL)
+
+Database.connect(config.dbUrl)
   .then(() => {
     const app = express();
 

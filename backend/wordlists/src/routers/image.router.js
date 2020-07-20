@@ -36,7 +36,7 @@ router
     })
   )
   .patch(
-    "/:idImage",
+    "/:idImage([0-9]+)",
     express.json({ limit: "2MB" }),
     wrapAsync(async (req, res, next) => {
       const status = await service.patchImage(
@@ -55,7 +55,7 @@ router
     })
   )
   .delete(
-    "/:idImage",
+    "/:idImage([0-9]+)",
     wrapAsync(async (req, res, next) => {
       const status = await service.deleteImage(
         req.params.idWordlist,

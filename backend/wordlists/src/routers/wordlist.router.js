@@ -34,10 +34,11 @@ router
     })
   )
   .get(
-    "/:id",
+    "/:id([0-9]+)",
     wrapAsync(async (req, res, next) => {
       const wordlist = await service.get(req.params.id, req.user);
-
+      logger.debug(wordlist);
+      
       if (wordlist) {
         res.status(200).send(wordlist);
       } else {
@@ -64,7 +65,7 @@ router
     })
   )
   .delete(
-    "/:id",
+    "/:id([0-9]+)",
     wrapAsync(async (req, res, next) => {
       const success = await service.delete(req.params.id, req.user);
       if (success) {
@@ -75,7 +76,7 @@ router
     })
   )
   .patch(
-    "/:id",
+    "/:id([0-9]+)",
     express.json(),
     wrapAsync(async (req, res, next) => {
       const success = await service.update(

@@ -120,10 +120,17 @@ async function searchSubtitles(videoId) {
 
 async function getAvailableVideoSubtitles(youtubeUrl) {
   const url = new URL(youtubeUrl);
-  if (!url.searchParams.has("v")) {
+  let videoID
+
+  if (url.host === 'youtu.be'){
+    videoID = url.pathname.slice(1)
+  } else if (url.searchParams.has("v")) {
+    videoID = url.searchParams.get("v");
+  }
+
+  if (!videoID){
     throw new Error("Invalid youtube url");
   }
-  const videoID = url.searchParams.get("v");
 
   try {
     let subtitles = await getCachedSubtitles(videoID);

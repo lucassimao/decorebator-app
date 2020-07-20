@@ -26,7 +26,7 @@ router
     })
   )
   .get(
-    "/:idWord",
+    "/:idWord([0-9]+)",
     wrapAsync(async (req, res, next) => {
       const object = await wordService.get(
         req.params.idWordlist,
@@ -59,7 +59,7 @@ router
     })
   )
   .patch(
-    "/:idWord",
+    "/:idWord([0-9]+)",
     express.json(),
     wrapAsync(async (req, res, next) => {
       const status = await wordService.patchWord(
@@ -77,7 +77,7 @@ router
     })
   )
   .delete(
-    "/:idWord",
+    "/:idWord([0-9]+)",
     wrapAsync(async (req, res, next) => {
       const status = await wordService.delete(
         req.params.idWordlist,

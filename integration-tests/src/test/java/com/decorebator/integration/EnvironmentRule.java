@@ -47,7 +47,7 @@ public class EnvironmentRule extends ExternalResource {
         this.env  = new DockerComposeContainer(new File(TestUtils.DOCKER_COMPOSER_YML))
                     .withLocalCompose(true)
                     .withEnv("TEST_CONTAINERS", "true")
-                    .withEnv("NODE_ENV", "development")
+                    .withEnv("NODE_ENV", "test")
                     .withEnv("IGNORE_REQUEST_LIMIT", "true")
                     .withEnv("SHOW_LOG_ON_STDOUT", "true")
                     .withEnv("DB_URL", "postgres://postgres:112358132134@postgres:5432/decorebator-dev")

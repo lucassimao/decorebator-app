@@ -1,9 +1,11 @@
 const app = require("./app");
 
-const { Database, config: {port,logger} } = require('@lucassimao/decorabator-common')
+const { Database, config: {port,logger,dbUrl} } = require('@lucassimao/decorabator-common')
 
-Database.connect(process.env.DB_URL)
-  .then(() => {
+Database
+  .connect(dbUrl)
+  .then(async (database) => {
+    // await database.sync()
     const server = app.listen(port);
 
     process.once("SIGUSR2", async () => {

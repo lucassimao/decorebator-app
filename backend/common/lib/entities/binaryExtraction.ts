@@ -11,7 +11,7 @@ export default (sequelize: Sequelize, DataTypes: any) => {
     BinaryExtraction.init({
         extension: { type: DataTypes.STRING, allowNull: false },
         size: { type: DataTypes.INTEGER, allowNull: false, validate: { min: 0 } },
-        extractionMs: { type: DataTypes.INTEGER, allowNull: false, validate: { min: 0 } }
+        extractionMs: { type: DataTypes.REAL, allowNull: false, validate: { min: 0 } }
     }, { sequelize, createdAt: false, updatedAt: false });
     return BinaryExtraction;
 }

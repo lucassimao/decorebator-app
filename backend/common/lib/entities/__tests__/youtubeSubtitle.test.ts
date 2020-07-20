@@ -3,6 +3,8 @@ import { YoutubeSubtitle } from "../youtubeSubtitle";
 
 beforeEach(async () => {
     await Database.connect('sqlite::memory:')
+    await Database.instance.sync()
+
 })
 
 afterEach(async () => {

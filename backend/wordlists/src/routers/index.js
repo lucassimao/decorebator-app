@@ -20,6 +20,10 @@ const resolveStatus = async (req, res, next) => {
 
   try {
     logger.warn(`Resolving status for ${url} ...`);
+    if (!req.url.startsWith('/wordlists')){
+        res.sendStatus(404);
+        return;
+    }
 
     const regex = /\/wordlists\/(\d+)(\/words\/(\d+)(\/images\/(\d+))?)?/;
     const [, idWordlist, , idWord, , idImage] = regex.exec(url);

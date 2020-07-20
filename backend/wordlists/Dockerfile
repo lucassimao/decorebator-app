@@ -12,7 +12,7 @@ RUN npm install -g nodemon
 RUN apk del g++ make python2 git
 
 COPY src /srv/wordlists/src
-EXPOSE ${HTTP_PORT}
+EXPOSE ${PORT}
 
 CMD ["npm", "start" ]
 
