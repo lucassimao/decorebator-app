@@ -12,9 +12,9 @@ export default class Pronunciation{
 
     @Column("text",{array:true})
     dialects?: string[];
-    @Column()
+    @Column({nullable:true})
     phoneticNotation?: string;
-    @Column()
+    @Column({nullable:true})
     phoneticSpelling?: string;
 
     @ManyToOne(() => Lemma, lemma => lemma.pronunciations)

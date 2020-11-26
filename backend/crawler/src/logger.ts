@@ -14,7 +14,7 @@ if (process.env.NODE_ENV !== 'production'){
 const logger = winston.createLogger({
     transports: [new winston.transports.Console({
         format: combine(...formats),
-        level: process.env.NODE_ENV === 'production' ? 'info' : "silly"
+        level:'silly' //process.env.NODE_ENV === 'production' ? 'info' : "silly"
     })]
 });
 
