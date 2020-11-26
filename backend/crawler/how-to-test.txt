@@ -1,0 +1,3 @@
+echo '{"languageCode":"en","name":"staggering"}' | base64
+
+curl -d '{"message":{"data":"eyJsYW5ndWFnZUNvZGUiOiJlbiIsIm5hbWUiOiJzdGFnZ2VyaW5nIn0K"}}' -H"content-type: application/json" http://localhost:3004/words/oxforddictionaries
