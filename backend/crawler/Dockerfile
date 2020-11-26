@@ -1,11 +1,13 @@
-FROM node:14.3.0-alpine
+FROM node:14.15.1-alpine3.12
 
-COPY package* /srv/crawler
+COPY tsconfig.json package* /srv/crawler/
 COPY src /srv/crawler/src
 
 WORKDIR /srv/crawler
-RUN npm ci --production
-RUN npm install -g nodemon
+RUN npm ci # --production
+
+RUN npm run build
+RUN npm prune --production
 
 EXPOSE ${HTTP_PORT}
 

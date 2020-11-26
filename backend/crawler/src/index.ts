@@ -1,4 +1,3 @@
-import { config } from '@lucassimao/decorabator-common';
 import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -9,12 +8,13 @@ import { Server } from 'http';
 import { getConnection } from "typeorm";
 import logger from "./logger";
 
-const { port } = config;
+
+const port = process.env.HTTP_PORT;
 
 let server: Server;
 const app = express();
 app.set("trust proxy", 1);
-app.use(config.isDev ? morgan("dev", { immediate: true }) : morgan("combined"));
+app.use(process.env.NODE_ENV === 'production'  ? morgan("combined") : morgan("dev", { immediate: true }));
 app.use(helmet());
 app.use(express.json());
 app.use(router);
