@@ -9,7 +9,7 @@ import { getConnection } from "typeorm";
 import logger from "./logger";
 
 
-const port = process.env.HTTP_PORT;
+const port = process.env.PORT;
 
 let server: Server;
 const app = express();

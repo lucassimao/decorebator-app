@@ -9,7 +9,7 @@ RUN npm ci # --production
 RUN npm run build
 RUN npm prune --production
 
-EXPOSE ${HTTP_PORT}
+EXPOSE ${PORT}
 
 CMD ["npm", "start" ]
 
