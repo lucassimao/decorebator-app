@@ -1,0 +1,6 @@
+echo '{"languageCode":"en","name":"tear down"}' | base64
+
+
+curl -d '{"message":{"data":"'"$(echo '{"languageCode":"en","name":"tear down"}' | base64)"'"}}' -H"content-type: application/json" http://localhost:3004/words/oxforddictionaries
+
+curl -d '{"message":{"data":"'"$(echo '{"languageCode":"en","name":"tear down"}' | base64)"'"}}' -H"content-type: application/json"  https://crawler-6bzynn6uxa-uc.a.run.app/words/oxforddictionaries

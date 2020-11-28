@@ -1,6 +1,7 @@
 import { PubSub } from '@google-cloud/pubsub';
 import axios, { AxiosRequestConfig } from 'axios';
 import moment from 'moment';
+import { In } from 'typeorm';
 import Lemma from "../entities/lemma";
 import Pronunciation from "../entities/Pronunciation";
 import Sense from "../entities/sense";
@@ -141,7 +142,7 @@ const OxfordDictionaryService = {
                 // plural?
                 // phrasal verbs
                 const {text: name,language,lexicalCategory: {text: lexicalCategory}} = lexicalEntry;
-                const existingLemma = await LemmaService.findOneBy({name,language,lexicalCategory})
+                const existingLemma = await LemmaService.findOneBy({name,language,lexicalCategory: In([lexicalCategory, 'unknow'])})
 
                 await LemmaService.save({
                     ...existingLemma,
