@@ -25,23 +25,39 @@ export const oxfordDictionaryCrawler = async (req: Request, response: Response):
 
     const tag = `${word.name}(${word.languageCode})`;
 
-    logger.debug(`[${tag}] Starting processing  ...`)
+    try {
+        const lemma = await LemmaService.findByNameAndLanguage(word.name, word.languageCode)
 
-    const lemma = await LemmaService.findByNameAndLanguage(word.name, word.languageCode)
-
-    if (lemma) {
-        logger.debug(`[${tag}] Lemma already exists`);
-
-        if (!lemma.isRefreshRequired()) {
+        if (lemma && !lemma.isRefreshRequired()) {
             logger.debug(`[${tag}] Lemma is fresh, skipping ...`);
             response.sendStatus(200);
             return;
         }
+
+        logger.debug(`[${tag}] Starting processing  ...`)
+
+        const searchEntryResponse = await OxfordDictionaryService.searchEntry(word.name, word.languageCode);
+        logger.debug(`[${tag}] found ${searchEntryResponse.results?.length ?? 0} head word entries ...`);
+
+        await OxfordDictionaryService.mapRetrieveEntryToLemmas(searchEntryResponse, word, lemma)
+        response.sendStatus(200);
+
+    } catch (error) {
+        if (error.isAxiosError) {
+            if (error.response) {
+                const { response: { data, status, headers } } = error;
+                logger.debug(`[${tag}] Request made and server responded with error ...`, { data, status, headers });
+            } else if (error.request) {
+                logger.error(`[${tag}] request was made but no response was received ...`, { request: error.request });
+            } else {
+                logger.error(`[${tag}] Something happened in setting up the request that triggered an Error ...`, { message: error.message });
+            }
+
+        } else {
+            logger.error(error)
+        }
+        response.sendStatus(500);
+        return;
     }
 
-    const searchEntryResponse = await OxfordDictionaryService.searchEntry(word.name, word.languageCode);
-    logger.debug(`[${tag}] found ${searchEntryResponse.results?.length ?? 0} head word entries ...`);
-
-    await OxfordDictionaryService.mapRetrieveEntryToLemmas(searchEntryResponse, word, lemma)
-    response.sendStatus(200);
 }

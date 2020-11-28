@@ -23,7 +23,7 @@ if (!appKey) {
 }
 
 const topic: string = process.env.PUB_SUB_WORDS_TOPIC ?? ''
-if (!topic){
+if (!topic) {
     throw new Error('PUB_SUB_WORDS_TOPIC is required')
 }
 
@@ -41,7 +41,7 @@ function __notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
     return value !== null && value !== undefined;
 }
 
-async function __findLemmaOrSaveAsOutdated(text: string, language: string, provider: string): Promise<Lemma|null> {
+async function __findLemmaOrSaveAsOutdated(text: string, language: string, provider: string): Promise<Lemma | null> {
     const lemma = await LemmaService.findByNameAndLanguage(text, language)
     if (lemma) {
         return lemma
@@ -69,26 +69,24 @@ async function __findLemmaOrSaveAsOutdated(text: string, language: string, provi
 }
 
 
-const searchLemma =  async (word: string, languageCode: LanguageCode): Promise<Lemmatron> => {
-    const path = `/api/v2/lemmas/${languageCode}/` + word;
-    const response = await axios.get(path,axiosConfig)
+const searchLemma = async (word: string, languageCode: LanguageCode): Promise<Lemmatron> => {
+    const path = `/api/v2/lemmas/${languageCode}/` + encodeURIComponent(word);
+    const response = await axios.get(path, axiosConfig)
     const lemmatron: Lemmatron = response.data;
     return lemmatron;
 }
 
-const searchEntry =  async(word: string, languageCode: LanguageCode): Promise<RetrieveEntry> => {
+const searchEntry = async (word: string, languageCode: LanguageCode): Promise<RetrieveEntry> => {
     const filters = '?lexicalEntries&'
-    const path = `/api/v2/entries/${languageCode}/` + encodeURIComponent(word);
-    const response = await axios.get(path,axiosConfig)  
-
-    
+    const path = `/api/v2/entries/${languageCode}/${encodeURIComponent(word)}`;
+    const response = await axios.get(path, axiosConfig)
     const retrieveEntry: RetrieveEntry = response.data;
     return retrieveEntry;
 }
 
-const mapRetrieveEntryToLemmas = async (searchEntryResponse: RetrieveEntry, word: WordDTO, lemma? : Lemma): Promise<void> => {
+const mapRetrieveEntryToLemmas = async (searchEntryResponse: RetrieveEntry, word: WordDTO, lemma?: Lemma): Promise<void> => {
     const tag = `${word.name}(${word.languageCode})`;
-    
+
     for (const headwordEntry of searchEntryResponse.results) {
 
         logger.debug(`[${tag}] found ${headwordEntry.lexicalEntries?.length ?? 0} lexical entries ...`);
@@ -155,5 +153,5 @@ const mapRetrieveEntryToLemmas = async (searchEntryResponse: RetrieveEntry, word
 
 }
 
-const OxfordDictionaryService = {searchEntry,searchLemma,mapRetrieveEntryToLemmas}
+const OxfordDictionaryService = { searchEntry, searchLemma, mapRetrieveEntryToLemmas }
 export default OxfordDictionaryService;

@@ -1,10 +1,11 @@
 import winston from 'winston';
 
-const { combine, timestamp, prettyPrint, colorize, errors, simple } = winston.format;
+const { combine, timestamp, prettyPrint, colorize, errors, simple,json } = winston.format;
 const formats: winston.Logform.Format[] = [
-    errors({ stack: true }),
+    // simple(),
+    // json(),
     prettyPrint(),
-    simple()
+    errors({ stack: true }),
 ]
 
 if (process.env.NODE_ENV !== 'production'){

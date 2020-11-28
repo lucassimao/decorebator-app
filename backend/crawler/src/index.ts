@@ -19,9 +19,9 @@ app.use(helmet());
 app.use(express.json());
 app.use(router);
 
-const stopApp = async (info: any) => {
-    logger.error('stoping server due ...', info)
-    
+const stopApp = async (info: any) => {   
+    logger.error('stoping server...',{info})
+
     const connection = getConnection()
     if (connection?.isConnected) {
         await connection.close()
@@ -40,6 +40,7 @@ async function init() {
     process.once("SIGUSR2", stopApp);
     process.once("uncaughtException", stopApp);
     process.once("unhandledRejection", stopApp);
+    process.once("rejectionHandled", stopApp);
 }    
 
 init()
