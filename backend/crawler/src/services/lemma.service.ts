@@ -23,6 +23,11 @@ const LemmaService = {
     async findOneBy(criteria: FindConditions<Lemma>): Promise<Lemma|undefined> {
         const repository = getRepository(Lemma)
         return repository.findOne({ where: criteria })
-    }    
+    }    ,
+
+    async getPlaceholders(): Promise<Lemma[]> {
+        const repository = getRepository(Lemma)
+        return repository.find({ where: {lexicalCategory:'unknow'} })
+    }
 }
 export default LemmaService;

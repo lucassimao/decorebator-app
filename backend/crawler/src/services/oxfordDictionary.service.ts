@@ -86,6 +86,20 @@ const OxfordDictionaryService = {
         const response = await axios.get(path, axiosConfig)
         const lemmatron: Lemmatron = response.data;
         return lemmatron;
+    },
+
+    async pushPlaceholdersToPubSub(): Promise<void> {
+        const placeholders = await LemmaService.getPlaceholders()
+        for (const placeholder of placeholders) {
+            if (!placeholder.name) continue;
+
+            const word: WordDTO = { languageCode: placeholder.language as LanguageCode, name: placeholder.name }
+            const dataBuffer = Buffer.from(JSON.stringify(word));
+            const tag = `${word.name}(${word.languageCode})`;
+
+            logger.debug(`[${tag}] publishing placeholder to Pub/Sub ...`)
+            await pubSubClient.topic(topic).publish(dataBuffer);
+        }
     }
     ,
 
@@ -163,7 +177,6 @@ const OxfordDictionaryService = {
                 }
 
                 // plural?
-                // phrasal verbs
 
                 await LemmaService.save({
                     ...existingLemma,

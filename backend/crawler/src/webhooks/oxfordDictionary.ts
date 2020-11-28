@@ -5,6 +5,17 @@ import OxfordDictionaryService from "../services/oxfordDictionary.service";
 import { PubSubMessage } from "../types/pubSubMessage";
 import { WordDTO } from "../types/word.dto";
 
+export const pushPlaceholdersToPubSub = async (req: Request, response: Response): Promise<void> => {
+    try {
+        await OxfordDictionaryService.pushPlaceholdersToPubSub()
+        response.sendStatus(200);
+        return
+    } catch (error) {
+        logger.error('problem pushing placeholders ...')
+        logger.error(error)
+        response.sendStatus(500);
+    }
+}
 
 export const oxfordDictionaryCrawler = async (req: Request, response: Response): Promise<void> => {
     const pubSubMessage: PubSubMessage = req.body?.message;
