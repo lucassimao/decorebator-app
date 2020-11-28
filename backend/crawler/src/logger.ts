@@ -4,8 +4,8 @@ const { combine, timestamp, prettyPrint, colorize, errors, simple,json } = winst
 const formats: winston.Logform.Format[] = [
     // simple(),
     // json(),
-    prettyPrint(),
     errors({ stack: true }),
+    prettyPrint(),
 ]
 
 if (process.env.NODE_ENV !== 'production'){

@@ -42,15 +42,18 @@ function __notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
     return value !== null && value !== undefined;
 }
 
-async function __findLemmaOrSaveAsOutdated(text: string, language: string, provider: string): Promise<Lemma | null> {
-    const lemma = await LemmaService.findOneBy({name: text,language,provider})
+async function __findLemmaOrSaveAsOutdated(name: string, language: string, provider: string): Promise<Lemma | null> {
+    let lemma = await LemmaService.findOneBy({ name, language, provider })
+    if (!lemma && language.includes('-')) {
+        lemma = await LemmaService.findOneBy({ name, language: language.split('-')[0], provider })
+    }
     if (lemma) {
         return lemma
     }
 
-    const word: WordDTO = { languageCode: language as LanguageCode, name: text }
+    const word: WordDTO = { languageCode: language as LanguageCode, name: name }
     const dataBuffer = Buffer.from(JSON.stringify(word));
-    const tag = `${text}(${language})`;
+    const tag = `${name}(${language})`;
 
     try {
         logger.debug(`[${tag}] publishing to Pub/Sub ...`)
@@ -59,12 +62,11 @@ async function __findLemmaOrSaveAsOutdated(text: string, language: string, provi
         // it creates a new lemma, but saves it as 'outdated' to force a refresh when the word comes from pubsub
         return LemmaService.save({
             updatedAt: moment().subtract(100, 'days').toDate(),
-            provider: provider, lexicalCategory: 'unknow',
-            name: text, language: language
+            provider, name, language, lexicalCategory: 'unknow'
         })
 
     } catch (error) {
-        logger.error(error);
+        logger.error(error, { name, language, provider });
         return null
     }
 }
@@ -88,17 +90,36 @@ const OxfordDictionaryService = {
     ,
 
     async mapRetrieveEntryToLemmas(searchEntryResponse: RetrieveEntry, word: WordDTO): Promise<void> {
+        const provider = searchEntryResponse.metadata.provider as string
         const tag = `${word.name}(${word.languageCode})`;
 
         for (const headwordEntry of searchEntryResponse.results) {
-
             logger.debug(`[${tag}] found ${headwordEntry.lexicalEntries?.length ?? 0} lexical entries ...`);
 
             for (const lexicalEntry of headwordEntry.lexicalEntries) {
 
+                const { text: name, language, lexicalCategory: { id: lexicalCategory } } = lexicalEntry;
+                let existingLemma = await LemmaService.findOneBy({ name, language, lexicalCategory })
+                if (!existingLemma) {
+                    existingLemma = await LemmaService.findOneBy({ name, lexicalCategory: 'unknow' })
+                }
+
+
                 const pronunciations: Pronunciation[] = []
                 const senses: Sense[] = []
                 const phrases = lexicalEntry.phrases?.map(phrase => phrase.text)
+                const phrasalVerbs: Lemma[] = [];
+
+                for (const phrasalVerb of (lexicalEntry.phrasalVerbs ?? [])) {
+                    if (phrasalVerb.text === lexicalEntry.text) continue;
+                    const lemma = await __findLemmaOrSaveAsOutdated(phrasalVerb.text, language, provider)
+                    if (lemma) {
+                        phrasalVerbs.push(lemma)
+                    }
+                }
+
+                logger.debug(`[${tag}] found ${phrasalVerbs.length} phrasal verbs ...`);
+
 
                 logger.debug(`[${tag}] found ${lexicalEntry.entries?.length ?? 0} entries ...`);
 
@@ -118,18 +139,20 @@ const OxfordDictionaryService = {
                         const definitions = sense.definitions
                         const examples = sense.examples?.map(example => example.text)
                         const shortDefinitions = sense.shortDefinitions
-                        const provider = searchEntryResponse.metadata.provider as string
-                        let synonyms: Lemma[] = [];
-                        if (sense.synonyms?.length) {
-                            const results = await Promise.all(sense.synonyms.map(synonym => __findLemmaOrSaveAsOutdated(synonym.text, synonym.language, provider)))
-                            synonyms = results.filter(__notEmpty)
+                        const synonyms: Lemma[] = [];
+                        for (const synonym of (sense.synonyms ?? [])) {
+                            if (synonym.text === lexicalEntry.text || synonyms.find(s => s.name === synonym.text)) continue;
+                            const lemma = await __findLemmaOrSaveAsOutdated(synonym.text, language, provider)
+                            if (lemma) {
+                                synonyms.push(lemma)
+                            }
                         }
 
                         logger.debug(`[${tag}] found ${synonyms.length} synonyms ...`);
 
                         let antonyms: Lemma[] = [];
                         if (sense.antonyms?.length) {
-                            const results = await Promise.all(sense.antonyms.map(antonym => __findLemmaOrSaveAsOutdated(antonym.text, antonym.language, provider)))
+                            const results = await Promise.all(sense.antonyms.map(antonym => __findLemmaOrSaveAsOutdated(antonym.text, language, provider)))
                             antonyms = results.filter(__notEmpty)
                         }
 
@@ -141,8 +164,6 @@ const OxfordDictionaryService = {
 
                 // plural?
                 // phrasal verbs
-                const {text: name,language,lexicalCategory: {text: lexicalCategory}} = lexicalEntry;
-                const existingLemma = await LemmaService.findOneBy({name,language,lexicalCategory: In([lexicalCategory, 'unknow'])})
 
                 await LemmaService.save({
                     ...existingLemma,
@@ -150,7 +171,8 @@ const OxfordDictionaryService = {
                     name: lexicalEntry.text, language: lexicalEntry.language,
                     lexicalCategory: lexicalEntry.lexicalCategory.id,
                     provider: searchEntryResponse.metadata.provider as string,
-                    pronunciations, senses
+                    pronunciations, senses,
+                    phrasalVerbs
                 })
                 logger.debug(`[${tag}] lemma saved`);
 

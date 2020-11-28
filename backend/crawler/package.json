@@ -10,6 +10,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start:dev": "nodemon --watch 'src/' --exec \"ts-node -r dotenv/config src/index.ts\" -e ts",
     "start:prod": "nodemon --watch 'src/' --exec \"ts-node -r dotenv/config src/index.ts dotenv_config_path=.env.prod\" -e ts",
+    "debug:prod": "ts-node -r dotenv/config src/index.ts dotenv_config_path=.env.prod",
     "build": "rimraf build && npx tsc",
     "start": "node build/index.js"
   },

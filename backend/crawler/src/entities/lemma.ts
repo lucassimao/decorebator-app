@@ -26,11 +26,11 @@ export default class Lemma{
     @Column({nullable:true})
     plural?: string;
 
-    @ManyToOne(() => Lemma, lemma => lemma.prasalVerbs)
+    @ManyToOne(() => Lemma, lemma => lemma.phrasalVerbs)
     parent?: Lemma;
 
     @OneToMany(() => Lemma, lemma => lemma.parent,{cascade: true})
-    prasalVerbs?: Lemma[]
+    phrasalVerbs?: Lemma[]
 
     @Column("text",{array:true,nullable:true})
     phrases?: string[]
