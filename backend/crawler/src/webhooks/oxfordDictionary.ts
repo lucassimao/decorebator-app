@@ -27,7 +27,7 @@ export const oxfordDictionaryCrawler = async (req: Request, response: Response):
 
     try {
         const existingLemmas = await LemmaService.findAllBy({name:word.name,language: word.languageCode})
-        const canSkipRefresh = existingLemmas.every(lemma => !lemma.isRefreshRequired())
+        const canSkipRefresh = existingLemmas.length > 0 && existingLemmas.every(lemma => !lemma.isRefreshRequired())
 
         if (canSkipRefresh) {
             logger.debug(`[${tag}] existing lemmas are updated ...`);
