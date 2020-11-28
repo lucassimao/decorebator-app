@@ -42,7 +42,7 @@ function __notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
 }
 
 async function __findLemmaOrSaveAsOutdated(text: string, language: string, provider: string): Promise<Lemma | null> {
-    const lemma = await LemmaService.findByNameAndLanguage(text, language)
+    const lemma = await LemmaService.findOneBy({name: text,language,provider})
     if (lemma) {
         return lemma
     }
@@ -69,89 +69,93 @@ async function __findLemmaOrSaveAsOutdated(text: string, language: string, provi
 }
 
 
-const searchLemma = async (word: string, languageCode: LanguageCode): Promise<Lemmatron> => {
-    const path = `/api/v2/lemmas/${languageCode}/` + encodeURIComponent(word);
-    const response = await axios.get(path, axiosConfig)
-    const lemmatron: Lemmatron = response.data;
-    return lemmatron;
-}
+const OxfordDictionaryService = {
+    async searchEntry(word: string, languageCode: LanguageCode): Promise<RetrieveEntry> {
+        const filters = '?lexicalEntries&'
+        const path = `/api/v2/entries/${languageCode}/${encodeURIComponent(word)}`;
+        const response = await axios.get(path, axiosConfig)
+        const retrieveEntry: RetrieveEntry = response.data;
+        return retrieveEntry;
+    },
 
-const searchEntry = async (word: string, languageCode: LanguageCode): Promise<RetrieveEntry> => {
-    const filters = '?lexicalEntries&'
-    const path = `/api/v2/entries/${languageCode}/${encodeURIComponent(word)}`;
-    const response = await axios.get(path, axiosConfig)
-    const retrieveEntry: RetrieveEntry = response.data;
-    return retrieveEntry;
-}
+    async searchLemma(word: string, languageCode: LanguageCode): Promise<Lemmatron> {
+        const path = `/api/v2/lemmas/${languageCode}/` + encodeURIComponent(word);
+        const response = await axios.get(path, axiosConfig)
+        const lemmatron: Lemmatron = response.data;
+        return lemmatron;
+    }
+    ,
 
-const mapRetrieveEntryToLemmas = async (searchEntryResponse: RetrieveEntry, word: WordDTO, lemma?: Lemma): Promise<void> => {
-    const tag = `${word.name}(${word.languageCode})`;
+    async mapRetrieveEntryToLemmas(searchEntryResponse: RetrieveEntry, word: WordDTO): Promise<void> {
+        const tag = `${word.name}(${word.languageCode})`;
 
-    for (const headwordEntry of searchEntryResponse.results) {
+        for (const headwordEntry of searchEntryResponse.results) {
 
-        logger.debug(`[${tag}] found ${headwordEntry.lexicalEntries?.length ?? 0} lexical entries ...`);
+            logger.debug(`[${tag}] found ${headwordEntry.lexicalEntries?.length ?? 0} lexical entries ...`);
 
-        for (const lexicalEntry of headwordEntry.lexicalEntries) {
+            for (const lexicalEntry of headwordEntry.lexicalEntries) {
 
-            const pronunciations: Pronunciation[] = []
-            const senses: Sense[] = []
-            const phrases = lexicalEntry.phrases?.map(phrase => phrase.text)
+                const pronunciations: Pronunciation[] = []
+                const senses: Sense[] = []
+                const phrases = lexicalEntry.phrases?.map(phrase => phrase.text)
 
-            logger.debug(`[${tag}] found ${lexicalEntry.entries?.length ?? 0} entries ...`);
+                logger.debug(`[${tag}] found ${lexicalEntry.entries?.length ?? 0} entries ...`);
 
-            for (const entry of lexicalEntry.entries ?? []) {
-                logger.debug(`[${tag}] found ${entry.pronunciations?.length ?? 0} pronunciations ...`);
-                logger.debug(`[${tag}] found ${entry.senses?.length ?? 0} senses ...`);
+                for (const entry of lexicalEntry.entries ?? []) {
+                    logger.debug(`[${tag}] found ${entry.pronunciations?.length ?? 0} pronunciations ...`);
 
-                entry.pronunciations?.forEach(pronunciation => pronunciations.push({
-                    audioFile: pronunciation.audioFile,
-                    dialects: pronunciation.dialects,
-                    phoneticNotation: pronunciation.phoneticNotation,
-                    phoneticSpelling: pronunciation.phoneticSpelling,
-                })) ?? []
+                    entry.pronunciations?.forEach(pronunciation => pronunciations.push({
+                        audioFile: pronunciation.audioFile,
+                        dialects: pronunciation.dialects,
+                        phoneticNotation: pronunciation.phoneticNotation,
+                        phoneticSpelling: pronunciation.phoneticSpelling,
+                    })) ?? []
 
-                for (const sense of (entry.senses ?? [])) {
-                    const definitions = sense.definitions
-                    const examples = sense.examples?.map(example => example.text)
-                    const shortDefinitions = sense.shortDefinitions
-                    const provider = searchEntryResponse.metadata.provider as string
-                    let synonyms: Lemma[] = [];
-                    if (sense.synonyms?.length) {
-                        const results = await Promise.all(sense.synonyms.map(synonym => __findLemmaOrSaveAsOutdated(synonym.text, synonym.language, provider)))
-                        synonyms = results.filter(__notEmpty)
+                    logger.debug(`[${tag}] found ${entry.senses?.length ?? 0} senses ...`);
+
+                    for (const sense of (entry.senses ?? [])) {
+                        const definitions = sense.definitions
+                        const examples = sense.examples?.map(example => example.text)
+                        const shortDefinitions = sense.shortDefinitions
+                        const provider = searchEntryResponse.metadata.provider as string
+                        let synonyms: Lemma[] = [];
+                        if (sense.synonyms?.length) {
+                            const results = await Promise.all(sense.synonyms.map(synonym => __findLemmaOrSaveAsOutdated(synonym.text, synonym.language, provider)))
+                            synonyms = results.filter(__notEmpty)
+                        }
+
+                        logger.debug(`[${tag}] found ${synonyms.length} synonyms ...`);
+
+                        let antonyms: Lemma[] = [];
+                        if (sense.antonyms?.length) {
+                            const results = await Promise.all(sense.antonyms.map(antonym => __findLemmaOrSaveAsOutdated(antonym.text, antonym.language, provider)))
+                            antonyms = results.filter(__notEmpty)
+                        }
+
+                        logger.debug(`[${tag}] found ${antonyms.length} antonyms ...`);
+                        senses.push({ definitions, examples, shortDefinitions, synonyms, antonyms })
                     }
 
-                    logger.debug(`[${tag}] found ${synonyms.length} synonyms ...`);
-
-                    let antonyms: Lemma[] = [];
-                    if (sense.antonyms?.length) {
-                        const results = await Promise.all(sense.antonyms.map(antonym => __findLemmaOrSaveAsOutdated(antonym.text, antonym.language, provider)))
-                        antonyms = results.filter(__notEmpty)
-                    }
-
-                    logger.debug(`[${tag}] found ${antonyms.length} antonyms ...`);
-                    senses.push({ definitions, examples, shortDefinitions, synonyms, antonyms })
                 }
 
+                // plural?
+                // phrasal verbs
+                const {text: name,language,lexicalCategory: {text: lexicalCategory}} = lexicalEntry;
+                const existingLemma = await LemmaService.findOneBy({name,language,lexicalCategory})
+
+                await LemmaService.save({
+                    ...existingLemma,
+                    phrases: [...(existingLemma?.phrases ?? []), ...(phrases ?? [])],
+                    name: lexicalEntry.text, language: lexicalEntry.language,
+                    lexicalCategory: lexicalEntry.lexicalCategory.id,
+                    provider: searchEntryResponse.metadata.provider as string,
+                    pronunciations, senses
+                })
+                logger.debug(`[${tag}] lemma saved`);
+
             }
-
-            // plural?
-            // phrasal verbs
-
-            await LemmaService.save({
-                ...lemma,
-                phrases: [...(lemma?.phrases ?? []), ...(phrases ?? [])],
-                name: lexicalEntry.text, language: lexicalEntry.language,
-                lexicalCategory: lexicalEntry.lexicalCategory.id,
-                provider: searchEntryResponse.metadata.provider as string,
-                pronunciations, senses
-            })
-            logger.debug(`[${tag}] lemma saved`);
-
         }
+
     }
-
 }
-
-const OxfordDictionaryService = { searchEntry, searchLemma, mapRetrieveEntryToLemmas }
 export default OxfordDictionaryService;

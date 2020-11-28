@@ -26,10 +26,11 @@ export const oxfordDictionaryCrawler = async (req: Request, response: Response):
     const tag = `${word.name}(${word.languageCode})`;
 
     try {
-        const lemma = await LemmaService.findByNameAndLanguage(word.name, word.languageCode)
+        const existingLemmas = await LemmaService.findAllBy({name:word.name,language: word.languageCode})
+        const canSkipRefresh = existingLemmas.every(lemma => !lemma.isRefreshRequired())
 
-        if (lemma && !lemma.isRefreshRequired()) {
-            logger.debug(`[${tag}] Lemma is fresh, skipping ...`);
+        if (canSkipRefresh) {
+            logger.debug(`[${tag}] existing lemmas are updated ...`);
             response.sendStatus(200);
             return;
         }
@@ -39,7 +40,7 @@ export const oxfordDictionaryCrawler = async (req: Request, response: Response):
         const searchEntryResponse = await OxfordDictionaryService.searchEntry(word.name, word.languageCode);
         logger.debug(`[${tag}] found ${searchEntryResponse.results?.length ?? 0} head word entries ...`);
 
-        await OxfordDictionaryService.mapRetrieveEntryToLemmas(searchEntryResponse, word, lemma)
+        await OxfordDictionaryService.mapRetrieveEntryToLemmas(searchEntryResponse, word)
         response.sendStatus(200);
 
     } catch (error) {
