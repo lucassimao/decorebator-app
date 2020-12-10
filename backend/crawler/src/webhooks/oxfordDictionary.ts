@@ -1,11 +1,14 @@
 import { Request, Response } from "express";
-import logger from "../logger";
+import {createHttpRequestLogger} from "../logger";
 import LemmaService from "../services/lemma.service";
 import OxfordDictionaryService from "../services/oxfordDictionary.service";
 import { PubSubMessage } from "../types/pubSubMessage";
 import { WordDTO } from "../types/word.dto";
 
+
 export const pushPlaceholdersToPubSub = async (req: Request, response: Response): Promise<void> => {
+    const logger = await createHttpRequestLogger(req);
+
     try {
         await OxfordDictionaryService.pushPlaceholdersToPubSub()
         response.sendStatus(200);
@@ -18,6 +21,7 @@ export const pushPlaceholdersToPubSub = async (req: Request, response: Response)
 }
 
 export const oxfordDictionaryCrawler = async (req: Request, response: Response): Promise<void> => {
+    const logger = await createHttpRequestLogger(req);
     const pubSubMessage: PubSubMessage = req.body?.message;
 
     if (!pubSubMessage) {
@@ -37,7 +41,7 @@ export const oxfordDictionaryCrawler = async (req: Request, response: Response):
     const tag = `${word.name}(${word.languageCode})`;
 
     try {
-        const existingLemmas = await LemmaService.findAllBy({name:word.name,language: word.languageCode})
+        const existingLemmas = await LemmaService.findAllBy({ name: word.name, language: word.languageCode })
         const canSkipRefresh = existingLemmas.length > 0 && existingLemmas.every(lemma => !lemma.isRefreshRequired())
 
         if (canSkipRefresh) {
@@ -51,7 +55,7 @@ export const oxfordDictionaryCrawler = async (req: Request, response: Response):
         const searchEntryResponse = await OxfordDictionaryService.searchEntry(word.name, word.languageCode);
         logger.debug(`[${tag}] found ${searchEntryResponse.results?.length ?? 0} head word entries ...`);
 
-        await OxfordDictionaryService.mapRetrieveEntryToLemmas(searchEntryResponse, word)
+        await OxfordDictionaryService.mapRetrieveEntryToLemmas(searchEntryResponse, word, logger)
         response.sendStatus(200);
 
     } catch (error) {

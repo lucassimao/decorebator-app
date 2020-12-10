@@ -1,16 +1,16 @@
 import { PubSub } from '@google-cloud/pubsub';
 import axios, { AxiosRequestConfig } from 'axios';
 import moment from 'moment';
-import { In } from 'typeorm';
 import Lemma from "../entities/lemma";
 import Pronunciation from "../entities/Pronunciation";
 import Sense from "../entities/sense";
-import logger from "../logger";
+import defaultLogger from "../logger";
 import LemmaService from "../services/lemma.service";
 import { LanguageCode } from "../types/languageCode";
 import { Lemmatron } from "../types/lemmatron";
 import { RetrieveEntry } from "../types/retrieveEntry";
 import { WordDTO } from "../types/word.dto";
+import winston from 'winston';
 
 
 
@@ -42,7 +42,8 @@ function __notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
     return value !== null && value !== undefined;
 }
 
-async function __findLemmaOrSaveAsOutdated(name: string, language: string, provider: string): Promise<Lemma | null> {
+async function __findLemmaOrSaveAsOutdated(name: string, language: string, provider: string, customLogger? : winston.Logger ): Promise<Lemma | null> {
+    const logger = customLogger ?? defaultLogger;
     let lemma = await LemmaService.findOneBy({ name, language, provider })
     if (!lemma && language.includes('-')) {
         lemma = await LemmaService.findOneBy({ name, language: language.split('-')[0], provider })
@@ -88,7 +89,9 @@ const OxfordDictionaryService = {
         return lemmatron;
     },
 
-    async pushPlaceholdersToPubSub(): Promise<void> {
+    async pushPlaceholdersToPubSub( customLogger? : winston.Logger): Promise<void> {
+        const logger = customLogger ?? defaultLogger;
+
         const placeholders = await LemmaService.getPlaceholders()
         for (const placeholder of placeholders) {
             if (!placeholder.name) continue;
@@ -103,9 +106,11 @@ const OxfordDictionaryService = {
     }
     ,
 
-    async mapRetrieveEntryToLemmas(searchEntryResponse: RetrieveEntry, word: WordDTO): Promise<void> {
+    async mapRetrieveEntryToLemmas(searchEntryResponse: RetrieveEntry, word: WordDTO,customLogger? : winston.Logger): Promise<void> {
         const provider = searchEntryResponse.metadata.provider as string
         const tag = `${word.name}(${word.languageCode})`;
+        const logger = customLogger ?? defaultLogger;
+
 
         for (const headwordEntry of searchEntryResponse.results) {
             logger.debug(`[${tag}] found ${headwordEntry.lexicalEntries?.length ?? 0} lexical entries ...`);
@@ -126,7 +131,7 @@ const OxfordDictionaryService = {
 
                 for (const phrasalVerb of (lexicalEntry.phrasalVerbs ?? [])) {
                     if (phrasalVerb.text === lexicalEntry.text) continue;
-                    const lemma = await __findLemmaOrSaveAsOutdated(phrasalVerb.text, language, provider)
+                    const lemma = await __findLemmaOrSaveAsOutdated(phrasalVerb.text, language, provider, logger)
                     if (lemma) {
                         phrasalVerbs.push(lemma)
                     }
@@ -156,7 +161,7 @@ const OxfordDictionaryService = {
                         const synonyms: Lemma[] = [];
                         for (const synonym of (sense.synonyms ?? [])) {
                             if (synonym.text === lexicalEntry.text || synonyms.find(s => s.name === synonym.text)) continue;
-                            const lemma = await __findLemmaOrSaveAsOutdated(synonym.text, language, provider)
+                            const lemma = await __findLemmaOrSaveAsOutdated(synonym.text, language, provider, logger)
                             if (lemma) {
                                 synonyms.push(lemma)
                             }
@@ -166,7 +171,7 @@ const OxfordDictionaryService = {
 
                         let antonyms: Lemma[] = [];
                         if (sense.antonyms?.length) {
-                            const results = await Promise.all(sense.antonyms.map(antonym => __findLemmaOrSaveAsOutdated(antonym.text, language, provider)))
+                            const results = await Promise.all(sense.antonyms.map(antonym => __findLemmaOrSaveAsOutdated(antonym.text, language, provider, logger)))
                             antonyms = results.filter(__notEmpty)
                         }
 
