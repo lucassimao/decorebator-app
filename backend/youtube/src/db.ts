@@ -13,7 +13,7 @@ export async function initDB(): Promise<Connection> {
     url: process.env.DB_URL,
     type: "postgres",
     entities: [`${__dirname}/entities/${extension}`],
-    synchronize: true,
+    synchronize: false,
     namingStrategy: new SnakeNamingStrategy()
   });
   promise.catch((error: any) => logger.error(error));

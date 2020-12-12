@@ -2,6 +2,7 @@ const { getRepository } = require("typeorm");
 const { default: User } = require("../entities/user");
 const bcrypt = require("bcrypt");
 const jwtBuilder = require("jwt-builder");
+const { default: logger } = require("../logger");
 
 if (!process.env.JWT_SECRETE_KEY) {
   throw new Error("env JWT_SECRETE_KEY not found");
@@ -42,7 +43,7 @@ const doLogin = async (email, password) => {
     throw new Error("Login and password must be provided");
   }
   const user = await repository.findOne({ where: { email } });
-  const doesMatch = await bcrypt.compare(password, user?.encryptedPassword);
+  const doesMatch = user && await bcrypt.compare(password, user.encryptedPassword);
 
   if (doesMatch) {
     return jwtBuilder({

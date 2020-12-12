@@ -20,7 +20,7 @@ var jwtStrategyOpts = {
   secretOrKey: process.env.JWT_SECRETE_KEY,
   authScheme: "Bearer",
   issuer: "auth.decorebator.com",
-  audience: "decorebator.com"
+  // audience: "decorebator.com"
 };
 
 const jwtStrategy = new JwtStrategy(
