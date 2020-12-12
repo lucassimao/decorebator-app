@@ -1,38 +1,56 @@
 const express = require("express");
-const { config, Database } = require("@lucassimao/decorabator-common");
-const rootRouter = require("./routers");
 const rateLimit = require("express-rate-limit");
 const cors = require("cors");
 const morgan = require("morgan");
+const { default: logger } = require("./logger");
+const { initDB } = require("./db");
+const { getConnection } = require("typeorm");
+
+if (!process.env.PORT) {
+  throw new Error("env PORT not found");
+}
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // window size: 5 minutes
-  max: 50 // 50 requests per windowMs
+  max: 50, // 50 requests per windowMs
 });
 
+const app = express();
 
-Database.connect(config.dbUrl)
-  .then(() => {
-    const app = express();
+app.set("trust proxy", 1);
+app.use(cors({ exposedHeaders: "authorization" }));
 
-    app.set("trust proxy", 1);
-    app.use(cors({ exposedHeaders: "authorization" }));
+app.use(limiter);
+if (process.env.NODE_ENV !== "production") {
+  app.use(morgan("dev", { immediate: true }));
+}
 
-    app.use(limiter);
-    app.use(
-      config.isDev ? morgan("dev", { immediate: true }) : morgan("combined")
-    );
-    app.use("/", rootRouter);
-    const server = app.listen(config.port);
+let server = null;
 
-    config.logger.info(`auth is listenning at ${process.env.HTTP_PORT}`);
+const stopApp = async (info) => {
+  logger.error("stoping server...", { info });
 
-    process.once("SIGUSR2", async () => {
-      await Database.instance.disconnect()
-      if (server) {
-        server.close()
-      }
-    });
+  const connection = getConnection();
+  if (connection?.isConnected) {
+    await connection.close();
+  }
+  if (server) {
+    server.close();
+  }
+  process.exit(-1);
+};
 
-  })
-  .catch(config.logger.error);
+async function init() {
+  await initDB();
+  const rootRouter = require("./routers");
+  app.use("/", rootRouter);
+  server = app.listen(process.env.PORT);
+  logger.info(`auth is listenning at ${process.env.PORT}`);
+}
+
+process.once("SIGUSR2", stopApp);
+process.once("uncaughtException", stopApp);
+process.once("unhandledRejection", stopApp);
+process.once("rejectionHandled", stopApp);
+
+init();

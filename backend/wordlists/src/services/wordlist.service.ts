@@ -111,7 +111,7 @@ const save = async (wordlistDTO: WordlistDTO, user: User) => {
       originalFileSize: fileInfo?.size
     };
   }
-  return repository.create(entity);
+  return repository.save(entity);
 };
 
 const get = async (id: number, user: User) => repository.findOne(id);

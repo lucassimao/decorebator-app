@@ -31,7 +31,7 @@ const addWord = async (
   wordlistId: number,
   wordDTO: Partial<Word>,
   user: User
-) => repository.create({ ...wordDTO, wordlistId });
+) => repository.save({ ...wordDTO, wordlistId });
 
 const patchWord = (
   idWordlist: number,

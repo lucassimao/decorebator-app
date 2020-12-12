@@ -13,7 +13,7 @@ const addImage = async (
   user: User
 ) => {
   const url = await filestorageService.store(user, fileName, base64Image);
-  return repository.create({ wordId, url, description });
+  return repository.save({ wordId, url, description });
 };
 
 const deleteImage = (
