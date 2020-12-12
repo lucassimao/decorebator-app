@@ -1,4 +1,4 @@
-import {Entity,Column,PrimaryGeneratedColumn, OneToMany, ManyToOne } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import Lemma from "./lemma";
 
 @Entity()

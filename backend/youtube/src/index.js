@@ -2,37 +2,62 @@ const { ApolloServer } = require("apollo-server");
 const typeDefs = require("./schemas");
 const resolvers = require("./resolvers");
 const AuthService = require("./services/auth.service");
-const { Database, config: { logger, port, isDev,isProduction,dbUrl } } = require('@lucassimao/decorabator-common')
+const { default: logger } = require("./logger");
+const { getConnection } = require("typeorm");
+const { initDB } = require("./db");
 
-Database.connect(dbUrl)
-  .then(() => {
-    const server = new ApolloServer({
-      typeDefs,
-      resolvers,
-      logger,
-      context: contextFunction,
-      cors:{origin:'*',allowedHeaders:'*',exposedHeaders:'*',credentials:true}
-    });
-    server.listen({ port }).then(({ url }) => {
-      logger.info(`🚀 Server ready at ${url}`);
-    });
+if (!process.env.PORT) {
+  throw new Error("env PORT not found");
+}
 
-    process.once("SIGUSR2", async () => {
-      await Database.instance.disconnect()
-      if (server) {
-        await server.stop()
-      }
-    });
+let server = null;
 
-  })
-  .catch(logger.error);
+const stopApp = async (info) => {
+  logger.error("stoping server...", { info });
 
+  const connection = getConnection();
+  if (connection?.isConnected) {
+    await connection.close();
+  }
+  if (server) {
+    server.stop();
+  }
+  process.exit(-1);
+};
 
+async function init() {
+  await initDB();
 
+  server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    logger,
+    context: contextFunction,
+    cors: {
+      origin: "*",
+      allowedHeaders: "*",
+      exposedHeaders: "*",
+      credentials: true,
+    },
+  });
+  server.listen({ port: process.env.PORT }).then(({ url }) => {
+    logger.info(`🚀 Server ready at ${url}`);
+  });
+}
+
+process.once("SIGUSR2", stopApp);
+process.once("uncaughtException", stopApp);
+process.once("unhandledRejection", stopApp);
+process.once("rejectionHandled", stopApp);
+
+init();
 
 const contextFunction = ({ req }) => {
   const { operationName } = req.body || {};
-  if (operationName == "IntrospectionQuery" && isDev) {
+  if (
+    operationName == "IntrospectionQuery" &&
+    process.env.NODE_ENV !== "production"
+  ) {
     return;
   }
 

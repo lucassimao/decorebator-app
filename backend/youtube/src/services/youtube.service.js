@@ -1,10 +1,11 @@
 const https = require("https");
 const { URL } = require("url");
-const {
-  config: { logger },
-  YoutubeSubtitleRepository,
-} = require("@lucassimao/decorabator-common");
+
 const { ApolloError } = require("apollo-server");
+const { getRepository } = require("typeorm");
+const { default: YoutubeSubtitle } = require("../entities/youtubeSubtitle");
+
+const { default: logger } = require("../logger");
 
 /**
  * Checks if the subtitles for this video is already stored in our database,
@@ -13,10 +14,9 @@ const { ApolloError } = require("apollo-server");
  * @param {String} videoId The youtube video ID
  */
 async function getCachedSubtitles(videoId) {
+  const repository = getRepository(YoutubeSubtitle);
   const _10_DAYS_MILLISECONDS = 8.64e8;
-  const youtubeSubtitles = await YoutubeSubtitleRepository.getAllByVideoId(
-    videoId
-  );
+  const youtubeSubtitles = await repository.find({ where: { videoId } });
   if (youtubeSubtitles) {
     const isAnyStale = youtubeSubtitles.find((ySubtitle) => {
       const dateCreated = new Date(ySubtitle.dateCreated);
@@ -24,7 +24,7 @@ async function getCachedSubtitles(videoId) {
       return diff > _10_DAYS_MILLISECONDS;
     });
     if (isAnyStale) {
-      await YoutubeSubtitleRepository.deleteVideoSubtitles(videoId);
+      await repository.delete({ where: { videoId } });
     } else {
       return youtubeSubtitles;
     }
@@ -40,8 +40,10 @@ async function getCachedSubtitles(videoId) {
  * @param {Array<{language: String, isAutomatic: Boolean, downloadUrl: String }>} subtitles The subtitles available for this video
  */
 async function cacheSubtitles(subtitles) {
+  const repository = getRepository(YoutubeSubtitle);
+
   const dtos = subtitles.map(
-    ({ languageCode,languageName,videoId, isAutomatic, downloadUrl }) => ({
+    ({ languageCode, languageName, videoId, isAutomatic, downloadUrl }) => ({
       isAutomatic,
       downloadUrl,
       videoId,
@@ -49,7 +51,7 @@ async function cacheSubtitles(subtitles) {
       languageName,
     })
   );
-  await YoutubeSubtitleRepository.bulkInsert(dtos);
+  await repository.save(dtos);
 }
 
 /**
@@ -93,7 +95,7 @@ async function searchSubtitles(videoId) {
                   languageName: caption.name.simpleText,
                   isAutomatic: caption.kind == "asr",
                   downloadUrl: caption.baseUrl,
-                  videoId
+                  videoId,
                 }));
 
                 resolve(result);
@@ -120,15 +122,15 @@ async function searchSubtitles(videoId) {
 
 async function getAvailableVideoSubtitles(youtubeUrl) {
   const url = new URL(youtubeUrl);
-  let videoID
+  let videoID;
 
-  if (url.host === 'youtu.be'){
-    videoID = url.pathname.slice(1)
+  if (url.host === "youtu.be") {
+    videoID = url.pathname.slice(1);
   } else if (url.searchParams.has("v")) {
     videoID = url.searchParams.get("v");
   }
 
-  if (!videoID){
+  if (!videoID) {
     throw new Error("Invalid youtube url");
   }
 

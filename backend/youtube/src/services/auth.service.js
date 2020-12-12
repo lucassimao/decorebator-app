@@ -1,9 +1,12 @@
 const jwt = require("jsonwebtoken");
 const { AuthenticationError, ApolloError } = require("apollo-server");
-const {
-  config: { logger, jwtSecretKey },
-  UserRepository,
-} = require("@lucassimao/decorabator-common");
+const { getRepository } = require("typeorm");
+const { default: User } = require("../entities/user");
+const { default: logger } = require("../logger");
+
+if (!process.env.JWT_SECRETE_KEY) {
+  throw new Error("env JWT_SECRETE_KEY not found");
+}
 
 /**
  * Decodes the jwt token and returns a object with the name, email and _id of the user, if it exists
@@ -22,14 +25,15 @@ function authenticate(jwtToken) {
   }
 
   return new Promise((resolve, reject) => {
-    jwt.verify(jwtToken, jwtSecretKey, async (err, decoded) => {
+    jwt.verify(jwtToken, process.env.JWT_SECRETE_KEY, async (err, decoded) => {
       const { userId } = decoded || {};
 
       if (err) {
         logger.error(err);
         reject(new ApolloError(err.message, err.name));
       } else {
-        const user = await UserRepository.getById(userId);
+        const repository = getRepository(User);
+        const user = await repository.findOne(userId);
 
         if (user) {
           resolve(user);
