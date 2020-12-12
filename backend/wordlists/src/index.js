@@ -1,20 +1,36 @@
-const app = require("./app");
+const { initDB } = require("./db");
+const logger = require("./logger").default;
+const { getConnection } = require("typeorm");
 
-const { Database, config: {port,logger,dbUrl} } = require('@lucassimao/decorabator-common')
+if (!process.env.PORT) {
+  throw new Error("env variable PORT not found");
+}
 
-Database
-  .connect(dbUrl)
-  .then(async (database) => {
-    // await database.sync()
-    const server = app.listen(port);
+let server = null;
 
-    process.once("SIGUSR2", async () => {
-      await Database.instance.disconnect()
-      if (server) {
-        server.close()
-      }
-    });
+const stopApp = async info => {
+  logger.error("stoping server...", { info });
 
-    logger.info(`wordlists is listenning at ${port}`);
-  })
-  .catch(logger.error);
+  const connection = getConnection();
+  if (connection?.isConnected) {
+    await connection.close();
+  }
+  if (server) {
+    server.close();
+  }
+  process.exit(-1);
+};
+
+async function init() {
+  await initDB();
+  const app = require("./app");
+  server = app.listen(process.env.PORT);
+  logger.info(`wordlist is listenning at ${process.env.PORT}`);
+}
+
+process.once("SIGUSR2", stopApp);
+process.once("uncaughtException", stopApp);
+process.once("unhandledRejection", stopApp);
+process.once("rejectionHandled", stopApp);
+
+init();

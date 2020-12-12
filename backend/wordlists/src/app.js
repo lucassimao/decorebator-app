@@ -7,23 +7,27 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const morgan = require("morgan");
 const cors = require("cors");
-
+const userService = require("./services/user.service").default;
 const routers = require("./routers");
-const { UserRepository, config } = require('@lucassimao/decorabator-common')
+const logger = require("./logger").default;
+
+if (!process.env.JWT_SECRETE_KEY) {
+  throw new Error("JTW_SECRETE_KEY not found");
+}
 
 var jwtStrategyOpts = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: config.jwtSecretKey,
+  secretOrKey: process.env.JWT_SECRETE_KEY,
   authScheme: "Bearer",
-  issuer: config.domain
-  // opts.audience : 'yoursite.net';
+  issuer: "auth.decorebator.com",
+  audience: "decorebator.com"
 };
 
 const jwtStrategy = new JwtStrategy(
   jwtStrategyOpts,
   async (jwt_payload, done) => {
     try {
-      const user = await UserRepository.getById(parseInt(jwt_payload.userId))
+      const user = await userService.getById(parseInt(jwt_payload.userId));
       if (user) {
         return done(null, user);
       } else {
@@ -50,13 +54,17 @@ app.use(passport.initialize());
 app.use(passport.authenticate("jwt", { session: false }));
 
 if (!process.env.IGNORE_REQUEST_LIMIT) {
+  logger.info("Applying request limiter ...");
   app.use(limiter);
 }
-if (config.httpOptions.enableCompression) {
+if (process.env.ENABLE_COMPRESSION) {
+  logger.info("Enabling http compression ...");
   app.use(compression());
 }
 
-app.use(config.isDev ? morgan("dev", { immediate: true }) : morgan("combined"));
+if (process.env.NODE_ENV !== "production") {
+  app.use(morgan("dev", { immediate: true }));
+}
 app.use(helmet());
 app.use("/", routers);
 

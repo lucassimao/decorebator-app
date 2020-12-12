@@ -4,25 +4,23 @@ const wordlistRouter = require("./wordlist.router");
 const imageRouter = require("./image.router");
 const wordlistService = require("../services/wordlist.service");
 const wordService = require("../services/word.service");
-
-const { config: { logger } } = require('@lucassimao/decorabator-common')
-
+const { createHttpRequestLogger } = require("../logger");
 const root = Router();
-
 
 /**
  * This express midleware is only called in the situation in which the default
- * midleware is not able to successfull process the request 
+ * midleware is not able to successfull process the request
  *
  */
 const resolveStatus = async (req, res, next) => {
   const url = req.baseUrl + req.url;
+  const logger = await createHttpRequestLogger(req);
 
   try {
     logger.warn(`Resolving status for ${url} ...`);
-    if (!req.url.startsWith('/wordlists')){
-        res.sendStatus(404);
-        return;
+    if (!req.url.startsWith("/wordlists")) {
+      res.sendStatus(404);
+      return;
     }
 
     const regex = /\/wordlists\/(\d+)(\/words\/(\d+)(\/images\/(\d+))?)?/;
@@ -41,7 +39,11 @@ const resolveStatus = async (req, res, next) => {
     }
 
     if (idWord) {
-      const word = await wordService.getWithImages(idWordlist, idWord, req.user)
+      const word = await wordService.getWithImages(
+        idWordlist,
+        idWord,
+        req.user
+      );
       if (!word) {
         res.status(404).send("word not found");
         return;
@@ -58,8 +60,8 @@ const resolveStatus = async (req, res, next) => {
 
     res.sendStatus(404);
   } catch (error) {
-    logger.error(`Error while resolving ${url}`)
-    next(error)
+    logger.error(`Error while resolving ${url}`);
+    next(error);
   }
 };
 

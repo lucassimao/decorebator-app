@@ -1,12 +1,12 @@
 const express = require("express");
 const service = require("../services/wordlist.service");
-const { config: {logger},RepositoryException } = require('@lucassimao/decorabator-common')
-
 const router = express.Router();
+const { createHttpRequestLogger } = require("../logger");
 
 const wrapAsync = asyncMiddleware => {
   return (req, res, next) =>
-    asyncMiddleware(req, res, next).catch(error => {
+    asyncMiddleware(req, res, next).catch(async error => {
+      const logger = await createHttpRequestLogger(req);
       logger.error(error);
       next(error);
     });
@@ -37,8 +37,9 @@ router
     "/:id([0-9]+)",
     wrapAsync(async (req, res, next) => {
       const wordlist = await service.get(req.params.id, req.user);
+      const logger = await createHttpRequestLogger(req);
       logger.debug(wordlist);
-      
+
       if (wordlist) {
         res.status(200).send(wordlist);
       } else {
@@ -50,18 +51,12 @@ router
     "/",
     express.json({ limit: 2 * 1024 * 1024 }), // //TODO<backend> buffer size should be bigger for paying users
     wrapAsync(async (req, res) => {
-      try {
-        const wordlist = await service.save(req.body, req.user);
-        res.set("Link", `/wordlists/${wordlist.id}`);
-        res.status(201).end();
-      } catch (error) {
-        if (error instanceof RepositoryException && error.isValidationError) {
-          logger.error(error)
-          res.status(400).send(error.validationErrors);
-        } else {
-          throw error;
-        }
-      }
+      const wordlist = await service.save(req.body, req.user);
+      res.set("Link", `/wordlists/${wordlist.id}`);
+      res.status(201).end();
+      // const logger = await createHttpRequestLogger(req);
+      // logger.error(error)
+      // res.status(400).send(error.validationErrors);
     })
   )
   .delete(
@@ -79,11 +74,7 @@ router
     "/:id([0-9]+)",
     express.json(),
     wrapAsync(async (req, res, next) => {
-      const success = await service.update(
-        req.params.id,
-        req.body,
-        req.user
-      );
+      const success = await service.update(req.params.id, req.body, req.user);
 
       if (success) {
         res.set("Link", `/wordlists/${req.params.id}`);
