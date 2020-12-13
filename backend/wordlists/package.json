@@ -6,7 +6,7 @@
     "test": "npx jest --detectOpenHandles 'src/'",
     "jest-watch": "jest --watch --detectOpenHandles 'src/'",
     "start:dev": "nodemon",
-    "build": "rimraf build && npx tsc",
+    "build": "npx rimraf build && npx tsc",
     "start": "node build/index.js"
   },
   "repository": {
@@ -39,7 +39,6 @@
     "nodemon": "^2.0.4",
     "prettier": "^1.19.1",
     "rimraf": "^3.0.2",
-    "sqlite3": "^4.2.0",
     "supertest": "^4.0.2",
     "ts-node": "^9.1.1",
     "typescript": "^4.1.3"

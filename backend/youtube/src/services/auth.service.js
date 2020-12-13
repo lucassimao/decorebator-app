@@ -4,7 +4,7 @@ const { getRepository } = require("typeorm");
 const { default: User } = require("../entities/user");
 const { default: logger } = require("../logger");
 
-if (!process.env.JWT_SECRETE_KEY) {
+if (!process.env.JWT_SECRET_KEY) {
   throw new Error("env JWT_SECRETE_KEY not found");
 }
 

@@ -11,13 +11,13 @@ const userService = require("./services/user.service").default;
 const routers = require("./routers");
 const logger = require("./logger").default;
 
-if (!process.env.JWT_SECRETE_KEY) {
-  throw new Error("JTW_SECRETE_KEY not found");
+if (!process.env.JWT_SECRET_KEY) {
+  throw new Error("JTW_SECRET_KEY not found");
 }
 
 var jwtStrategyOpts = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRETE_KEY,
+  secretOrKey: process.env.JWT_SECRET_KEY,
   authScheme: "Bearer",
   issuer: "auth.decorebator.com",
   // audience: "decorebator.com"

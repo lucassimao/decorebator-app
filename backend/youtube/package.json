@@ -8,7 +8,7 @@
     "jest-watch": "jest --watch --detectOpenHandles 'src/'",
     "format": "prettier --write 'src/**/*.js'",
     "start:dev": "nodemon",
-    "build": "rimraf build && npx tsc",
+    "build": "npx rimraf build && npx tsc",
     "start": "node build/index.js"
   },
   "repository": {

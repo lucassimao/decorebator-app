@@ -4,7 +4,6 @@ import User from "../entities/user";
 import filestorageService from "./filestorage.service";
 
 type ImageDTO = { fileName: string; base64Image: string; description: string };
-const repository = getRepository(Image);
 
 const addImage = async (
   idWordlist: number,
@@ -12,6 +11,8 @@ const addImage = async (
   { fileName, base64Image, description }: ImageDTO,
   user: User
 ) => {
+const repository = getRepository(Image);
+
   const url = await filestorageService.store(user, fileName, base64Image);
   return repository.save({ wordId, url, description });
 };
@@ -22,6 +23,8 @@ const deleteImage = (
   idImage: number,
   user: User
 ) => {
+const repository = getRepository(Image);
+
   return repository.delete(idImage);
 };
 
@@ -32,6 +35,8 @@ const patchImage = (
   imageDTO: Partial<Image>,
   user: User
 ) => {
+const repository = getRepository(Image);
+
   return repository.update(idImage, imageDTO);
 };
 

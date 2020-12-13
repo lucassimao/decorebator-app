@@ -2,9 +2,8 @@ const { getRepository } = require("typeorm");
 const { default: User } = require("../entities/user");
 const bcrypt = require("bcrypt");
 const jwtBuilder = require("jwt-builder");
-const { default: logger } = require("../logger");
 
-if (!process.env.JWT_SECRETE_KEY) {
+if (!process.env.JWT_SECRET_KEY) {
   throw new Error("env JWT_SECRETE_KEY not found");
 }
 
@@ -13,7 +12,6 @@ if (!process.env.JWT_EXPIRATION) {
 }
 
 const isStringEmpty = (string) => !string || string.trim().length == 0;
-const repository = getRepository(User);
 /**
  *
  * @param {String} name User full name
@@ -27,6 +25,8 @@ const register = async (name, country, email, password) => {
   if (isStringEmpty(password)) {
     throw new Error("A password must be provided");
   }
+const repository = getRepository(User);
+
   const encryptedPassword = await bcrypt.hash(password, 10);
   return repository.save({ name, country, email, encryptedPassword });
 };
@@ -42,6 +42,8 @@ const doLogin = async (email, password) => {
   if (isStringEmpty(email) || isStringEmpty(password)) {
     throw new Error("Login and password must be provided");
   }
+const repository = getRepository(User);
+
   const user = await repository.findOne({ where: { email } });
   const doesMatch = user && await bcrypt.compare(password, user.encryptedPassword);
 
@@ -64,6 +66,6 @@ const doLogin = async (email, password) => {
   }
 };
 
-const removeAccount = (email) => repository.delete({ where: { email } });
+const removeAccount = (email) => getRepository(User).delete({ where: { email } });
 
 module.exports = { register, doLogin, removeAccount };

@@ -24,12 +24,12 @@ function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
   return value !== null && value !== undefined;
 }
 
-const repository = getRepository(Wordlist);
 
 const list = (
   { pageSize = DEFAULT_PAGE_SIZE, page = DEFAULT_PAGE, filter }: ListDTO,
   user: User
 ) => {
+const repository = getRepository(Wordlist);
   const where: FindConditions<Wordlist> = { ownerId: user.id };
   if (filter) {
     where.name = ILike(`%${filter}%`);
@@ -51,6 +51,8 @@ const list = (
  * @returns {Promise} A promise, which resolves to the persisted object
  */
 const save = async (wordlistDTO: WordlistDTO, user: User) => {
+const repository = getRepository(Wordlist);
+
   const {
     minWordLength = 1,
     onlyNewWords = false,
@@ -114,15 +116,16 @@ const save = async (wordlistDTO: WordlistDTO, user: User) => {
   return repository.save(entity);
 };
 
-const get = async (id: number, user: User) => repository.findOne(id);
+
+const get = async (id: number, user: User) => getRepository(Wordlist).findOne(id);
 
 const getWithWords = async (id: number, user: User) =>
-  repository.findOne(id, { relations: ["words"] });
+  getRepository(Wordlist).findOne(id, { relations: ["words"] });
 
 const update = async (id: number, updateObj: DeepPartial<Wordlist>) =>
-  repository.update(id, updateObj);
+  getRepository(Wordlist).update(id, updateObj);
 
-const remove = async (id: number) => repository.delete(id);
+const remove = async (id: number) => getRepository(Wordlist).delete(id);
 
 /**
  * Checks if a string contains a valid binary file

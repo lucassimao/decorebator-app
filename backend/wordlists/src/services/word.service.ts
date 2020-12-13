@@ -3,13 +3,12 @@ import User from "../entities/user";
 import Word from "../entities/word";
 import logger from "../logger";
 
-const repository = getRepository(Word);
 
 const get = async (idWordlist: number, idWord: number, user: User) =>
-  repository.findOne(idWord);
+  getRepository(Word).findOne(idWord);
 
 const getWithImages = async (idWordlist: number, idWord: number, user: User) =>
-  repository.findOne(idWord, { relations: ["images"] });
+  getRepository(Word).findOne(idWord, { relations: ["images"] });
 
 const getWords = async (
   wordlistId: number,
@@ -18,12 +17,12 @@ const getWords = async (
   limit: number
 ) => {
   if (Number.isInteger(skip) && Number.isInteger(limit)) {
-    return repository.find({ where: { wordlistId }, skip, take: limit });
+    return getRepository(Word).find({ where: { wordlistId }, skip, take: limit });
   } else {
     logger.warn(
       `Ignoring pagination args: idWordlist ${wordlistId} skip: ${skip} limit: ${limit}`
     );
-    return repository.find({ where: { wordlistId } });
+    return getRepository(Word).find({ where: { wordlistId } });
   }
 };
 
@@ -31,20 +30,20 @@ const addWord = async (
   wordlistId: number,
   wordDTO: Partial<Word>,
   user: User
-) => repository.save({ ...wordDTO, wordlistId });
+) => getRepository(Word).save({ ...wordDTO, wordlistId });
 
 const patchWord = (
   idWordlist: number,
   idWord: number,
   wordDTO: Partial<Word>,
   user: User
-) => repository.update(idWord, wordDTO);
+) => getRepository(Word).update(idWord, wordDTO);
 
 const deleteWord = (idWordlist: number, idWord: number, user: User) =>
-  repository.delete(idWord);
+  getRepository(Word).delete(idWord);
 
 const getAllWordsByUser = async (userId: number): Promise<Array<string>> => {
-  return repository
+  return getRepository(Word)
     .createQueryBuilder("word")
     .select("name")
     .distinct()
