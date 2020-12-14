@@ -20,7 +20,7 @@ app.use(express.json());
 app.use(router);
 
 const stopApp = async (info: any) => {   
-    logger.error('stoping server...',{info})
+    logger.error('stoping server...',info)
 
     const connection = getConnection()
     if (connection?.isConnected) {
@@ -40,7 +40,6 @@ async function init() {
     process.once("SIGUSR2", stopApp);
     process.once("uncaughtException", stopApp);
     process.once("unhandledRejection", stopApp);
-    process.once("rejectionHandled", stopApp);
 }    
 
 init()

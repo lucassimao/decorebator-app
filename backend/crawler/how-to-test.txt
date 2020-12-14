@@ -1,3 +1,6 @@
+curl -v -H  "content-type: application/json" -d '{"login":"lsimaocosta@gmail.com","password":"123"}' \
+    https://decorebator-auth-6bzynn6uxa-uc.a.run.app/signin
+
 echo '{"languageCode":"en","name":"tear down"}' | base64
 
 
