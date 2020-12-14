@@ -1,5 +1,5 @@
 const express = require("express");
-const wordService = require("../services/word.service");
+const {default: wordService} = require("../services/word.service");
 
 const router = express.Router({ mergeParams: true });
 const wrapAsync = asyncMiddleware => {

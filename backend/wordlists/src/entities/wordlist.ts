@@ -33,13 +33,13 @@ export default class Wordlist {
   @Column({ nullable: true })
   originalFileExtension?: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true,type:'float' })
   @Min(0)
-  originalFileSize?: Number;
+  originalFileSize?: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type:'float' })
   @Min(0)
-  originalFileExtractionMs?: Number;
+  originalFileExtractionMs?: number;
 
   @CreateDateColumn()
   createdAt?: Date;

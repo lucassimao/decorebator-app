@@ -2,8 +2,8 @@ const Router = require("express").Router;
 const wordRouter = require("./word.router");
 const wordlistRouter = require("./wordlist.router");
 const imageRouter = require("./image.router");
-const wordlistService = require("../services/wordlist.service");
-const wordService = require("../services/word.service");
+const {default:wordlistService} = require("../services/wordlist.service");
+const {default:wordService} = require("../services/word.service");
 const { createHttpRequestLogger } = require("../logger");
 const root = Router();
 

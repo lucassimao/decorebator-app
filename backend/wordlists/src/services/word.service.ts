@@ -43,13 +43,15 @@ const deleteWord = (idWordlist: number, idWord: number, user: User) =>
   getRepository(Word).delete(idWord);
 
 const getAllWordsByUser = async (userId: number): Promise<Array<string>> => {
-  return getRepository(Word)
+  const result = await getRepository(Word)
     .createQueryBuilder("word")
-    .select("name")
+    .select("word.name")
     .distinct()
     .innerJoin("word.wordlist", "wordlist")
     .where("wordlist.ownerId=:userId", { userId })
-    .getRawMany<string>();
+    .getRawMany();
+
+  return result.map(word => word.word_name)
 };
 
 export default {

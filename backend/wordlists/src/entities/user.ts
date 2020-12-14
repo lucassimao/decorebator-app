@@ -1,13 +1,15 @@
 import { IsEmail } from "class-validator";
 import {
   Column,
+  CreateDateColumn,
   Entity,
   OneToMany,
-  PrimaryGeneratedColumn
+  PrimaryGeneratedColumn,
+  UpdateDateColumn
 } from "typeorm";
 import Wordlist from "./wordlist";
 
-@Entity()
+ @Entity()
 export default class User {
   @Column()
   @PrimaryGeneratedColumn()

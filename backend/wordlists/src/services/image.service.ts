@@ -40,4 +40,4 @@ const repository = getRepository(Image);
   return repository.update(idImage, imageDTO);
 };
 
-module.exports = { addImage, deleteImage, patchImage };
+export default { addImage, deleteImage, patchImage };

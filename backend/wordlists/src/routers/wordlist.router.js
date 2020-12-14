@@ -1,5 +1,5 @@
 const express = require("express");
-const service = require("../services/wordlist.service");
+const {default:service} = require("../services/wordlist.service");
 const router = express.Router();
 const { createHttpRequestLogger } = require("../logger");
 
@@ -37,8 +37,6 @@ router
     "/:id([0-9]+)",
     wrapAsync(async (req, res, next) => {
       const wordlist = await service.get(req.params.id, req.user);
-      const logger = await createHttpRequestLogger(req);
-      logger.debug(wordlist);
 
       if (wordlist) {
         res.status(200).send(wordlist);

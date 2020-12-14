@@ -1,6 +1,6 @@
 const express = require("express");
-const service = require("../services/image.service");
-const wordService = require("../services/word.service");
+const {default:service} = require("../services/image.service");
+const wordService = require("../services/word.service").default;
 
 const router = express.Router({ mergeParams: true });
 const wrapAsync = (asyncMiddleware) => (req, res, next) => asyncMiddleware(req, res, next).catch(next);

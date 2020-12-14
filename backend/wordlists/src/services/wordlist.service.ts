@@ -1,7 +1,8 @@
 import { performance } from "perf_hooks";
 import textract from "textract";
-import { DeepPartial, FindConditions, getRepository, ILike } from "typeorm";
+import { DeepPartial, FindConditions, getConnection, getRepository, ILike } from "typeorm";
 import User from "../entities/user";
+import Word from "../entities/word";
 import Wordlist from "../entities/wordlist";
 import logger from "../logger";
 import wordService from "./word.service";
@@ -29,7 +30,7 @@ const list = (
   { pageSize = DEFAULT_PAGE_SIZE, page = DEFAULT_PAGE, filter }: ListDTO,
   user: User
 ) => {
-const repository = getRepository(Wordlist);
+  const repository = getRepository(Wordlist);
   const where: FindConditions<Wordlist> = { ownerId: user.id };
   if (filter) {
     where.name = ILike(`%${filter}%`);
@@ -51,7 +52,7 @@ const repository = getRepository(Wordlist);
  * @returns {Promise} A promise, which resolves to the persisted object
  */
 const save = async (wordlistDTO: WordlistDTO, user: User) => {
-const repository = getRepository(Wordlist);
+  const repository = getRepository(Wordlist);
 
   const {
     minWordLength = 1,
@@ -117,7 +118,12 @@ const repository = getRepository(Wordlist);
 };
 
 
-const get = async (id: number, user: User) => getRepository(Wordlist).findOne(id);
+const get = async (id: number, user: User) => {
+  const wordsCountPromise = getRepository(Word).count({ where: { wordlistId: id } })
+  const wordlistPromise = getRepository(Wordlist).findOne(id)
+  const [wordsCount, wordlist] = await Promise.all([wordsCountPromise, wordlistPromise])
+  return { ...wordlist, wordsCount }
+};
 
 const getWithWords = async (id: number, user: User) =>
   getRepository(Wordlist).findOne(id, { relations: ["words"] });
@@ -125,90 +131,95 @@ const getWithWords = async (id: number, user: User) =>
 const update = async (id: number, updateObj: DeepPartial<Wordlist>) =>
   getRepository(Wordlist).update(id, updateObj);
 
-const remove = async (id: number) => getRepository(Wordlist).delete(id);
+const remove = async (id: number) => {
+  return getConnection().transaction(async (tx) => {
 
-/**
- * Checks if a string contains a valid binary file
- *
- * @param {String} base64EncodedFile A base 64 encoded binary file
- * @returns {{fileType: String, buffer: Buffer}} a object identifying the file type and the buffer
- */
-const __parseBase64EncodedFile = (base64EncodedFile: string) => {
-  const regex = /data:(\S+);base64,(\S+)/;
-  const isString = typeof base64EncodedFile == "string";
+    await tx.getRepository(Word).delete({wordlistId: id});
+    await tx.getRepository(Wordlist).delete(id);
+  })
+}
 
-  if (!isString || !regex.test(base64EncodedFile)) {
-    logger.debug("Invalid base64 encoded file was sent");
-    logger.debug(base64EncodedFile);
-    throw new Error("Invalid file");
-  }
+  /**
+   * Checks if a string contains a valid binary file
+   *
+   * @param {String} base64EncodedFile A base 64 encoded binary file
+   * @returns {{fileType: String, buffer: Buffer}} a object identifying the file type and the buffer
+   */
+  const __parseBase64EncodedFile = (base64EncodedFile: string) => {
+    const regex = /data:(\S+);base64,(\S+)/;
+    const isString = typeof base64EncodedFile == "string";
 
-  const [, fileType, data] = regex.exec(base64EncodedFile) ?? [];
-  const buffer = Buffer.from(data, "base64");
-  return { fileType, buffer };
-};
-/**
- * Extract words from a buffer
- *
- * @param {Buffer} buffer A buffer object representing a binary file
- * @returns {Pomise<Array<String>>} a promise which resolves to a set of words found in the buffer passed as argument
- */
-const __extractWordsFromBuffer = async (
-  buffer: Buffer,
-  fileType: string
-): Promise<Array<string>> => {
-  return new Promise((resolve, reject) => {
-    //TODO<backend> buffer size should be bigger for paying users
-    const options = {
-      preserveLineBreaks: false,
-      exec: { maxBuffer: 2 * 1024 * 1024 }
-    };
-    //@ts-ignore
-    textract.fromBufferWithMime(fileType, buffer, options, function(
-      error,
-      text
-    ) {
-      if (error) {
-        logger.error(`Error while extracting text from a ${fileType}`, error);
-        reject(error);
-      } else {
-        const allWords = text
-          .toLowerCase()
-          .split(/\s+/)
-          .map(word => word.trim())
-          .filter(string => string.length > 0);
-        resolve(allWords);
-      }
+    if (!isString || !regex.test(base64EncodedFile)) {
+      logger.debug("Invalid base64 encoded file was sent");
+      logger.debug(base64EncodedFile);
+      throw new Error("Invalid file");
+    }
+
+    const [, fileType, data] = regex.exec(base64EncodedFile) ?? [];
+    const buffer = Buffer.from(data, "base64");
+    return { fileType, buffer };
+  };
+  /**
+   * Extract words from a buffer
+   *
+   * @param {Buffer} buffer A buffer object representing a binary file
+   * @returns {Pomise<Array<String>>} a promise which resolves to a set of words found in the buffer passed as argument
+   */
+  const __extractWordsFromBuffer = async (
+    buffer: Buffer,
+    fileType: string
+  ): Promise<Array<string>> => {
+    return new Promise((resolve, reject) => {
+      //TODO<backend> buffer size should be bigger for paying users
+      const options = {
+        preserveLineBreaks: false,
+        exec: { maxBuffer: 2 * 1024 * 1024 }
+      };
+      //@ts-ignore
+      textract.fromBufferWithMime(fileType, buffer, options, function (
+        error,
+        text
+      ) {
+        if (error) {
+          logger.error(`Error while extracting text from a ${fileType}`, error);
+          reject(error);
+        } else {
+          const allWords = text
+            .toLowerCase()
+            .split(/\s+/)
+            .map(word => word.trim())
+            .filter(string => string.length > 0);
+          resolve(allWords);
+        }
+      });
     });
-  });
-};
+  };
 
-/**
- * Remove non alpha numeric characteres and lower cases the word
- *
- * @param {String} word The word to be formatted
- */
-const __formatWord = (word: string): string => {
-  if (!word) return "";
+  /**
+   * Remove non alpha numeric characteres and lower cases the word
+   *
+   * @param {String} word The word to be formatted
+   */
+  const __formatWord = (word: string): string => {
+    if (!word) return "";
 
-  return word
-    .replace(/<\S+[^>]*>/gi, "")
-    .replace(/<\/\S+>/gi, "")
-    .replace(/[[\]#\$(),;{}:."?!_=&]/g, "")
-    .replace(/^'/, "")
-    .replace(/'$/, "")
-    .replace(/^\d+$/g, "") // just numbers? fuck
-    .toLowerCase()
-    .trim();
-};
+    return word
+      .replace(/<\S+[^>]*>/gi, "")
+      .replace(/<\/\S+>/gi, "")
+      .replace(/[[\]#\$(),;{}:."?!_=&]/g, "")
+      .replace(/^'/, "")
+      .replace(/'$/, "")
+      .replace(/^\d+$/g, "") // just numbers? fuck
+      .toLowerCase()
+      .trim();
+  };
 
-const api = {
-  list,
-  save,
-  get,
-  getWithWords,
-  update,
-  delete: remove
-};
+  export default {
+    list,
+    save,
+    get,
+    getWithWords,
+    update,
+    delete: remove
+  };
 
-module.exports = api;
