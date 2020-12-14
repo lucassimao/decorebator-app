@@ -11,6 +11,8 @@ import React from "react";
 import WikipediaImage from "../../img/wikipedia.jpeg";
 import WordlistsImage from "../../img/wordlists.jpeg";
 import YoutubeImage from "../../img/youtube.jpg";
+import MenuLink from "../../components/ui/MenuLink";
+
 
 
 const useStyles = makeStyles(theme => ({
@@ -104,7 +106,7 @@ function Welcome() {
         </Typography>
       </div>
 
-      <Fab href="/wordlists/menu" className={classes.button} color="primary" variant="extended">
+      <Fab component={MenuLink} className={classes.button} color="primary" variant="extended">
         <AddIcon /> New
       </Fab>
 

@@ -54,7 +54,7 @@ async function getVideoDetails(url) {
   const videoId = _extractVideoIdFromUrl(url);
   const fullUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${process.env.REACT_APP_YOUTUBE_API_KEY}`;
   const response = await fetch(fullUrl, { headers: { Accept: "application/json" } });
-  const jsonResponse = await response.json();
+  const jsonResponse = await response.json(); // TODO handle problem here
   const item = jsonResponse.items[0].snippet;
   const { title, description, thumbnails, defaultAudioLanguage, channelTitle } = item;
   return { title, description, thumbnails, defaultAudioLanguage, channelTitle };

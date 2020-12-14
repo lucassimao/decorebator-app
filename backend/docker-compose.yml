@@ -2,40 +2,31 @@ version: '3'
 services:
   auth:
     environment:
-      - GITHUB_TOKEN
       - DB_URL
-      - TEST_CONTAINERS
       - IGNORE_REQUEST_LIMIT
       - NODE_ENV
       - JWT_SECRET_KEY
+      - JWT_EXPIRATION
       - PORT=3000
     depends_on: 
       - postgres
     build:
       context: auth/
-      args: 
-        - GITHUB_TOKEN      
     ports: 
       - "3001:3000" 
   wordlists:
     environment: 
-      - TEST_CONTAINERS
       - IGNORE_REQUEST_LIMIT
       - NODE_ENV
       - JWT_SECRET_KEY
       - PORT=3000
       - DB_URL
-      - GITHUB_TOKEN
     depends_on: 
       - postgres
     build:
       context: wordlists/
-      args: 
-        - GITHUB_TOKEN
     ports:
     - "3002:3000"
-    volumes: 
-      - $HOME/.aws/:/root/.aws/:ro
   # quizzes:
   #   environment: 
   #     - TEST_CONTAINERS
@@ -55,7 +46,6 @@ services:
   #     - "3003:4000" 
   youtube:
     environment: 
-      - TEST_CONTAINERS
       - NODE_ENV
       - DB_URL
       - SHOW_LOG_ON_STDOUT
@@ -65,8 +55,6 @@ services:
       - postgres
     build:
       context: youtube/
-      args: 
-        - GITHUB_TOKEN        
     ports: 
       - "3004:4000"      
   postgres:

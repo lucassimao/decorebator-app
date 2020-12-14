@@ -10,6 +10,8 @@ import ProgressModal from "../../components/ui/ProgressModal";
 import { fetchUserWordlists } from "../../thunks/wordlist.thunks";
 import SearchBox from "./components/SearchBox";
 import Wordlists from "./components/UserWordlists";
+import MenuLink from "../../components/ui/MenuLink";
+
 const Welcome = lazy(() => import("./Welcome").then(m => m));
 
 const useStyles = makeStyles(theme => ({
@@ -59,7 +61,7 @@ function Home(props) {
         <Wordlists wordlists={userWordlists} />
       </div>
 
-      <Fab href="/wordlists/menu" className={classes.fab} color="primary" aria-label="add">
+      <Fab component={MenuLink} className={classes.fab} color="primary" aria-label="add">
         <AddIcon />
       </Fab>
     </Container>)
