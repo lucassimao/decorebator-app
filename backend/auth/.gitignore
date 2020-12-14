@@ -1,3 +1,4 @@
+.env.prod
 build
 node_modules
 .eslintcache

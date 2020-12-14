@@ -28,7 +28,7 @@ if (process.env.NODE_ENV !== "production") {
 let server = null;
 
 const stopApp = async (info) => {
-  logger.error("stoping server...", { info });
+  logger.error("stoping server...", info);
 
   const connection = getConnection();
   if (connection?.isConnected) {
@@ -51,6 +51,5 @@ async function init() {
 process.once("SIGUSR2", stopApp);
 process.once("uncaughtException", stopApp);
 process.once("unhandledRejection", stopApp);
-process.once("rejectionHandled", stopApp);
 
 init();

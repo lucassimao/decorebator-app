@@ -25,7 +25,7 @@ const register = async (name, country, email, password) => {
   if (isStringEmpty(password)) {
     throw new Error("A password must be provided");
   }
-const repository = getRepository(User);
+  const repository = getRepository(User);
 
   const encryptedPassword = await bcrypt.hash(password, 10);
   return repository.save({ name, country, email, encryptedPassword });
@@ -42,15 +42,16 @@ const doLogin = async (email, password) => {
   if (isStringEmpty(email) || isStringEmpty(password)) {
     throw new Error("Login and password must be provided");
   }
-const repository = getRepository(User);
+  const repository = getRepository(User);
 
   const user = await repository.findOne({ where: { email } });
-  const doesMatch = user && await bcrypt.compare(password, user.encryptedPassword);
+  const doesMatch =
+    user && (await bcrypt.compare(password, user.encryptedPassword));
 
   if (doesMatch) {
     return jwtBuilder({
       algorithm: "HS256",
-      secret: process.env.JWT_SECRETE_KEY,
+      secret: process.env.JWT_SECRET_KEY,
       iat: true,
       nbf: true,
       exp: process.env.JWT_EXPIRATION,
@@ -66,6 +67,7 @@ const repository = getRepository(User);
   }
 };
 
-const removeAccount = (email) => getRepository(User).delete({ where: { email } });
+const removeAccount = (email) =>
+  getRepository(User).delete({ where: { email } });
 
 module.exports = { register, doLogin, removeAccount };

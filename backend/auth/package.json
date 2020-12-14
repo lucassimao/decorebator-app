@@ -9,6 +9,7 @@
     "format": "prettier --write 'src/**/*.js'",
     "jest-watch": "jest --watch --detectOpenHandles 'src/'",
     "start:dev": "nodemon",
+    "start:prod": "nodemon --config nodemon.prod.json",
     "build": "npx rimraf build && npx tsc && npx copyfiles -u 1 src/resources/*  build",
     "start": "node build/index.js"
   },
@@ -60,8 +61,11 @@
     }
   },
   "lint-staged": {
-    "*.js": [
+    "src/**/*.js": [
       "eslint --cache --fix",
+      "prettier --write"
+    ],
+    "src/**/*.ts": [
       "prettier --write"
     ]
   }

@@ -1,6 +1,6 @@
 import { Request } from "express";
 import winston from "winston";
-import gcpMetadata from "gcp-metadata";
+import * as gcpMetadata from "gcp-metadata";
 
 const { combine, prettyPrint, printf, errors, json } = winston.format;
 let projectId: string | undefined;
@@ -8,7 +8,7 @@ let projectId: string | undefined;
 const formats: winston.Logform.Format[] = [
   json(),
   errors({ stack: true }),
-  prettyPrint()
+  prettyPrint(),
 ];
 
 if (process.env.NODE_ENV === "production") {
@@ -19,13 +19,10 @@ if (process.env.NODE_ENV === "production") {
 }
 
 async function getProjectId(): Promise<string | undefined> {
-  if (process.env.NODE_ENV !== "production") {
-    return "dev-environment-project";
-  }
   if (!projectId) {
     const isAvailable = await gcpMetadata.isAvailable();
     if (!isAvailable) {
-      throw new Error(`Metadata api isn't available`);
+      return "dev-environment-project";
     }
 
     projectId = await gcpMetadata.project("project-id");
@@ -38,9 +35,9 @@ const logger = winston.createLogger({
   transports: [
     new winston.transports.Console({
       format: combine(...formats),
-      level: process.env.NODE_ENV === "production" ? "info" : "silly"
-    })
-  ]
+      level: process.env.NODE_ENV === "production" ? "info" : "silly",
+    }),
+  ],
 });
 
 export const createHttpRequestLogger = async (
@@ -52,7 +49,7 @@ export const createHttpRequestLogger = async (
   let defaultMeta;
   if (traceHeader) {
     defaultMeta = {
-      "logging.googleapis.com/trace": `projects/${projectId}/traces/${trace}`
+      "logging.googleapis.com/trace": `projects/${projectId}/traces/${trace}`,
     };
   }
 
@@ -61,9 +58,9 @@ export const createHttpRequestLogger = async (
     format: combine(...formats),
     transports: [
       new winston.transports.Console({
-        level: "silly"
-      })
-    ]
+        level: "silly",
+      }),
+    ],
   });
 
   return logger;
