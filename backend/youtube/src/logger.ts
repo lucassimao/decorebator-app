@@ -1,6 +1,6 @@
 import { Request } from "express";
 import winston from "winston";
-import gcpMetadata from "gcp-metadata";
+import * as gcpMetadata from "gcp-metadata";
 
 const { combine, prettyPrint, printf, errors, json } = winston.format;
 let projectId: string | undefined;
@@ -19,13 +19,10 @@ if (process.env.NODE_ENV === "production") {
 }
 
 async function getProjectId(): Promise<string | undefined> {
-  if (process.env.NODE_ENV !== "production") {
-    return "dev-environment-project";
-  }
   if (!projectId) {
     const isAvailable = await gcpMetadata.isAvailable();
     if (!isAvailable) {
-      throw new Error(`Metadata api isn't available`);
+      return "dev-environment-project";
     }
 
     projectId = await gcpMetadata.project("project-id");

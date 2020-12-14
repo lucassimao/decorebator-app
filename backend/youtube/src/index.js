@@ -13,7 +13,7 @@ if (!process.env.PORT) {
 let server = null;
 
 const stopApp = async (info) => {
-  logger.error("stoping server...", { info });
+  logger.error("stoping server...",  info);
 
   const connection = getConnection();
   if (connection?.isConnected) {

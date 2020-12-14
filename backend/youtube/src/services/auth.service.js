@@ -5,7 +5,7 @@ const { default: User } = require("../entities/user");
 const { default: logger } = require("../logger");
 
 if (!process.env.JWT_SECRET_KEY) {
-  throw new Error("env JWT_SECRETE_KEY not found");
+  throw new Error("env JWT_SECRET_KEY not found");
 }
 
 /**
@@ -25,7 +25,7 @@ function authenticate(jwtToken) {
   }
 
   return new Promise((resolve, reject) => {
-    jwt.verify(jwtToken, process.env.JWT_SECRETE_KEY, async (err, decoded) => {
+    jwt.verify(jwtToken, process.env.JWT_SECRET_KEY, async (err, decoded) => {
       const { userId } = decoded || {};
 
       if (err) {
