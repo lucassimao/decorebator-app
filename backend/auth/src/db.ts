@@ -14,7 +14,8 @@ export async function initDB(): Promise<Connection> {
     type: "postgres",
     entities: [`${__dirname}/entities/${extension}`],
     synchronize: false,
-    namingStrategy: new SnakeNamingStrategy()
+    namingStrategy: new SnakeNamingStrategy(),
+    logging: process.env.NODE_ENV !== "production"
   });
   promise.catch((error: any) => logger.error(error));
   return promise;

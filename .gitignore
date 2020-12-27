@@ -7,3 +7,4 @@
 .env.production
 **/migrations/bin/*
 **/.firebase/*
+**/integration-tests/*.project

@@ -48,7 +48,6 @@ async function init() {
 process.once("SIGUSR2", stopApp);
 process.once("uncaughtException", stopApp);
 process.once("unhandledRejection", stopApp);
-process.once("rejectionHandled", stopApp);
 
 init();
 
