@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
-import {createHttpRequestLogger} from "../logger";
+import { Like } from "typeorm";
+import { createHttpRequestLogger } from "../logger";
 import LemmaService from "../services/lemma.service";
 import OxfordDictionaryService from "../services/oxfordDictionary.service";
+import WordService from "../services/word.service";
 import { PubSubMessage } from "../types/pubSubMessage";
 import { WordDTO } from "../types/word.dto";
 
@@ -40,22 +42,35 @@ export const oxfordDictionaryCrawler = async (req: Request, response: Response):
 
     const tag = `${word.name}(${word.languageCode})`;
 
-    try {
-        const existingLemmas = await LemmaService.findAllBy({ name: word.name, language: word.languageCode })
-        const canSkipRefresh = existingLemmas.length > 0 && existingLemmas.every(lemma => !lemma.isRefreshRequired())
+    let existingLemmas = await LemmaService.findAllBy({ name: word.name, language: Like(`${word.languageCode}%`)})
+    const isRefreshRequired = !existingLemmas?.length || existingLemmas.some(lemma => lemma.isRefreshRequired())
 
-        if (canSkipRefresh) {
-            logger.debug(`[${tag}] existing lemmas are updated ...`);
-            response.sendStatus(200);
-            return;
+    try {
+
+        if (isRefreshRequired) {
+            logger.debug(`[${tag}] Starting refresh  ...`)
+
+            const searchEntryResponse = await OxfordDictionaryService.searchEntry(word.name, word.languageCode);
+            if (searchEntryResponse){
+                logger.debug(`[${tag}] found ${searchEntryResponse.results?.length ?? 0} head word entries ...`);
+                existingLemmas = await OxfordDictionaryService.mapRetrieveEntryToLemmas(searchEntryResponse, word, logger)
+            } else {
+                const lemmatron = await OxfordDictionaryService.searchLemma(word.name,word.languageCode)
+                const lemmas = lemmatron.results.flatMap(({lexicalEntries}) => lexicalEntries).flatMap(({inflectionOf}) => inflectionOf).map(({id}) =>id);
+                for (const lemma of lemmas) {
+                    const searchEntryResponse = await OxfordDictionaryService.searchEntry(lemma, word.languageCode);
+                    if (!searchEntryResponse) continue;
+                    const result = await OxfordDictionaryService.mapRetrieveEntryToLemmas(searchEntryResponse, word, logger)
+                    existingLemmas = [...result,...existingLemmas];
+                }
+            }
+    
+        }        
+
+        if (word.id) {
+            await WordService.updateWordLemmas(word.id, existingLemmas)
         }
 
-        logger.debug(`[${tag}] Starting processing  ...`)
-
-        const searchEntryResponse = await OxfordDictionaryService.searchEntry(word.name, word.languageCode);
-        logger.debug(`[${tag}] found ${searchEntryResponse.results?.length ?? 0} head word entries ...`);
-
-        await OxfordDictionaryService.mapRetrieveEntryToLemmas(searchEntryResponse, word, logger)
         response.sendStatus(200);
 
     } catch (error) {

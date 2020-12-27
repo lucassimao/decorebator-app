@@ -1,6 +1,6 @@
-import {Entity,Column,PrimaryGeneratedColumn, OneToMany, ManyToOne, Index, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import moment from 'moment';
+import { Column, CreateDateColumn, Entity, Index, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import Pronunciation from "./Pronunciation";
-import moment from 'moment'
 import Sense from "./sense";
 
 @Entity()
@@ -50,6 +50,5 @@ export default class Lemma{
     isRefreshRequired(): boolean {
         return moment().utc().diff(this.updatedAt,'days') > 10
     }
-
 
 }

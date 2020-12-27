@@ -159,7 +159,7 @@ type InlineModel2 = {
     registers?: registersList
     text: string
 }
-type ArrayOfRelatedEntries = Model2[]
+export type ArrayOfRelatedEntries = Model2[]
 
 interface LexicalEntry {
     compounds?: ArrayOfRelatedEntries

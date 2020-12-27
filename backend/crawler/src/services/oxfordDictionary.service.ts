@@ -1,6 +1,7 @@
 import { PubSub } from '@google-cloud/pubsub';
 import axios, { AxiosRequestConfig } from 'axios';
 import moment from 'moment';
+import winston from 'winston';
 import Lemma from "../entities/lemma";
 import Pronunciation from "../entities/Pronunciation";
 import Sense from "../entities/sense";
@@ -10,8 +11,6 @@ import { LanguageCode } from "../types/languageCode";
 import { Lemmatron } from "../types/lemmatron";
 import { RetrieveEntry } from "../types/retrieveEntry";
 import { WordDTO } from "../types/word.dto";
-import winston from 'winston';
-
 
 
 const appId = process.env.OXFORD_DICTIONARIES_APP_ID;
@@ -42,7 +41,7 @@ function __notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
     return value !== null && value !== undefined;
 }
 
-async function __findLemmaOrSaveAsOutdated(name: string, language: string, provider: string, customLogger? : winston.Logger ): Promise<Lemma | null> {
+async function __findLemmaOrSaveAsOutdated(name: string, language: string, provider: string, customLogger?: winston.Logger): Promise<Lemma | null> {
     const logger = customLogger ?? defaultLogger;
     let lemma = await LemmaService.findOneBy({ name, language, provider })
     if (!lemma && language.includes('-')) {
@@ -52,13 +51,13 @@ async function __findLemmaOrSaveAsOutdated(name: string, language: string, provi
         return lemma
     }
 
-    const word: WordDTO = { languageCode: language as LanguageCode, name: name }
-    const dataBuffer = Buffer.from(JSON.stringify(word));
-    const tag = `${name}(${language})`;
+    // const word: WordDTO = { languageCode: language as LanguageCode, name }
+    // const dataBuffer = Buffer.from(JSON.stringify(word));
+    // const tag = `${name}(${language})`;
 
     try {
-        logger.debug(`[${tag}] publishing to Pub/Sub ...`)
-        await pubSubClient.topic(topic).publish(dataBuffer);
+        // logger.debug(`[${tag}] publishing to Pub/Sub ...`)
+        // await pubSubClient.topic(topic).publish(dataBuffer);
 
         // it creates a new lemma, but saves it as 'outdated' to force a refresh when the word comes from pubsub
         return LemmaService.save({
@@ -74,12 +73,22 @@ async function __findLemmaOrSaveAsOutdated(name: string, language: string, provi
 
 
 const OxfordDictionaryService = {
-    async searchEntry(word: string, languageCode: LanguageCode): Promise<RetrieveEntry> {
-        const filters = '?lexicalEntries&'
-        const path = `/api/v2/entries/${languageCode}/${encodeURIComponent(word)}`;
-        const response = await axios.get(path, axiosConfig)
-        const retrieveEntry: RetrieveEntry = response.data;
-        return retrieveEntry;
+    async searchEntry(word: string, languageCode: LanguageCode): Promise<RetrieveEntry | undefined> {
+        try {
+            const path = `/api/v2/entries/${languageCode}/${encodeURIComponent(word)}`;
+            const response = await axios.get(path, axiosConfig)
+            const retrieveEntry: RetrieveEntry = response.data;
+            return retrieveEntry;
+        } catch (error) {
+            if (error.isAxiosError && error.response) {
+                const { response: { data, status } } = error;
+                if (status === 404 && data.error.startsWith('No entry found')) {
+                    return
+                }
+            }
+            throw error
+        }
+
     },
 
     async searchLemma(word: string, languageCode: LanguageCode): Promise<Lemmatron> {
@@ -89,7 +98,7 @@ const OxfordDictionaryService = {
         return lemmatron;
     },
 
-    async pushPlaceholdersToPubSub( customLogger? : winston.Logger): Promise<void> {
+    async pushPlaceholdersToPubSub(customLogger?: winston.Logger): Promise<void> {
         const logger = customLogger ?? defaultLogger;
 
         const placeholders = await LemmaService.getPlaceholders()
@@ -106,10 +115,13 @@ const OxfordDictionaryService = {
     }
     ,
 
-    async mapRetrieveEntryToLemmas(searchEntryResponse: RetrieveEntry, word: WordDTO,customLogger? : winston.Logger): Promise<void> {
+    async mapRetrieveEntryToLemmas(searchEntryResponse: RetrieveEntry, word: WordDTO, customLogger?: winston.Logger): Promise<Lemma[]> {
         const provider = searchEntryResponse.metadata.provider as string
         const tag = `${word.name}(${word.languageCode})`;
         const logger = customLogger ?? defaultLogger;
+        const lemmata: Lemma[] = []
+
+        logger.debug(`[${tag}] found ${searchEntryResponse.results?.length ?? 0} results ...`);
 
 
         for (const headwordEntry of searchEntryResponse.results) {
@@ -118,19 +130,20 @@ const OxfordDictionaryService = {
             for (const lexicalEntry of headwordEntry.lexicalEntries) {
 
                 const { text: name, language, lexicalCategory: { id: lexicalCategory } } = lexicalEntry;
+
                 let existingLemma = await LemmaService.findOneBy({ name, language, lexicalCategory })
                 if (!existingLemma) {
                     existingLemma = await LemmaService.findOneBy({ name, lexicalCategory: 'unknow' })
                 }
 
-
-                const pronunciations: Pronunciation[] = []
                 const senses: Sense[] = []
+                const pronunciations: Pronunciation[] = []
                 const phrases = lexicalEntry.phrases?.map(phrase => phrase.text)
                 const phrasalVerbs: Lemma[] = [];
 
                 for (const phrasalVerb of (lexicalEntry.phrasalVerbs ?? [])) {
                     if (phrasalVerb.text === lexicalEntry.text) continue;
+
                     const lemma = await __findLemmaOrSaveAsOutdated(phrasalVerb.text, language, provider, logger)
                     if (lemma) {
                         phrasalVerbs.push(lemma)
@@ -139,9 +152,7 @@ const OxfordDictionaryService = {
 
                 logger.debug(`[${tag}] found ${phrasalVerbs.length} phrasal verbs ...`);
 
-
-                logger.debug(`[${tag}] found ${lexicalEntry.entries?.length ?? 0} entries ...`);
-
+                // logger.debug(`[${tag}] found ${lexicalEntry.entries?.length ?? 0} entries ...`);
                 for (const entry of lexicalEntry.entries ?? []) {
                     logger.debug(`[${tag}] found ${entry.pronunciations?.length ?? 0} pronunciations ...`);
 
@@ -156,9 +167,14 @@ const OxfordDictionaryService = {
 
                     for (const sense of (entry.senses ?? [])) {
                         const definitions = sense.definitions
+                        if (!definitions?.length){
+                            continue
+                        }
+                        
                         const examples = sense.examples?.map(example => example.text)
                         const shortDefinitions = sense.shortDefinitions
                         const synonyms: Lemma[] = [];
+
                         for (const synonym of (sense.synonyms ?? [])) {
                             if (synonym.text === lexicalEntry.text || synonyms.find(s => s.name === synonym.text)) continue;
                             const lemma = await __findLemmaOrSaveAsOutdated(synonym.text, language, provider, logger)
@@ -183,7 +199,7 @@ const OxfordDictionaryService = {
 
                 // plural?
 
-                await LemmaService.save({
+                const lemma = await LemmaService.save({
                     ...existingLemma,
                     phrases: [...(existingLemma?.phrases ?? []), ...(phrases ?? [])],
                     name: lexicalEntry.text, language: lexicalEntry.language,
@@ -192,11 +208,14 @@ const OxfordDictionaryService = {
                     pronunciations, senses,
                     phrasalVerbs
                 })
+                if (!lemmata.find(item => item.id === lemma.id)) {
+                    lemmata.push(lemma);
+                }
                 logger.debug(`[${tag}] lemma saved`);
-
             }
         }
 
+        return lemmata;
     }
 }
 export default OxfordDictionaryService;
