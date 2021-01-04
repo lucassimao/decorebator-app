@@ -17,9 +17,16 @@ import Switch from "@material-ui/core/Switch";
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 const DEFAULT_MIN_WORD_LENGTH = 3;
 
+const LANGUAGES = {
+  English: 'en',
+  French: 'fr',
+  German: 'de',
+  Italian:'it',
+  Portuguese: 'pt',
+  Spanish: 'es'
+}
 
-const LANGUAGES = ["Dutch", "English", "French", "German", "Italian", "Portuguese", "Mandarin", "Spanish",];
-LANGUAGES.sort();
+const LANGUAGE_NAMES = Object.keys(LANGUAGES).sort();
 
 const useStyles = makeStyles(theme => ({
   form: {
@@ -129,8 +136,8 @@ export default function WordlistForm({ onSubmit, allowFileUpload, allowMinWordLe
         <Grid item xs={12}>
           <InputLabel htmlFor="language">Language</InputLabel>
           <Select name="language" placeholder="Language" fullWidth native inputRef={register}>
-            {LANGUAGES.map(lang => (
-              <option key={lang} value={lang}>
+            {LANGUAGE_NAMES.map(lang => (
+              <option key={lang} value={LANGUAGES[lang]}>
                 {lang}
               </option>
             ))}
