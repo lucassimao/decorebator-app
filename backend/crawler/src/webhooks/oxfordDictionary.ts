@@ -40,6 +40,10 @@ export const oxfordDictionaryCrawler = async (req: Request, response: Response):
         return;
     }
 
+    if (!['en','en-us','en-uk'].includes(word.languageCode.toLocaleLowerCase())) {
+        throw new Error(`Invalid languageCode ${word.languageCode}`);
+    }
+
     const tag = `${word.name}(${word.languageCode})`;
 
     let existingLemmas = await LemmaService.findAllBy({ name: word.name, language: Like(`${word.languageCode}%`)})
