@@ -1,9 +1,9 @@
+import { PubSub } from '@google-cloud/pubsub';
 import { getRepository } from "typeorm";
 import User from "../entities/user";
 import Word from "../entities/word";
-import logger from "../logger";
-import { PubSub } from '@google-cloud/pubsub';
 import Wordlist from "../entities/wordlist";
+import logger from "../logger";
 
 
 const topic: string = process.env.PUB_SUB_WORDS_TOPIC ?? ''
@@ -66,8 +66,7 @@ const patchWord = (
   user: User
 ) => getRepository(Word).update(idWord, wordDTO);
 
-const deleteWord = (idWordlist: number, idWord: number, user: User) =>
-  getRepository(Word).delete(idWord);
+const deleteWord = (idWordlist: number, idWord: number, user: User) => getRepository(Word).delete(idWord);
 
 const getAllWordsByUser = async (userId: number): Promise<Array<string>> => {
   const result = await getRepository(Word)

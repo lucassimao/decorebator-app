@@ -167,13 +167,7 @@ const getWithWords = async (id: number, user: User) =>
 const update = async (id: number, updateObj: DeepPartial<Wordlist>) =>
   getRepository(Wordlist).update(id, updateObj);
 
-const remove = async (id: number) => {
-  return getConnection().transaction(async (tx) => {
-
-    await tx.getRepository(Word).delete({ wordlistId: id });
-    await tx.getRepository(Wordlist).delete(id);
-  })
-}
+const remove = async (id: number) =>  getRepository(Wordlist).delete(id)
 
 /**
  * Checks if a string contains a valid binary file

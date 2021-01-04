@@ -8,7 +8,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from "typeorm";
-import Image from "./image";
 import User from "./user";
 import Word from "./word";
 
@@ -50,7 +49,7 @@ export default class Wordlist {
   @OneToMany(
     () => Word,
     word => word.wordlist,
-    { cascade: true }
+    { cascade: true}
   )
   words?: Word[];
 

@@ -1,6 +1,8 @@
 import {
   Column,
   Entity,
+
+
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn
@@ -29,7 +31,8 @@ export default class Word {
 
   @ManyToOne(
     () => Wordlist,
-    wordlist => wordlist.words
+    wordlist => wordlist.words,
   )
   wordlist?: Wordlist;
+ 
 }
