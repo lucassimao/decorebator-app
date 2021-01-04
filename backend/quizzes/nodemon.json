@@ -1,0 +1,6 @@
+{
+    "watch": ["src"],
+    "ext": "ts,js,json,graphql",
+    "ignore": ["src/**/*.spec.ts"],
+    "exec": "npm run graphql:codegen && ts-node -r dotenv/config src/index.ts" 
+  }

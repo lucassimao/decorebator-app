@@ -2,6 +2,16 @@ import { getRepository } from "typeorm";
 import User from "../entities/user";
 import Word from "../entities/word";
 import logger from "../logger";
+import { PubSub } from '@google-cloud/pubsub';
+import Wordlist from "../entities/wordlist";
+
+
+const topic: string = process.env.PUB_SUB_WORDS_TOPIC ?? ''
+if (!topic) {
+    throw new Error('PUB_SUB_WORDS_TOPIC is required')
+}
+
+const pubSubClient = new PubSub();
 
 
 const get = async (idWordlist: number, idWord: number, user: User) =>
@@ -29,8 +39,25 @@ const getWords = async (
 const addWord = async (
   wordlistId: number,
   wordDTO: Partial<Word>,
-  user: User
-) => getRepository(Word).save({ ...wordDTO, wordlistId });
+  user: User,
+) => {
+  const repository = getRepository(Word);
+  const wordlistRepository = getRepository(Wordlist);
+
+  const word = await repository.save({ ...wordDTO, wordlistId });
+  const wordlist = await wordlistRepository.findOne(wordlistId,{select:['language']});
+  const languageCode = wordlist?.language;
+
+  try {
+    const payload = {id: word.id, languageCode, name: word.name}
+    const dataBuffer = Buffer.from(JSON.stringify(payload));
+    logger.debug(`Publishing payload to Pub/Sub ...`)
+    await pubSubClient.topic(topic).publish(dataBuffer);  
+  } catch (error) {
+    logger.error(error);
+  }
+  return word;
+};
 
 const patchWord = (
   idWordlist: number,

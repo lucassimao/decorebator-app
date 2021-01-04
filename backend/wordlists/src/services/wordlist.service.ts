@@ -6,6 +6,7 @@ import Word from "../entities/word";
 import Wordlist from "../entities/wordlist";
 import logger from "../logger";
 import wordService from "./word.service";
+import { PubSub } from '@google-cloud/pubsub';
 
 type WordlistDTO = Partial<Wordlist> & {
   minWordLength: number;
@@ -20,6 +21,14 @@ type ListDTO = {
 };
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_PAGE = 0;
+
+const topic: string = process.env.PUB_SUB_WORDS_TOPIC ?? ''
+if (!topic) {
+  throw new Error('PUB_SUB_WORDS_TOPIC is required')
+}
+
+const pubSubClient = new PubSub();
+
 
 function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
   return value !== null && value !== undefined;
@@ -114,7 +123,34 @@ const save = async (wordlistDTO: WordlistDTO, user: User) => {
       originalFileSize: fileInfo?.size
     };
   }
-  return repository.save(entity);
+  const record = await repository.save(entity);
+
+  if (isArrayOfWordsPresent) {
+
+    try {
+      const batchPublisher = pubSubClient.topic(topic, {
+        batching: {
+          maxMessages: 100,
+          maxMilliseconds: 10 * 1000,
+        },
+      });
+      const languageCode = wordlist.language;
+
+      logger.debug(`Publishing payload to Pub/Sub ...`)
+      for (const word of (record.words ?? [])) {
+        const payload = { id: word.id, languageCode, name: word.name }
+        const dataBuffer = Buffer.from(JSON.stringify(payload));
+        batchPublisher.publish(dataBuffer);
+      }
+
+    } catch (error) {
+      logger.error(error)
+
+    }
+
+  }
+
+  return record;
 };
 
 
@@ -134,92 +170,92 @@ const update = async (id: number, updateObj: DeepPartial<Wordlist>) =>
 const remove = async (id: number) => {
   return getConnection().transaction(async (tx) => {
 
-    await tx.getRepository(Word).delete({wordlistId: id});
+    await tx.getRepository(Word).delete({ wordlistId: id });
     await tx.getRepository(Wordlist).delete(id);
   })
 }
 
-  /**
-   * Checks if a string contains a valid binary file
-   *
-   * @param {String} base64EncodedFile A base 64 encoded binary file
-   * @returns {{fileType: String, buffer: Buffer}} a object identifying the file type and the buffer
-   */
-  const __parseBase64EncodedFile = (base64EncodedFile: string) => {
-    const regex = /data:(\S+);base64,(\S+)/;
-    const isString = typeof base64EncodedFile == "string";
+/**
+ * Checks if a string contains a valid binary file
+ *
+ * @param {String} base64EncodedFile A base 64 encoded binary file
+ * @returns {{fileType: String, buffer: Buffer}} a object identifying the file type and the buffer
+ */
+const __parseBase64EncodedFile = (base64EncodedFile: string) => {
+  const regex = /data:(\S+);base64,(\S+)/;
+  const isString = typeof base64EncodedFile == "string";
 
-    if (!isString || !regex.test(base64EncodedFile)) {
-      logger.debug("Invalid base64 encoded file was sent");
-      logger.debug(base64EncodedFile);
-      throw new Error("Invalid file");
-    }
+  if (!isString || !regex.test(base64EncodedFile)) {
+    logger.debug("Invalid base64 encoded file was sent");
+    logger.debug(base64EncodedFile);
+    throw new Error("Invalid file");
+  }
 
-    const [, fileType, data] = regex.exec(base64EncodedFile) ?? [];
-    const buffer = Buffer.from(data, "base64");
-    return { fileType, buffer };
-  };
-  /**
-   * Extract words from a buffer
-   *
-   * @param {Buffer} buffer A buffer object representing a binary file
-   * @returns {Pomise<Array<String>>} a promise which resolves to a set of words found in the buffer passed as argument
-   */
-  const __extractWordsFromBuffer = async (
-    buffer: Buffer,
-    fileType: string
-  ): Promise<Array<string>> => {
-    return new Promise((resolve, reject) => {
-      //TODO<backend> buffer size should be bigger for paying users
-      const options = {
-        preserveLineBreaks: false,
-        exec: { maxBuffer: 2 * 1024 * 1024 }
-      };
-      //@ts-ignore
-      textract.fromBufferWithMime(fileType, buffer, options, function (
-        error,
-        text
-      ) {
-        if (error) {
-          logger.error(`Error while extracting text from a ${fileType}`, error);
-          reject(error);
-        } else {
-          const allWords = text
-            .toLowerCase()
-            .split(/\s+/)
-            .map(word => word.trim())
-            .filter(string => string.length > 0);
-          resolve(allWords);
-        }
-      });
+  const [, fileType, data] = regex.exec(base64EncodedFile) ?? [];
+  const buffer = Buffer.from(data, "base64");
+  return { fileType, buffer };
+};
+/**
+ * Extract words from a buffer
+ *
+ * @param {Buffer} buffer A buffer object representing a binary file
+ * @returns {Pomise<Array<String>>} a promise which resolves to a set of words found in the buffer passed as argument
+ */
+const __extractWordsFromBuffer = async (
+  buffer: Buffer,
+  fileType: string
+): Promise<Array<string>> => {
+  return new Promise((resolve, reject) => {
+    //TODO<backend> buffer size should be bigger for paying users
+    const options = {
+      preserveLineBreaks: false,
+      exec: { maxBuffer: 2 * 1024 * 1024 }
+    };
+    //@ts-ignore
+    textract.fromBufferWithMime(fileType, buffer, options, function (
+      error,
+      text
+    ) {
+      if (error) {
+        logger.error(`Error while extracting text from a ${fileType}`, error);
+        reject(error);
+      } else {
+        const allWords = text
+          .toLowerCase()
+          .split(/\s+/)
+          .map(word => word.trim())
+          .filter(string => string.length > 0);
+        resolve(allWords);
+      }
     });
-  };
+  });
+};
 
-  /**
-   * Remove non alpha numeric characteres and lower cases the word
-   *
-   * @param {String} word The word to be formatted
-   */
-  const __formatWord = (word: string): string => {
-    if (!word) return "";
+/**
+ * Remove non alpha numeric characteres and lower cases the word
+ *
+ * @param {String} word The word to be formatted
+ */
+const __formatWord = (word: string): string => {
+  if (!word) return "";
 
-    return word
-      .replace(/<\S+[^>]*>/gi, "")
-      .replace(/<\/\S+>/gi, "")
-      .replace(/[[\]#\$(),;{}:."?!_=&]/g, "")
-      .replace(/^'/, "")
-      .replace(/'$/, "")
-      .replace(/^\d+$/g, "") // just numbers? fuck
-      .toLowerCase()
-      .trim();
-  };
+  return word
+    .replace(/<\S+[^>]*>/gi, "")
+    .replace(/<\/\S+>/gi, "")
+    .replace(/[[\]#\$(),;{}:."?!_=&]/g, "")
+    .replace(/^'/, "")
+    .replace(/'$/, "")
+    .replace(/^\d+$/g, "") // just numbers? fuck
+    .toLowerCase()
+    .trim();
+};
 
-  export default {
-    list,
-    save,
-    get,
-    getWithWords,
-    update,
-    delete: remove
-  };
+export default {
+  list,
+  save,
+  get,
+  getWithWords,
+  update,
+  delete: remove
+};
 

@@ -21,34 +21,32 @@ services:
       - JWT_SECRET_KEY
       - PORT=3000
       - DB_URL
+      - PUB_SUB_WORDS_TOPIC
+      - GCLOUD_PROJECT=woven-gist-296814
     depends_on: 
       - postgres
     build:
       context: wordlists/
     ports:
     - "3002:3000"
-  # quizzes:
-  #   environment: 
-  #     - TEST_CONTAINERS
-  #     - NODE_ENV
-  #     - JWT_SECRET_KEY
-  #     - DB_URL
-  #     - PORT=4000
-  #     - GITHUB_TOKEN
-  #   depends_on: 
-  #     - postgres
-  #     - auth
-  #   build:
-  #     context: quizzes/
-  #     args: 
-  #       - GITHUB_TOKEN      
-  #   ports: 
-  #     - "3003:4000" 
+    volumes:
+    - ~/.config/gcloud:/root/.config/gcloud    
+  quizzes:
+    environment: 
+      - NODE_ENV
+      - JWT_SECRET_KEY
+      - DB_URL
+      - PORT=4000
+    depends_on: 
+      - postgres
+    build:
+      context: quizzes/
+    ports: 
+      - "3003:4000" 
   youtube:
     environment: 
       - NODE_ENV
       - DB_URL
-      - SHOW_LOG_ON_STDOUT
       - JWT_SECRET_KEY
       - PORT=4000
     depends_on: 

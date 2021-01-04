@@ -166,13 +166,13 @@ const OxfordDictionaryService = {
                     logger.debug(`[${tag}] found ${entry.senses?.length ?? 0} senses ...`);
 
                     for (const sense of (entry.senses ?? [])) {
-                        const definitions = sense.definitions
-                        if (!definitions?.length){
+                        const definitions = new Set([...(sense.definitions ?? []),...(sense.shortDefinitions ?? [])])
+                        
+                        if (!definitions?.size){
                             continue
                         }
                         
                         const examples = sense.examples?.map(example => example.text)
-                        const shortDefinitions = sense.shortDefinitions
                         const synonyms: Lemma[] = [];
 
                         for (const synonym of (sense.synonyms ?? [])) {
@@ -192,7 +192,7 @@ const OxfordDictionaryService = {
                         }
 
                         logger.debug(`[${tag}] found ${antonyms.length} antonyms ...`);
-                        senses.push({ definitions, examples, shortDefinitions, synonyms, antonyms })
+                        senses.push({ definitions: [...definitions], examples, synonyms, antonyms })
                     }
 
                 }

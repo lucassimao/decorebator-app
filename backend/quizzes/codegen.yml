@@ -1,0 +1,15 @@
+overwrite: true
+schema: "src/typeDefs.graphql"
+documents: null
+generates:
+  src/generated/graphql.ts:
+    plugins:
+      - add:
+         content: "/* eslint-disable */"    
+      - "typescript"
+      - "typescript-resolvers"
+    config:
+      contextType: ../resolvers/context#Context
+  ./graphql.schema.json:
+    plugins:
+      - "introspection"

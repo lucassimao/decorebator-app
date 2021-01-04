@@ -55,6 +55,7 @@ export const oxfordDictionaryCrawler = async (req: Request, response: Response):
                 logger.debug(`[${tag}] found ${searchEntryResponse.results?.length ?? 0} head word entries ...`);
                 existingLemmas = await OxfordDictionaryService.mapRetrieveEntryToLemmas(searchEntryResponse, word, logger)
             } else {
+                logger.debug(`[${tag}] no entry, searching lemma ...`);
                 const lemmatron = await OxfordDictionaryService.searchLemma(word.name,word.languageCode)
                 const lemmas = lemmatron.results.flatMap(({lexicalEntries}) => lexicalEntries).flatMap(({inflectionOf}) => inflectionOf).map(({id}) =>id);
                 for (const lemma of lemmas) {
@@ -65,6 +66,8 @@ export const oxfordDictionaryCrawler = async (req: Request, response: Response):
                 }
             }
     
+        } else{
+            logger.debug(`[${tag}] No refresh required  ...`)
         }        
 
         if (word.id) {

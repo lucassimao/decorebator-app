@@ -14,9 +14,6 @@ export default class Sense{
     @Column("text",{array:true,nullable:true})
     examples?: string[]
 
-    @Column("text",{array:true,nullable:true})
-    shortDefinitions?: string[]
-
     @ManyToMany(() => Lemma,{cascade: true})
     @JoinTable()
     synonyms? : Lemma[]
