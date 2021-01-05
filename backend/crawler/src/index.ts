@@ -19,8 +19,10 @@ app.use(helmet());
 app.use(express.json());
 app.use(router);
 
-const stopApp = async (info: any) => {   
-    logger.error('stoping server...',info)
+const stopApp = async (details: any) => {
+    if (typeof details !== 'string'){
+        logger.error('Stoping app due error',details)
+    }
 
     const connection = getConnection()
     if (connection?.isConnected) {
@@ -29,7 +31,7 @@ const stopApp = async (info: any) => {
     if (server) {
         server.close()
     }
-    process.exit(-1)
+    process.exit(details === 'SIGTERM' ? 0:-1)
 }
 
 async function init() {
@@ -40,6 +42,7 @@ async function init() {
     process.once("SIGUSR2", stopApp);
     process.once("uncaughtException", stopApp);
     process.once("unhandledRejection", stopApp);
+    process.once("SIGTERM", stopApp);    
 }    
 
 init()

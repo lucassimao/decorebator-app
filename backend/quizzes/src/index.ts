@@ -15,8 +15,10 @@ if (!process.env.PORT) {
 
 let server: http.Server;
 
-const stopApp = async (error: string | Error | any) => {
-  logger.error("stopping server ...", error);
+const stopApp = async (details: string | Error | any) => {
+  if (typeof details !== "string") {
+    logger.error("Stoping app due error", details);
+  }
 
   const connection = getConnection();
   if (connection?.isConnected) {
@@ -25,7 +27,7 @@ const stopApp = async (error: string | Error | any) => {
   if (server) {
     server.close();
   }
-  process.exit(-1);
+  process.exit(details === "SIGTERM" ? 0 : -1);
 };
 
 initDB()
@@ -68,3 +70,4 @@ initDB()
 process.once("SIGUSR2", stopApp);
 process.once("uncaughtException", stopApp);
 process.once("unhandledRejection", stopApp);
+process.once("SIGTERM", stopApp);
