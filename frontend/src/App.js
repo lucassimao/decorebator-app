@@ -32,45 +32,32 @@ function App(props) {
   return (
     <div className={classes.wrapper}>
       <Router>
-        <Switch>
-          <Route path="/wordlists/new-from-file">
-          <Suspense fallback={spinner}>
+        <Suspense fallback={spinner}>
+          <Switch>
+            <Route path="/wordlists/new-from-file">
               <FileWordlistScreen />
-            </Suspense> 
-          </Route>
-          <Route path="/wordlists/new-from-youtube">
-            <Suspense fallback={spinner}>
+            </Route>
+            <Route path="/wordlists/new-from-youtube">
               <YoutubeWordlistScreen />
-            </Suspense>
-          </Route>
-          <Route path="/wordlists/new">
-            <Suspense fallback={spinner}>
+            </Route>
+            <Route path="/wordlists/new">
               <EmptyWordlistScreen />
-            </Suspense>
-          </Route>
-          <Route path="/wordlists/menu">
-            <Suspense fallback={spinner}>
+            </Route>
+            <Route path="/wordlists/menu">
               <NewWordlistScreen />
-            </Suspense>
-          </Route>
-          <Route path="/wordlists/:id">
-            <Suspense fallback={spinner}>
+            </Route>
+            <Route path="/wordlists/:id">
               <EditWordlistScreen />
-            </Suspense>
-          </Route>
-          <Route path="/">
-            <HomeScreen />
-          </Route>
-        </Switch>
+            </Route>
+            <Route path="/">
+              <HomeScreen />
+            </Route>
+          </Switch>
+        </Suspense>
       </Router>
 
-      {/* success snack bar */}
       {snackbar.success && <SuccessSnackbar message={snackbar.message} />}
-
-      {/* error snack bar */}
       {snackbar.error && <ErrorSnackbar message={snackbar.message} />}
-
-      {/* progress modal */}
       {progressModal && <ProgressModal {...progressModal} />}
     </div>
   );
@@ -82,8 +69,8 @@ const mapStateToProps = state => ({
 });
 
 App.propTypes = {
-  snackbar: PropTypes.shape({success: PropTypes.bool, error: PropTypes.bool, message: PropTypes.string}),
-  progressModal: PropTypes.shape({title: PropTypes.string, message: PropTypes.string})
+  snackbar: PropTypes.shape({ success: PropTypes.bool, error: PropTypes.bool, message: PropTypes.string }),
+  progressModal: PropTypes.shape({ title: PropTypes.string, message: PropTypes.string })
 }
 
 export default connect(mapStateToProps, null)(App);

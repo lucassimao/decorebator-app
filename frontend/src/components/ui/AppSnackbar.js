@@ -2,7 +2,7 @@ import Snackbar from '@material-ui/core/Snackbar';
 import PropTypes from 'proptypes';
 import React, { useState } from "react";
 import { connect } from 'react-redux';
-import { CLEAR_SNACKBAR } from "../../reducers/snackbar";
+import { CLEAR_SNACKBAR } from "../../redux/deprecated/snackbar";
 import SnackbarContentWrapper from './SnackBarContentWrapper';
 
 function AppSnackbar(props) {

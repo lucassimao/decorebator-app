@@ -9,7 +9,7 @@ import ThemeProvider from "@material-ui/styles/ThemeProvider";
 import { Provider } from "react-redux";
 import { createStore, applyMiddleware } from "redux";
 import thunkMiddleware from "redux-thunk";
-import rootReducer from "./reducers";
+import {rootReducer} from "./redux/reducers";
 
 const store = createStore(rootReducer, applyMiddleware(thunkMiddleware));
 

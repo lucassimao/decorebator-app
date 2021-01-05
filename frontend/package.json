@@ -9,6 +9,7 @@
     "@material-ui/lab": "^4.0.0-alpha.57",
     "apollo-boost": "^0.4.7",
     "graphql": "^15.4.0",
+    "immer": "^1.10.0",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "react-hook-form": "^3.29.4",

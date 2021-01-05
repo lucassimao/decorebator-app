@@ -4,7 +4,7 @@ import SearchIcon from "@material-ui/icons/Search";
 import PropTypes from 'proptypes';
 import React from "react";
 import { connect } from "react-redux";
-import { fetchPublicWordlists, fetchUserWordlists } from "../../../thunks/wordlist.thunks";
+import { fetchUserWordlists } from "../../../redux/wordlists/actions";
 
 const useStyles = makeStyles(theme => ({
   search: {
@@ -61,10 +61,8 @@ const mapDispatchToProps = dispatch => ({
   filterWordlists: filter => {
     if (filter && filter.trim() && filter.trim().length > 2) {
       dispatch(fetchUserWordlists({ page: 0, filter }));
-      dispatch(fetchPublicWordlists({ page: 0, filter }));
     } else if (filter === "") {
       dispatch(fetchUserWordlists({ page: 0 }));
-      dispatch(fetchPublicWordlists({ page: 0 }));
     }
   }
 });

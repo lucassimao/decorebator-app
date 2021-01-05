@@ -11,8 +11,8 @@ import ApolloClient, { gql } from 'apollo-boost';
 import PropTypes from 'proptypes';
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import { HIDE_PROGRESS_MODAL, SHOW_PROGRESS_MODAL } from "../../../reducers/progressModal";
-import { SET_ERROR_SNACKBAR } from "../../../reducers/snackbar";
+import { HIDE_PROGRESS_MODAL, SHOW_PROGRESS_MODAL } from "../../../redux/deprecated/progressModal";
+import { SET_ERROR_SNACKBAR } from "../../../redux/deprecated/snackbar";
 
 
 const useStyles = makeStyles(theme => ({

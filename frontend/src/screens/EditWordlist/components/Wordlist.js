@@ -5,8 +5,8 @@ import { connect } from "react-redux";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList } from "react-window";
 import InfiniteLoader from "react-window-infinite-loader";
-import { HIDE_PROGRESS_MODAL, SHOW_PROGRESS_MODAL } from "../../../reducers/progressModal";
-import { SET_ERROR_SNACKBAR } from "../../../reducers/snackbar";
+import { HIDE_PROGRESS_MODAL, SHOW_PROGRESS_MODAL } from "../../../redux/deprecated/progressModal";
+import { SET_ERROR_SNACKBAR } from "../../../redux/deprecated/snackbar";
 import service from "../../../services/wordlist.service";
 import WordlistRow from "./WordlistRow";
 

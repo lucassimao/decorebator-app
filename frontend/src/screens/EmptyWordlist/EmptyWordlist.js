@@ -7,8 +7,8 @@ import React from "react";
 import { connect } from "react-redux";
 import { useHistory } from "react-router-dom";
 import WordlistForm from '../../components/core/WordlistForm';
-import { HIDE_PROGRESS_MODAL, SHOW_PROGRESS_MODAL } from "../../reducers/progressModal";
-import { SET_ERROR_SNACKBAR, SET_SUCCESS_SNACKBAR } from "../../reducers/snackbar";
+import { HIDE_PROGRESS_MODAL, SHOW_PROGRESS_MODAL } from "../../redux/deprecated/progressModal";
+import { SET_ERROR_SNACKBAR, SET_SUCCESS_SNACKBAR } from "../../redux/deprecated/snackbar";
 import service from "../../services/wordlist.service";
 import MenuLink from '../../components/ui/MenuLink';
 
