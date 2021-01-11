@@ -52,7 +52,7 @@ export type Sentence = {
 };
 
 export type QuizzInput = {
-  type: QuizzType;
+  type?: Maybe<QuizzType>;
   wordlistId?: Maybe<Scalars["ID"]>;
 };
 

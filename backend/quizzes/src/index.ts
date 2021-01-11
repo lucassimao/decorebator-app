@@ -44,19 +44,10 @@ initDB()
         exposedHeaders: "*",
         credentials: true,
       },
-      context: async (expressContext) => {
-        const req = expressContext.req;
-        const { operationName } = req.body || {};
-        if (
-          operationName == "IntrospectionQuery" &&
-          process.env.NODE_ENV !== "production"
-        ) {
-          return;
-        }
-
-        const user = await AuthService.authenticate(
-          req.headers.authorization ?? ""
-        );
+      introspection: true,
+      context: async ({ req }) => {
+        if (!req.headers?.authorization) return;
+        const user = await AuthService.authenticate(req.headers.authorization);
         return { user };
       },
     });

@@ -33,13 +33,18 @@ async function init() {
     typeDefs,
     resolvers,
     logger,
-    context: contextFunction,
+    context: async ({req}) => {
+      if (!req.headers?.authorization) return;
+      const user = await AuthService.authenticate(req.headers.authorization);
+      return { user };
+    },    
     cors: {
       origin: "*",
       allowedHeaders: "*",
       exposedHeaders: "*",
       credentials: true,
     },
+    introspection: true
   });
   server.listen({ port: process.env.PORT }).then(({ url }) => {
     logger.info(`🚀 Server ready at ${url}`);
@@ -52,15 +57,3 @@ process.once("unhandledRejection", stopApp);
 process.once("SIGTERM", stopApp);    
 
 init();
-
-const contextFunction = ({ req }) => {
-  const { operationName } = req.body || {};
-  if (
-    operationName == "IntrospectionQuery" &&
-    process.env.NODE_ENV !== "production"
-  ) {
-    return;
-  }
-
-  return AuthService.authenticate(req.headers.authorization);
-};

@@ -24,7 +24,7 @@ type Sentence{
 }
 
 input QuizzInput{
-    type: QuizzType!
+    type: QuizzType
     wordlistId: ID
 }
 

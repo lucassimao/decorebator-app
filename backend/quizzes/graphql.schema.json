@@ -230,13 +230,9 @@
             "name": "type",
             "description": null,
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "ENUM",
-                "name": "QuizzType",
-                "ofType": null
-              }
+              "kind": "ENUM",
+              "name": "QuizzType",
+              "ofType": null
             },
             "defaultValue": null
           },
