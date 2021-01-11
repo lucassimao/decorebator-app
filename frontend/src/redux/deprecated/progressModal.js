@@ -1,7 +1,7 @@
 export const HIDE_PROGRESS_MODAL = "hide progress modal";
 export const SHOW_PROGRESS_MODAL = "show progress modal";
 
-export default (state = null, action) => {
+const reducer = (state = null, action) => {
 
   switch (action.type) {
     case SHOW_PROGRESS_MODAL: {
@@ -14,3 +14,5 @@ export default (state = null, action) => {
       return state;
   }
 };
+
+export default reducer;

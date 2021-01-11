@@ -1,6 +1,6 @@
 export const SET_LOGGED_IN = "set logged in";
 
-export default (state = {}, action) => {
+const reducer = (state = {}, action) => {
   switch (action.type) {
     case SET_LOGGED_IN:
       break;
@@ -8,3 +8,5 @@ export default (state = {}, action) => {
       return state;
   }
 };
+
+export default reducer;

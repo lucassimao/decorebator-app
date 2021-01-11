@@ -1,4 +1,4 @@
-import { useQuery } from '@apollo/react-hooks';
+import { useQuery, gql } from '@apollo/client';
 import { makeStyles, NativeSelect } from "@material-ui/core";
 import FormControl from "@material-ui/core/FormControl";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
@@ -7,7 +7,6 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Slider from "@material-ui/core/Slider";
 import Switch from "@material-ui/core/Switch";
 import Typography from "@material-ui/core/Typography";
-import ApolloClient, { gql } from 'apollo-boost';
 import PropTypes from 'proptypes';
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
@@ -22,13 +21,6 @@ const useStyles = makeStyles(theme => ({
         verticalAlign: 'bottom'
     }
 }))
-
-export const client = new ApolloClient({
-    uri: process.env.REACT_APP_YOUTUBE_SERVICE_URL,
-    headers:{
-        authorization: process.env.REACT_APP_AUTH_TOKEN
-    }
-});
 
 export const YOUTUBE_SUBTITLES_QUERY = gql`
     query getSubtitles($url: String!){
@@ -45,7 +37,7 @@ const DEFAULT_MIN_WORD_LENGTH = 3;
 
 function Form(props) {
     const { url, onError, showProgressModal, hideProgressModal, dispatch } = props;
-    const { loading, error, data } = useQuery(YOUTUBE_SUBTITLES_QUERY, { client, variables: { url } });
+    const { loading, error, data } = useQuery(YOUTUBE_SUBTITLES_QUERY, { variables: { url } });
     const [allowAsr, setAllowAsr] = useState(true); // automatic speech recognition
     const classes = useStyles();
 

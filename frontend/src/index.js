@@ -1,24 +1,28 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import "./index.css";
-import App from "./App";
-import * as serviceWorker from "./serviceWorker";
-import theme from "./theme";
+import { ApolloProvider } from "@apollo/client";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import ThemeProvider from "@material-ui/styles/ThemeProvider";
+import React from "react";
+import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
-import { createStore, applyMiddleware } from "redux";
+import { applyMiddleware, createStore } from "redux";
 import thunkMiddleware from "redux-thunk";
-import {rootReducer} from "./redux/reducers";
+import App from "./App";
+import { apolloClient } from "./graphql/client";
+import "./index.css";
+import { rootReducer } from "./redux/reducers";
+import * as serviceWorker from "./serviceWorker";
+import theme from "./theme";
 
 const store = createStore(rootReducer, applyMiddleware(thunkMiddleware));
 
 ReactDOM.render(
   <ThemeProvider theme={theme}>
     <CssBaseline />
-    <Provider store={store}>
-      <App />
-    </Provider>
+    <ApolloProvider client={apolloClient}>
+      <Provider store={store}>
+        <App />
+      </Provider>
+    </ApolloProvider>
   </ThemeProvider>,
   document.getElementById("root")
 );

@@ -2,7 +2,7 @@ export const SET_SUCCESS_SNACKBAR = "set_success_snackbar";
 export const SET_ERROR_SNACKBAR = "set_error_snackbar";
 export const CLEAR_SNACKBAR = "clear_snackbar";
 
-export default (state = {}, action) => {
+const reducer = (state = {}, action) => {
   switch (action.type) {
     case SET_SUCCESS_SNACKBAR:
       return { success: true, message: action.message };
@@ -14,3 +14,5 @@ export default (state = {}, action) => {
       return state;
   }
 };
+
+export default reducer;
