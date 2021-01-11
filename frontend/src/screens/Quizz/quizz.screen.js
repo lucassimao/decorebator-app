@@ -5,8 +5,8 @@ import { useParams, Link as RouterLink } from 'react-router-dom';
 import { HIDE_PROGRESS_MODAL, SHOW_PROGRESS_MODAL } from "../../redux/deprecated/progressModal";
 import { SET_ERROR_SNACKBAR, CLEAR_SNACKBAR } from "../../redux/deprecated/snackbar";
 import { useStyles } from "./quizz.styles";
-import { Container, IconButton,Typography,Card,CardActionArea,CardContent } from "@material-ui/core";
-import {ArrowBack} from "@material-ui/icons";
+import { Container, IconButton, Typography, Card, CardActionArea, CardContent } from "@material-ui/core";
+import { ArrowBack } from "@material-ui/icons";
 
 const SAVE_QUIZZ_RESULT = gql`
   mutation SaveQuizzResult($quizzId: ID!, $success: Boolean!) {
@@ -82,22 +82,25 @@ export const QuizzScreen = () => {
     saveQuizzResult({ variables: { quizzId, success: isCorrect } })
   }
 
-  const { nextQuizz: { id: quizzId, type, text, rightOptionIdx, options, word } } = data;
   let title
 
-  switch (type) {
-    case 'SYNONYM':
-      title = `Synonym for ${word.name} (${word.lexicalCategory}):`
-      break;
-    case 'WORD_FROM_MEANING':
-      title = `${text} (${word.lexicalCategory}):`;
-      break;
-    case 'MEANING_FROM_WORD':
-      title = `Meaning of ${word.name} (${word.lexicalCategory}):`;
-      break;
-    default:
-      throw new Error(`unexpected quizz type: ${type}`);
+  if (data?.nextQuizz) {
+    const { type, word, text } = data.nextQuizz;
+    switch (type) {
+      case 'SYNONYM':
+        title = `Synonym for ${word.name} (${word.lexicalCategory}):`
+        break;
+      case 'WORD_FROM_MEANING':
+        title = `${text} (${word.lexicalCategory}):`;
+        break;
+      case 'MEANING_FROM_WORD':
+        title = `Meaning of ${word.name} (${word.lexicalCategory}):`;
+        break;
+      default:
+        throw new Error(`unexpected type: ${type}`)
+    }
   }
+
 
   return (
     <Container>
@@ -110,30 +113,36 @@ export const QuizzScreen = () => {
 
         <Typography variant="h5" style={{ fontWeight: "bold" }} align="center">
           Quizz
-    </Typography>
+        </Typography>
       </header>
 
       <main className={classes.main}>
         <Card raised={true} className={classes.card}>
           <CardActionArea>
             <CardContent>
-              <Typography gutterBottom variant="h6">
-                {title}
-              </Typography>
 
-              <ul>
-                {options.map((option, idx) => {
-                  const optionText = option.__typename === 'Lemma' ? option.name : option.text;
-                  const showResult = (idx === clickedOptionIdx);
-                  const isCorrect = (idx === rightOptionIdx);
-                  const cssClasses = [classes.quizzItem]
-                  if (showResult) {
-                    cssClasses.push(isCorrect ? classes.quizzItemCorrect : classes.quizzItemWrong)
-                  }
-                  return <li onClick={() => onClickOption(quizzId, idx, isCorrect)} 
-                  className={cssClasses.join(' ')} key={`${optionText}-${idx}`}>{optionText}</li>
-                })}
-              </ul>
+              {!data?.nextQuizz ? <Typography gutterBottom variant="h6">Still processing words, come back later please</Typography> : (
+                <>
+                  <Typography gutterBottom variant="h6">
+                    {title}
+                  </Typography>
+
+                  <ul>
+                    {data.nextQuizz.options.map((option, idx) => {
+                      const optionText = option.__typename === 'Lemma' ? option.name : option.text;
+                      const showResult = (idx === clickedOptionIdx);
+                      const isCorrect = (idx === data.nextQuizz.rightOptionIdx);
+                      const cssClasses = [classes.quizzItem]
+                      if (showResult) {
+                        cssClasses.push(isCorrect ? classes.quizzItemCorrect : classes.quizzItemWrong)
+                      }
+                      return <li onClick={() => onClickOption(data.nextQuizz.id, idx, isCorrect)}
+                        className={cssClasses.join(' ')} key={`${optionText}-${idx}`}>{optionText}</li>
+                    })}
+                  </ul>
+                </>
+
+              )}
 
             </CardContent>
           </CardActionArea>
