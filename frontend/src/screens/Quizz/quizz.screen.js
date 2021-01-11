@@ -121,7 +121,7 @@ export const QuizzScreen = () => {
           <CardActionArea>
             <CardContent>
 
-              {!data?.nextQuizz ? <Typography gutterBottom variant="h6">Still processing words, come back later please</Typography> : (
+              {!data?.nextQuizz ? <Typography gutterBottom variant="h6">Still processing this wordlist, try another one please</Typography> : (
                 <>
                   <Typography gutterBottom variant="h6">
                     {title}
