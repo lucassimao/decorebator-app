@@ -1,42 +1,15 @@
-import { gql, useLazyQuery, useMutation } from '@apollo/client';
+import clsx from 'clsx';
+import { useLazyQuery, useMutation } from '@apollo/client';
+import { Card, CardActionArea, CardContent, Container, IconButton, Typography } from "@material-ui/core";
+import { ArrowBack } from "@material-ui/icons";
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useParams, Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useParams } from 'react-router-dom';
 import { HIDE_PROGRESS_MODAL, SHOW_PROGRESS_MODAL } from "../../redux/deprecated/progressModal";
-import { SET_ERROR_SNACKBAR, CLEAR_SNACKBAR } from "../../redux/deprecated/snackbar";
+import { CLEAR_SNACKBAR, SET_ERROR_SNACKBAR } from "../../redux/deprecated/snackbar";
+import { NEXT_QUIZZ_QUERY, SAVE_QUIZZ_RESULT } from "./graphql";
 import { useStyles } from "./quizz.styles";
-import { Container, IconButton, Typography, Card, CardActionArea, CardContent } from "@material-ui/core";
-import { ArrowBack } from "@material-ui/icons";
 
-const SAVE_QUIZZ_RESULT = gql`
-  mutation SaveQuizzResult($quizzId: ID!, $success: Boolean!) {
-    saveQuizzGuess(quizzId: $quizzId, success: $success)
-  }
-`;
-
-const NEXT_QUERY = gql`
-  query GetNextQuizz($input: QuizzInput) {
-    nextQuizz(input: $input) {
-      id
-      type
-      text
-      rightOptionIdx
-      options{
-      	... on Lemma{
-          name
-        }
-        ... on Sentence{
-          text
-        }
-      }
-      word{
-        name
-        lexicalCategory
-        id
-      }
-    }    
-  }
-`;
 
 export const QuizzScreen = () => {
   const classes = useStyles();
@@ -46,7 +19,7 @@ export const QuizzScreen = () => {
 
   const [saveQuizzResult] = useMutation(SAVE_QUIZZ_RESULT);
 
-  const [fetchNextQuery, { called, loading, data }] = useLazyQuery(NEXT_QUERY, {
+  const [fetchNextQuery, { called, loading, data }] = useLazyQuery(NEXT_QUIZZ_QUERY, {
     fetchPolicy: 'network-only',
     variables: { input: { wordlistId: id } }
   });
@@ -69,6 +42,9 @@ export const QuizzScreen = () => {
   }
 
   const onClickOption = (event) => {
+    if (event.target.tagName !== 'LI'){
+      return;
+    }
     const quizzId = data.nextQuizz.id;
     const clickedOptionIdx = parseInt(event.target.dataset.index);
     const isCorrect = clickedOptionIdx === data.nextQuizz.rightOptionIdx;
@@ -135,21 +111,17 @@ export const QuizzScreen = () => {
                     {data.nextQuizz.options.map((option, idx) => {
                       const optionText = option.__typename === 'Lemma' ? option.name : option.text;
                       const key = `${optionText}-${idx}`;
-                      const cssClasses = [classes.quizzItem]
+                      const hasUserClicked = (clickedOptionIdx !== null);
+                      const { rightOptionIdx } = data.nextQuizz;
 
-                      if (clickedOptionIdx !== null) {
-                        switch (idx) {
-                          case data.nextQuizz.rightOptionIdx:
-                            cssClasses.push(classes.quizzItemCorrect)
-                            break;
-                          case clickedOptionIdx:
-                            cssClasses.push(classes.quizzItemWrong);
-                            break;
-                          default:
-                            break;
-                        }
-                      }
-                      return <li data-index={idx} className={cssClasses.join(' ')}   key={key}>{optionText}</li>
+                      return <li data-index={idx}
+                        className={clsx(classes.quizzItem, hasUserClicked ?
+                          {
+                            [classes.quizzItemCorrect]: idx === rightOptionIdx,
+                            [classes.quizzItemWrong]: idx === clickedOptionIdx
+                          }
+                          : null)}
+                        key={key}>{optionText}</li>
                     })}
                   </ul>
                 </>
