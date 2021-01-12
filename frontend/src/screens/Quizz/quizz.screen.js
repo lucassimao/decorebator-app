@@ -68,12 +68,16 @@ export const QuizzScreen = () => {
     return null;
   }
 
-  const onClickOption = (quizzId, clickedOptionIdx, isCorrect) => {
+  const onClickOption = (event) => {
+    const quizzId = data.nextQuizz.id;
+    const clickedOptionIdx = parseInt(event.target.dataset.index);
+    const isCorrect = clickedOptionIdx === data.nextQuizz.rightOptionIdx;
+
     setClickedOptionIdx(clickedOptionIdx)
     if (!isCorrect) {
       dispatch({ type: SET_ERROR_SNACKBAR, message: 'Wrong option' })
     }
-    const interval = isCorrect ? 500 : 800;
+    const interval = isCorrect ? 500 : 1800;
     setTimeout(() => {
       fetchNextQuery()
       setClickedOptionIdx(null)
@@ -127,17 +131,25 @@ export const QuizzScreen = () => {
                     {title}
                   </Typography>
 
-                  <ul>
+                  <ul onClick={onClickOption}>
                     {data.nextQuizz.options.map((option, idx) => {
                       const optionText = option.__typename === 'Lemma' ? option.name : option.text;
-                      const showResult = (idx === clickedOptionIdx);
-                      const isCorrect = (idx === data.nextQuizz.rightOptionIdx);
+                      const key = `${optionText}-${idx}`;
                       const cssClasses = [classes.quizzItem]
-                      if (showResult) {
-                        cssClasses.push(isCorrect ? classes.quizzItemCorrect : classes.quizzItemWrong)
+
+                      if (clickedOptionIdx !== null) {
+                        switch (idx) {
+                          case data.nextQuizz.rightOptionIdx:
+                            cssClasses.push(classes.quizzItemCorrect)
+                            break;
+                          case clickedOptionIdx:
+                            cssClasses.push(classes.quizzItemWrong);
+                            break;
+                          default:
+                            break;
+                        }
                       }
-                      return <li onClick={() => onClickOption(data.nextQuizz.id, idx, isCorrect)}
-                        className={cssClasses.join(' ')} key={`${optionText}-${idx}`}>{optionText}</li>
+                      return <li data-index={idx} className={cssClasses.join(' ')}   key={key}>{optionText}</li>
                     })}
                   </ul>
                 </>
