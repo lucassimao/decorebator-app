@@ -6,13 +6,14 @@ import QuizzType from "../entities/quizzType";
 import LemmaService from "./lemma.service";
 import SenseService from "./sense.service";
 import WordService from "./word.service";
+import stringSimilarity from "string-similarity";
 
 const OPTIONS_LENGTH = 4;
 interface QuizzWithOptions<T> {
   quizz: Quizz;
   options: T[];
   rightOptionIdx: number;
-  definition?: string;
+  text?: string;
 }
 
 const __loadOrCreateQuizz = async (
@@ -141,7 +142,7 @@ const QuizzService = {
       where: { ownerId },
     });
 
-    // [Synonym -> WordFromMeaning -> MeaningFromWord]
+    // [Synonym -> WordFromMeaning -> MeaningFromWord -> FillSentence]
 
     switch (lastQuizz?.type) {
       case QuizzType.Synonym:
@@ -149,9 +150,51 @@ const QuizzService = {
       case QuizzType.WordFromMeaning:
         return QuizzService.nextMeaningFromWordQuizz(ownerId, wordlistId);
       case QuizzType.MeaningFromWord:
+        return QuizzService.nextFillSentenceQuizz(ownerId, wordlistId);
+      case QuizzType.FillSentence:
       default:
         return QuizzService.nextSynonymQuizz(ownerId, wordlistId);
     }
+  },
+
+  nextFillSentenceQuizz: async (
+    ownerId: number,
+    wordlistId?: number
+  ): Promise<QuizzWithOptions<string>> => {
+    const quizz = await __loadOrCreateQuizz(
+      ownerId,
+      QuizzType.FillSentence,
+      wordlistId
+    );
+    const sense = quizz.sense;
+
+    if (!sense) throw new Error("no sense");
+    if (!sense.examples?.length) throw new Error("no examples");
+    if (!sense.lemma) throw new Error("no lemma");
+
+    const exampleIdx = Math.floor(Math.random() * sense.examples.length);
+    const example = sense.examples[exampleIdx];
+
+    const lemma = sense.lemma;
+    const randomLemmas = await LemmaService.getRandomLemmasForWord(
+      quizz.wordId,
+      OPTIONS_LENGTH,
+      lemma?.lexicalCategory
+    );
+    const options = randomLemmas.map((lemma) => lemma.name);
+
+    const rightOptionIdx = Math.floor(Math.random() * OPTIONS_LENGTH);
+    const regex = new RegExp(`\b${lemma.name}\b`);
+    if (regex.test(example)) {
+      options.splice(rightOptionIdx, 0, lemma.name);
+    } else {
+      const {
+        bestMatch: { target },
+      } = stringSimilarity.findBestMatch(lemma.name, example.split(" "));
+      options.splice(rightOptionIdx, 0, target);
+    }
+
+    return { quizz, options, rightOptionIdx, text: example };
   },
 
   nextMeaningFromWordQuizz: async (
@@ -216,7 +259,7 @@ const QuizzService = {
     const rightOptionIdx = Math.floor(Math.random() * OPTIONS_LENGTH);
     options.splice(rightOptionIdx, 0, lemma);
 
-    return { quizz, options, rightOptionIdx, definition };
+    return { quizz, options, rightOptionIdx, text: definition };
   },
 
   nextSynonymQuizz: async (

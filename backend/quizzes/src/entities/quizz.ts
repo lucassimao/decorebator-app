@@ -38,7 +38,7 @@ export default class Quizz {
   word?: Word;
 
   @Column()
-  wordId?: number;
+  wordId!: number;
 
   @Column()
   hits!: number;

@@ -43,6 +43,10 @@ const WordService = {
       case QuizzType.Synonym:
         queryBuilder.innerJoinAndSelect("sense.synonyms", "synonym"); //only lemmas with synonym
         break;
+      case QuizzType.FillSentence:
+        queryBuilder.andWhere("array_length(sense.examples,1)>0");
+        queryBuilder.addSelect(["sense.examples"]);
+        break;
       default:
         break;
     }

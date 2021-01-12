@@ -18,7 +18,7 @@ export default class Lemma {
   id?: number;
 
   @Column()
-  name?: string;
+  name!: string;
 
   @Column()
   language?: string;

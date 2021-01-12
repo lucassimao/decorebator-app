@@ -7,7 +7,7 @@ const LemmaService = {
     wordId: number,
     qty: number,
     lexicalCategory?: string
-  ): Promise<Lemma[] | undefined> => {
+  ): Promise<Lemma[]> => {
     const lemmaRepository = getRepository(Lemma);
 
     const qBuilder = lemmaRepository
