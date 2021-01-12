@@ -15,8 +15,7 @@ const LemmaService = {
       .where((qb) => {
         const subQuery = qb
           .subQuery()
-          .select("synonym.id")
-          .select("lemma.id")
+          .select(["synonym.id", "lemma.id"])
           .from(Sense, "sense")
           .innerJoin("sense.synonyms", "synonym")
           .innerJoin("sense.lemma", "lemma")
