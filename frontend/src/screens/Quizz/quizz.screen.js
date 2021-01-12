@@ -26,7 +26,7 @@ export const QuizzScreen = () => {
 
   useEffect(() => {
     if (loading) {
-      dispatch({ type: SHOW_PROGRESS_MODAL })
+      dispatch({ type: SHOW_PROGRESS_MODAL, message:'Loading' })
     } else {
       dispatch({ type: HIDE_PROGRESS_MODAL })
     }
