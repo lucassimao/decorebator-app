@@ -42,7 +42,7 @@ export const QuizzScreen = () => {
   const classes = useStyles();
   const { id } = useParams();
   const dispatch = useDispatch();
-  const [clickedOptionIdx, setClickedOptionIdx] = useState();
+  const [clickedOptionIdx, setClickedOptionIdx] = useState(null);
 
   const [saveQuizzResult] = useMutation(SAVE_QUIZZ_RESULT);
 
