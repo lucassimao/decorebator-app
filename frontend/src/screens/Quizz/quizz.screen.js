@@ -65,7 +65,7 @@ export const QuizzScreen = () => {
   let title
 
   if (data?.nextQuizz) {
-    const { type, word, text } = data.nextQuizz;
+    const { type, word, text, options, rightOptionIdx } = data.nextQuizz;
     switch (type) {
       case 'SYNONYM':
         title = `Synonym for ${word.name} (${word.lexicalCategory}):`
@@ -76,6 +76,12 @@ export const QuizzScreen = () => {
       case 'MEANING_FROM_WORD':
         title = `Meaning of ${word.name} (${word.lexicalCategory}):`;
         break;
+      case 'FILL_SENTENCE':{
+        const target = options[rightOptionIdx].text;
+        const placeholder = [...Array(target.length)].map(_ => '_').join('');
+        title = text.replace(target,placeholder) + ` (${word.lexicalCategory}):`;
+        break;
+      }
       default:
         throw new Error(`unexpected type: ${type}`)
     }
