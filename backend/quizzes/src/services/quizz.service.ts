@@ -122,6 +122,10 @@ const QuizzService = {
       case QuizzType.Synonym:
         queryBuilder.innerJoinAndSelect("sense.synonyms", "synonym");
         break;
+      case QuizzType.FillSentence:
+        queryBuilder.andWhere("array_length(sense.examples,1)>0");
+        queryBuilder.addSelect(["sense.examples"]);
+        break;
       default:
         break;
     }
