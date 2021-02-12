@@ -68,7 +68,7 @@ export const QuizzScreen = () => {
     const { type, word, text, options, rightOptionIdx } = data.nextQuizz;
     switch (type) {
       case 'SYNONYM':
-        title = `Synonym for ${word.name} (${word.lexicalCategory}):`
+        title = `Related or synonym for ${word.name} (${word.lexicalCategory}):`
         break;
       case 'WORD_FROM_MEANING':
         title = `${text} (${word.lexicalCategory}):`;
