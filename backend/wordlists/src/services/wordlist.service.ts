@@ -7,11 +7,14 @@ import Wordlist from "../entities/wordlist";
 import logger from "../logger";
 import wordService from "./word.service";
 import { PubSub } from '@google-cloud/pubsub';
+import axios from "axios";
+import { parse } from 'node-html-parser';
 
 type WordlistDTO = Partial<Wordlist> & {
   minWordLength: number;
   onlyNewWords: boolean;
   base64EncodedFile: string;
+  url?: string;
 };
 
 type ListDTO = {
@@ -67,10 +70,12 @@ const save = async (wordlistDTO: WordlistDTO, user: User) => {
     minWordLength = 1,
     onlyNewWords = false,
     base64EncodedFile,
+    url,
     ...wordlist
   } = wordlistDTO;
   let fileInfo;
   let words: Array<string> = [];
+
 
   if (base64EncodedFile) {
     const { fileType, buffer } = __parseBase64EncodedFile(
@@ -85,7 +90,29 @@ const save = async (wordlistDTO: WordlistDTO, user: User) => {
       extension: fileType,
       size: buffer.length
     };
-  } else if (Array.isArray(wordlistDTO.words)) {
+  } else if (url) {
+
+    try {
+      const response = await axios({ method: 'get',url})
+      const root = parse( response.data);
+      const title = root.querySelector('title').text;
+      words = await __extractWordsFromBuffer(Buffer.from(response.data), 'text/html');
+      if (!wordlist.description){
+        wordlist.description = title;
+      }
+    } catch (error) { 
+      logger.error('Error while requesting ' + url);
+      if (error.response) {
+        logger.error(`Request was made but the server responded with a status code ${error.response.status}`)
+      } else if (error.request) {
+        logger.error(`Request was made but no response was received`)
+      } else {
+        logger.error(error.message)
+      }
+    }
+
+  } 
+  else if (Array.isArray(wordlistDTO.words)) {
     words = wordlistDTO.words?.map(({ name }) => name).filter(notEmpty);
   }
   const isArrayOfWordsPresent =
