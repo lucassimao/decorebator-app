@@ -14,6 +14,7 @@ const FileWordlistScreen = lazy(() => import("./screens/FileWordlist").then(iden
 const EditWordlistScreen = lazy(() => import("./screens/EditWordlist").then(identity));
 const NewWordlistScreen = lazy(() => import("./screens/NewWordlist").then(identity));
 const QuizzScreen = lazy(() => import("./screens/Quizz").then(identity));
+const UrlWordlistScreen = lazy(() => import("./screens/UrlWordlist").then(identity));
 
 const useStyles = makeStyles(theme => ({
 
@@ -40,6 +41,9 @@ function App(props) {
             </Route>
             <Route path="/wordlists/new-from-youtube">
               <YoutubeWordlistScreen />
+            </Route>
+            <Route path="/wordlists/new-from-url">
+              <UrlWordlistScreen />
             </Route>
             <Route path="/wordlists/new">
               <EmptyWordlistScreen />

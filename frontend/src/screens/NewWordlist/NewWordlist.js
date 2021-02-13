@@ -11,6 +11,8 @@ import { Link } from "react-router-dom";
 import WordlistsImage from "../../img/wordlists.jpeg";
 import YoutubeImage from "../../img/youtube.jpg";
 import TextFileFormatsImage from "../../img/textfileFormats.png";
+import UrlInternetImage from "../../img/urlinternet.jpg";
+
 
 
 const useStyles = makeStyles(theme => ({
@@ -27,30 +29,6 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const NewEmptyWordlistLink = React.forwardRef((props, ref) => (
-  <Link to="/wordlists/new" innerRef={ref} {...props} />
-));
-
-NewEmptyWordlistLink.displayName = 'NewEmptyWordlistLink'
-
-const NewWordlistFromYoutubeLink = React.forwardRef((props, ref) => (
-  <Link to="/wordlists/new-from-youtube" innerRef={ref} {...props} />
-));
-
-NewWordlistFromYoutubeLink.displayName = 'NewWordlistFromYoutubeLink'
-
-const NewWordlistFromFileLink = React.forwardRef((props, ref) => (
-  <Link to="/wordlists/new-from-file" innerRef={ref} {...props} />
-));
-
-NewWordlistFromFileLink.displayName = 'NewWordlistFromFileLink'
-
-
-
-const HomeLink = React.forwardRef((props, ref) => (
-  <Link to="/" innerRef={ref} {...props} />
-));
-HomeLink.displayName = 'HomeLink'
 
 
 export function NewWordlistScreen() {
@@ -59,7 +37,7 @@ export function NewWordlistScreen() {
     <Container>
 
       <header className={classes.header}>
-        <IconButton component={HomeLink} size="medium" color="primary"
+        <IconButton component={Link} to='/' size="medium" color="primary"
           style={{ position: "absolute", top: -5, left: 0, fontWeight: "bold" }}>
           <ArrowBackIcon />
         </IconButton>
@@ -71,7 +49,7 @@ export function NewWordlistScreen() {
 
       <main className={classes.main}>
         <Card raised={true} className={classes.card}>
-          <CardActionArea component={NewEmptyWordlistLink}>
+          <CardActionArea component={Link} to='/wordlists/new'>
             <CardMedia
               component="img"
               alt="Create empty wordlist"
@@ -92,7 +70,28 @@ export function NewWordlistScreen() {
         </Card>
 
         <Card raised={true} className={classes.card}>
-          <CardActionArea component={NewWordlistFromYoutubeLink}>
+          <CardActionArea component={Link} to='/wordlists/new-from-url'>
+            <CardMedia
+              component="img"
+              alt="Create wordlist from an URL"
+              height="140"
+              style={{ objectFit: "fill" }}
+              image={UrlInternetImage}
+              title="Create a new wordlist from any page in the internet"
+            />
+            <CardContent>
+              <Typography gutterBottom variant="h6">
+                URL
+              </Typography>
+              <Typography variant="body2" color="textSecondary" component="p">
+                Create a new wordlist from any page in the internet
+              </Typography>
+            </CardContent>
+          </CardActionArea>
+        </Card>        
+
+        <Card raised={true} className={classes.card}>
+          <CardActionArea  component={Link} to='/wordlists/new-from-youtube'>
             <CardMedia
               component="img"
               alt="Create wordlist from youtube"
@@ -106,15 +105,14 @@ export function NewWordlistScreen() {
                 Youtube
               </Typography>
               <Typography variant="body2" color="textSecondary" component="p">
-                Create a new wordlist from subtitles of youtube videos. You can choose the minimum word length
-                as well as ignore words that already exists in your other wordlists.
+                Create a new wordlist from youtube videos&apos; subtitles
               </Typography>
             </CardContent>
           </CardActionArea>
         </Card>
 
         <Card raised className={classes.card}>
-          <CardActionArea component={NewWordlistFromFileLink}>
+          <CardActionArea component={Link} to='/wordlists/new-from-file'>
             <CardMedia
               component="img"
               alt="Create wordlist from a file"
