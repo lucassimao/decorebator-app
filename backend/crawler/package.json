@@ -26,7 +26,7 @@
   "homepage": "https://github.com/lucassimao/decorebator-app#readme",
   "dependencies": {
     "@google-cloud/pubsub": "^2.7.0",
-    "axios": "^0.21.0",
+    "axios": "^0.21.1",
     "express": "^4.17.1",
     "gcp-metadata": "^4.2.1",
     "helmet": "^4.1.0",
