@@ -63,10 +63,15 @@ export const QuizzScreen = () => {
   }
 
   let title
+  let audioFile
 
   if (data?.nextQuizz) {
     const { type, word, text, options, rightOptionIdx } = data.nextQuizz;
     switch (type) {
+      case 'WORD_FROM_AUDIO':
+        title = `Select the word you hear:`
+        audioFile = data.nextQuizz.audioFile;
+        break;      
       case 'SYNONYM':
         title = `Related or synonym for ${word.name} (${word.lexicalCategory}):`
         break;
@@ -112,6 +117,8 @@ export const QuizzScreen = () => {
                   <Typography gutterBottom variant="h6">
                     {title}
                   </Typography>
+
+                  {audioFile && <audio controls autobuffer='true' preload='auto' src={audioFile}/>}
 
                   <ul onClick={onClickOption}>
                     {data.nextQuizz.options.map((option, idx) => {

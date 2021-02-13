@@ -13,6 +13,7 @@ export const NEXT_QUIZZ_QUERY = gql`
       type
       text
       rightOptionIdx
+      audioFile
       options{
       	... on Lemma{
           name
