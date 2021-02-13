@@ -32,7 +32,7 @@ export const nextQuizz = async (
     userId,
     parseInt(args.input?.wordlistId ?? "")
   );
-  const { quizz, options, rightOptionIdx, text } = result;
+  const { quizz, options, rightOptionIdx, text, audioFile } = result;
   const { word, sense } = quizz;
 
   return {
@@ -41,6 +41,7 @@ export const nextQuizz = async (
     type: quizz.type,
     rightOptionIdx,
     text,
+    audioFile,
     word: {
       id: String(word?.id),
       name: String(word?.name),

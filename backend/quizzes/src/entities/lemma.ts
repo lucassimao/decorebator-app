@@ -7,6 +7,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
+import Pronunciation from "./pronunciation";
 import Sense from "./sense";
 import Word from "./word";
 
@@ -40,4 +41,10 @@ export default class Lemma {
 
   @ManyToMany(() => Word, (word) => word.lemmas)
   words?: Word[];
+
+  @OneToMany(
+    () => Pronunciation,
+    (lemmaPronunciation) => lemmaPronunciation.lemma
+  )
+  pronunciations?: Pronunciation[];
 }

@@ -4,7 +4,8 @@ enum QuizzType{
     MEANING_FROM_WORD,
     FILL_SENTENCE,
     PHRASAL_VERB,
-    PREPOSITION
+    PREPOSITION,
+    WORD_FROM_AUDIO
 }
 
 type Lemma{
@@ -37,6 +38,7 @@ type Quizz{
     rightOptionIdx: Int!
     word: Word
     text: String
+    audioFile: String
 }
 
 type Query{

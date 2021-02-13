@@ -14,6 +14,7 @@ interface QuizzWithOptions<T> {
   options: T[];
   rightOptionIdx: number;
   text?: string;
+  audioFile?: string;
 }
 
 const __loadOrCreateQuizz = async (
@@ -26,6 +27,7 @@ const __loadOrCreateQuizz = async (
     quizzType,
     wordlistId
   );
+
   let quizz = null;
   let sense = null;
 
@@ -115,6 +117,12 @@ const QuizzService = {
       .andWhere("quizz.type=:quizzType", { quizzType });
 
     switch (quizzType) {
+      case QuizzType.WordFromAudio:
+        queryBuilder.innerJoinAndSelect(
+          "lemma.pronunciations",
+          "pronunciation"
+        );
+        break;
       case QuizzType.WordFromMeaning:
       case QuizzType.MeaningFromWord:
         queryBuilder.addSelect(["sense.definitions"]);
@@ -146,12 +154,14 @@ const QuizzService = {
       where: { ownerId },
     });
 
-    // [Synonym -> WordFromMeaning -> MeaningFromWord -> FillSentence]
+    // [Synonym -> WordFromMeaning -> WordFromAudio -> MeaningFromWord -> FillSentence]
 
     switch (lastQuizz?.type) {
       case QuizzType.Synonym:
         return QuizzService.nextWordFromMeaningQuizz(ownerId, wordlistId);
       case QuizzType.WordFromMeaning:
+        return QuizzService.nextWordFromAudioQuizz(ownerId, wordlistId);
+      case QuizzType.WordFromAudio:
         return QuizzService.nextMeaningFromWordQuizz(ownerId, wordlistId);
       case QuizzType.MeaningFromWord:
         return QuizzService.nextFillSentenceQuizz(ownerId, wordlistId);
@@ -300,6 +310,50 @@ const QuizzService = {
     options.splice(rightOptionIdx, 0, synonym);
 
     return { quizz, options, rightOptionIdx };
+  },
+
+  nextWordFromAudioQuizz: async (
+    ownerId: number,
+    wordlistId?: number
+  ): Promise<QuizzWithOptions<Lemma>> => {
+    const quizz = await __loadOrCreateQuizz(
+      ownerId,
+      QuizzType.WordFromAudio,
+      wordlistId
+    );
+    const sense = quizz.sense;
+
+    if (!sense) throw new Error("no sense");
+    if (!quizz.wordId) throw new Error("no wordId");
+
+    const lemma = sense.lemma;
+    if (!lemma) throw new Error("no lemma");
+    if (!lemma?.pronunciations?.length) throw new Error("no pronunciations");
+
+    const allPronunciations = lemma.pronunciations;
+    const pronunciationIdx = Math.floor(
+      Math.random() * allPronunciations.length
+    );
+    const pronunciation = allPronunciations[pronunciationIdx];
+
+    const options = await LemmaService.getRandomLemmasForWord(
+      quizz.wordId,
+      OPTIONS_LENGTH,
+      lemma.lexicalCategory
+    );
+    if (!options?.length) {
+      throw new Error("no options");
+    }
+
+    const rightOptionIdx = Math.floor(Math.random() * OPTIONS_LENGTH);
+    options.splice(rightOptionIdx, 0, lemma);
+
+    return {
+      quizz,
+      options,
+      rightOptionIdx,
+      audioFile: pronunciation.audioFile,
+    };
   },
 };
 

@@ -30,6 +30,7 @@ export enum QuizzType {
   FillSentence = "FILL_SENTENCE",
   PhrasalVerb = "PHRASAL_VERB",
   Preposition = "PREPOSITION",
+  WordFromAudio = "WORD_FROM_AUDIO",
 }
 
 export type Lemma = {
@@ -66,6 +67,7 @@ export type Quizz = {
   rightOptionIdx: Scalars["Int"];
   word?: Maybe<Word>;
   text?: Maybe<Scalars["String"]>;
+  audioFile?: Maybe<Scalars["String"]>;
 };
 
 export type Query = {
@@ -287,6 +289,11 @@ export type QuizzResolvers<
   rightOptionIdx?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
   word?: Resolver<Maybe<ResolversTypes["Word"]>, ParentType, ContextType>;
   text?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  audioFile?: Resolver<
+    Maybe<ResolversTypes["String"]>,
+    ParentType,
+    ContextType
+  >;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

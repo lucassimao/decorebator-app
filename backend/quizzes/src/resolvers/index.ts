@@ -17,6 +17,7 @@ const resolvers: IResolvers = {
     FILL_SENTENCE: "fill_sentence",
     PHRASAL_VERB: "phrasal_verb",
     PREPOSITION: "preposition",
+    WORD_FROM_AUDIO: "word_from_audio",
   },
   Query: {
     nextQuizz,

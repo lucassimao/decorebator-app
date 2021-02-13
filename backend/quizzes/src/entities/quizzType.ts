@@ -5,6 +5,7 @@ enum QuizzType {
   FillSentence = "fill_sentence",
   PhrasalVerb = "phrasal_verb",
   Preposition = "preposition",
+  WordFromAudio = "word_from_audio",
 }
 
 export default QuizzType;

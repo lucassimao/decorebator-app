@@ -36,6 +36,12 @@ const WordService = {
     // word's sense not yet used for quizzes
 
     switch (quizzType) {
+      case QuizzType.WordFromAudio:
+        queryBuilder.innerJoinAndSelect(
+          "senseLemma.pronunciations",
+          "pronunciation"
+        ); //only lemmas with pronunciations
+        break;
       case QuizzType.WordFromMeaning:
       case QuizzType.MeaningFromWord:
         queryBuilder.addSelect(["sense.definitions"]);
