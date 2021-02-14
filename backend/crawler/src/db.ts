@@ -16,6 +16,7 @@ export async function initDB(): Promise<Connection> {
             `${__dirname}/entities/${extension}`
         ],
         synchronize: false,
+        logging:true,
         namingStrategy: new SnakeNamingStrategy()
     })
     promise.catch((error: any) => logger.error(error));
