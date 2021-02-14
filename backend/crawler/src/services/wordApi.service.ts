@@ -6,7 +6,8 @@ import { SuccessfulReponse } from "../types/wordApiResponse";
 import { WordDTO } from "../types/word.dto";
 import LemmaService from "./lemma.service";
 import Sense from "../entities/sense";
-import { Like, getRepository } from "typeorm";
+import { Like, getRepository, getConnection } from "typeorm";
+import Word from "../entities/word";
 
 const apiKey = process.env.WORDS_API_KEY;
 if (!apiKey) {
@@ -38,8 +39,8 @@ export default class WordApiService {
     async mapResultToLemmas(word: WordDTO, response: SuccessfulReponse): Promise<boolean> {
         
         const {languageCode: language} = word;
-        const tag = `${word.name}(${language})`;
         const provider = 'wordsApi';
+        const tag = `${word.name}(${language}) - ${provider}`;
         
         this.logger.debug(`[${tag}] Processing ${response.results.length} result(s)`);
 
@@ -74,6 +75,14 @@ export default class WordApiService {
                     lexicalCategory: result.partOfSpeech })
             } else {
                 this.logger.debug(`[${tag}] Lemma found`);
+            }
+
+            if (word.id){
+                await getConnection()
+                .createQueryBuilder()
+                .relation(Word, "lemmas")
+                .of(word.id)
+                .add(sense.lemma);            
             }
 
             await getRepository(Sense).save(sense);
