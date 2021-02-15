@@ -99,7 +99,7 @@ export default class WordApiService {
 
     }
 
-    async search(word: string, language: LanguageCode): Promise<SuccessfulReponse> {
+    async search(word: string, language: LanguageCode): Promise<SuccessfulReponse|undefined> {
         const tag = `${word}(${language})`;
 
         try {
@@ -111,6 +111,9 @@ export default class WordApiService {
                 if (error.response) {
                     const { response: { data, status, headers } } = error;
                     this.logger.debug(`[${tag}] Request made and server responded with error ...`, { data, status, headers });
+                    if (data.message === 'word not found'){
+                        return;
+                    }
                 } else if (error.request) {
                     this.logger.error(`[${tag}] request was made but no response was received ...`, { request: error.request });
                 } else {

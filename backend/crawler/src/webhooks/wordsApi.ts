@@ -30,7 +30,9 @@ export const wordsApiCrawler = async (req: Request, response: Response): Promise
     try {
         const sevice = new WordApiService(logger);
         const result = await sevice.search(word.name,'en');
-        await sevice.mapResultToLemmas(word, result)
+        if (result){
+            await sevice.mapResultToLemmas(word, result)
+        }
         response.sendStatus(200);
     } catch (error) {
         response.sendStatus(500);
