@@ -29,7 +29,7 @@ const LemmaService = {
       })
       .limit(qty)
       .setParameters({ wordId, lexicalCategory })
-      .orderBy("generate_series(0,1)");
+      .orderBy("RANDOM()");
 
     if (lexicalCategory) {
       qBuilder.andWhere("lemma.lexicalCategory=:lexicalCategory");
