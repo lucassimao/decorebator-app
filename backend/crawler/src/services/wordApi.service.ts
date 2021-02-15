@@ -1,13 +1,13 @@
-import { LanguageCode } from "../types/languageCode";
 import axios, { AxiosRequestConfig } from 'axios';
+import { getConnection, Like } from "typeorm";
 import winston from "winston";
-import defaultLogger from "../logger";
-import { SuccessfulReponse } from "../types/wordApiResponse";
-import { WordDTO } from "../types/word.dto";
-import LemmaService from "./lemma.service";
+import Lemma from "../entities/lemma";
 import Sense from "../entities/sense";
-import { Like, getRepository, getConnection } from "typeorm";
 import Word from "../entities/word";
+import defaultLogger from "../logger";
+import { LanguageCode } from "../types/languageCode";
+import { WordDTO } from "../types/word.dto";
+import { SuccessfulReponse } from "../types/wordApiResponse";
 
 const apiKey = process.env.WORDS_API_KEY;
 if (!apiKey) {
@@ -37,59 +37,66 @@ export default class WordApiService {
     }
 
     async mapResultToLemmas(word: WordDTO, response: SuccessfulReponse): Promise<boolean> {
+
+        return await getConnection().transaction(async entityManager => {
+
+            const lemmaRepository = entityManager.getRepository(Lemma);
+            const {languageCode: language} = word;
+            const provider = 'wordsApi';
+            const tag = `${word.name}(${language}) - ${provider}`;
+            
+            this.logger.debug(`[${tag}] Processing ${response.results.length} result(s)`);
+    
+            for (const result of response.results) {
+                const sense = new Sense()
+                sense.definitions = [result.definition];
+                sense.examples = result.examples;
+                if (result.synonyms) {
+                    this.logger.debug(`[${tag}] Processing ${result.synonyms.length} synonyms`);
+                    sense.synonyms = await Promise.all(result.synonyms.map(async synonym => {
+                        let lemma = await lemmaRepository.findOne({ name: synonym, language: Like(`${language}%`) })
+                        if (!lemma) {
+                            lemma = await lemmaRepository.save({ provider, language, name: synonym, lexicalCategory: 'unknow' })
+                        }
+                        return lemma;
+                    }))
+                }
+                if (result.antonyms) {
+                    this.logger.debug(`[${tag}] Processing ${result.antonyms.length} antonyms`);
+                    sense.antonyms = await Promise.all(result.antonyms.map(async antonym => {
+                        let lemma = await lemmaRepository.findOne({ name: antonym, language: Like(`${language}%`) })
+                        if (!lemma) {
+                            lemma = await lemmaRepository.save({ provider, language, name: antonym, lexicalCategory: 'unknow' })
+                        }
+                        return lemma;
+                    }))
+                }
+                sense.lemma = await lemmaRepository.findOne({ name: word.name, language: Like(`${language}%`), lexicalCategory: result.partOfSpeech })
+                if (!sense.lemma) {
+                    this.logger.debug(`[${tag}] Creating new lemma`);
+                    sense.lemma = await lemmaRepository.save({ name: word.name, language, provider,
+                        lexicalCategory: result.partOfSpeech })
+                } else {
+                    this.logger.debug(`[${tag}] Lemma found`);
+                }
+    
+                if (word.id){
+                    await entityManager
+                    .createQueryBuilder()
+                    .relation(Word, "lemmas")
+                    .of(word.id)
+                    .add(sense.lemma);            
+                }
+    
+                await entityManager.getRepository(Sense).save(sense);
+                this.logger.debug(`[${tag}] Sense saved`);
+            }
+
+            return true
+        })
         
-        const {languageCode: language} = word;
-        const provider = 'wordsApi';
-        const tag = `${word.name}(${language}) - ${provider}`;
-        
-        this.logger.debug(`[${tag}] Processing ${response.results.length} result(s)`);
+     
 
-        for (const result of response.results) {
-            const sense = new Sense()
-            sense.definitions = [result.definition];
-            sense.examples = result.examples;
-            if (result.synonyms) {
-                this.logger.debug(`[${tag}] Processing ${result.synonyms.length} synonyms`);
-                sense.synonyms = await Promise.all(result.synonyms.map(async synonym => {
-                    let lemma = await LemmaService.findOneBy({ name: synonym, language: Like(`${language}%`) })
-                    if (!lemma) {
-                        lemma = await LemmaService.save({ provider, language, name: synonym, lexicalCategory: 'unknow' })
-                    }
-                    return lemma;
-                }))
-            }
-            if (result.antonyms) {
-                this.logger.debug(`[${tag}] Processing ${result.antonyms.length} antonyms`);
-                sense.antonyms = await Promise.all(result.antonyms.map(async antonym => {
-                    let lemma = await LemmaService.findOneBy({ name: antonym, language: Like(`${language}%`) })
-                    if (!lemma) {
-                        lemma = await LemmaService.save({ provider, language, name: antonym, lexicalCategory: 'unknow' })
-                    }
-                    return lemma;
-                }))
-            }
-            sense.lemma = await LemmaService.findOneBy({ name: word.name, language: Like(`${language}%`), lexicalCategory: result.partOfSpeech })
-            if (!sense.lemma) {
-                this.logger.debug(`[${tag}] Creating new lemma`);
-                sense.lemma = await LemmaService.save({ name: word.name, language, provider,
-                    lexicalCategory: result.partOfSpeech })
-            } else {
-                this.logger.debug(`[${tag}] Lemma found`);
-            }
-
-            if (word.id){
-                await getConnection()
-                .createQueryBuilder()
-                .relation(Word, "lemmas")
-                .of(word.id)
-                .add(sense.lemma);            
-            }
-
-            await getRepository(Sense).save(sense);
-            this.logger.debug(`[${tag}] Sense saved`);
-        }
-
-        return true;
     }
 
     async search(word: string, language: LanguageCode): Promise<SuccessfulReponse> {
