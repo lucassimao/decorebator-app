@@ -81,11 +81,17 @@ export default class WordApiService {
                 }
     
                 if (word.id){
-                    await entityManager
-                    .createQueryBuilder()
-                    .relation(Word, "lemmas")
-                    .of(word.id)
-                    .add(sense.lemma);            
+                    try {
+                        await entityManager
+                        .createQueryBuilder()
+                        .relation(Word, "lemmas")
+                        .of(word.id)
+                        .add(sense.lemma);  
+                    } catch (error) {
+                        this.logger.debug('Error while adding ' + sense.lemma + " to " + word);
+                        this.logger.error(error,{sense, word})
+                    }
+          
                 }
     
                 await entityManager.getRepository(Sense).save(sense);
