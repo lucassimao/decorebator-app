@@ -1,4 +1,5 @@
 import Lemma from "../entities/lemma";
+import QuizzType from "../entities/quizzType";
 import {
   Lemma as GraphQLLemma,
   Option as GraphQLOption,
@@ -30,7 +31,8 @@ export const nextQuizz = async (
   const userId = ctx.user.id;
   const result = await QuizzService.nextQuizz(
     userId,
-    parseInt(args.input?.wordlistId ?? "")
+    parseInt(args.input?.wordlistId ?? ""),
+    args.input?.type as string
   );
   const { quizz, options, rightOptionIdx, text, audioFile } = result;
   const { word, sense } = quizz;

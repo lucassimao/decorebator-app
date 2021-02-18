@@ -146,8 +146,26 @@ const QuizzService = {
 
   nextQuizz: async (
     ownerId: number,
-    wordlistId?: number
+    wordlistId?: number,
+    type?: string
   ): Promise<QuizzWithOptions<string | Lemma>> => {
+    if (type) {
+      switch (type) {
+        case QuizzType.Synonym:
+          return QuizzService.nextSynonymQuizz(ownerId, wordlistId);
+        case QuizzType.WordFromMeaning:
+          return QuizzService.nextWordFromMeaningQuizz(ownerId, wordlistId);
+        case QuizzType.WordFromAudio:
+          return QuizzService.nextWordFromAudioQuizz(ownerId, wordlistId);
+        case QuizzType.MeaningFromWord:
+          return QuizzService.nextMeaningFromWordQuizz(ownerId, wordlistId);
+        case QuizzType.FillSentence:
+          return QuizzService.nextFillSentenceQuizz(ownerId, wordlistId);
+        default:
+          throw new Error("unexpected type: " + type);
+      }
+    }
+
     const quizzRepository = getRepository(Quizz);
     const lastQuizz = await quizzRepository.findOne({
       order: { updatedAt: "DESC" },
