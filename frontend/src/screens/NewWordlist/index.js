@@ -1,3 +1,3 @@
 import { NewWordlistScreen } from "./NewWordlist";
 
-export default NewWordlistScreen
+export default NewWordlistScreen;

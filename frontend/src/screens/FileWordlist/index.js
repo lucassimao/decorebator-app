@@ -1,2 +1,2 @@
-import {FileWordlistScreen} from './FileWordlist'
-export default FileWordlistScreen
+import { FileWordlistScreen } from "./FileWordlist";
+export default FileWordlistScreen;

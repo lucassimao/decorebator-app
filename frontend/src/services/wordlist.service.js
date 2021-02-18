@@ -1,12 +1,12 @@
 import conf from "../conf";
 
 const DEFAULT_HEADERS = {
-  "content-type": "application/json"
+  "content-type": "application/json",
 };
 
 // TODO remove this when signup and signin become available
 // if (process.env.NODE_ENV === "development") {
-  DEFAULT_HEADERS.authorization = `Bearer ${process.env.REACT_APP_AUTH_TOKEN}`;
+DEFAULT_HEADERS.authorization = `Bearer ${process.env.REACT_APP_AUTH_TOKEN}`;
 // }
 
 /**
@@ -14,16 +14,40 @@ const DEFAULT_HEADERS = {
  * @param {wordlist} The wordlist to be created
  * @returns {Promise} A promise which resolves to the link of the new wordlist
  */
-const save = async wordlist => {
-  const { url, avatarColor, base64EncodedFile, description, isPrivate = true, language, name, words, onlyNewWords = false, minWordLength = 1 } = wordlist
+const save = async (wordlist) => {
+  const {
+    url,
+    avatarColor,
+    base64EncodedFile,
+    description,
+    isPrivate = true,
+    language,
+    name,
+    words,
+    onlyNewWords = false,
+    minWordLength = 1,
+  } = wordlist;
   if (base64EncodedFile && words) {
-    throw new Error("Simultaneuosly sending a file and a list of words is wrong")
+    throw new Error(
+      "Simultaneuosly sending a file and a list of words is wrong"
+    );
   }
 
   const response = await fetch(conf.api.wordlists, {
     method: "POST",
-    body: JSON.stringify({ url, avatarColor, base64EncodedFile, description, isPrivate, language, name, words, onlyNewWords, minWordLength }),
-    headers: DEFAULT_HEADERS
+    body: JSON.stringify({
+      url,
+      avatarColor,
+      base64EncodedFile,
+      description,
+      isPrivate,
+      language,
+      name,
+      words,
+      onlyNewWords,
+      minWordLength,
+    }),
+    headers: DEFAULT_HEADERS,
   });
   if (!response.ok) {
     throw new Error("Couldn't create wordlist: " + response.statusText);
@@ -40,7 +64,7 @@ const fetchUserWordlists = async (filter = undefined) => {
     url += `?filter=${filter}`;
   }
   const response = await fetch(url, {
-    headers: DEFAULT_HEADERS
+    headers: DEFAULT_HEADERS,
   });
   const { wordlists } = await response.json();
   return wordlists;
@@ -55,7 +79,7 @@ const fetchPublicWordlists = async (filter = undefined) => {
     url += `?filter=${filter}`;
   }
   const response = await fetch(url, {
-    headers: DEFAULT_HEADERS
+    headers: DEFAULT_HEADERS,
   });
   const { wordlists } = await response.json();
   return wordlists;
@@ -66,9 +90,9 @@ const fetchPublicWordlists = async (filter = undefined) => {
  * @param {String} id The id of wordlist
  * @returns {Promise} A promise which resolves to the wordlist
  */
-const get = async id => {
+const get = async (id) => {
   const response = await fetch(`${conf.api.wordlists}/${id}`, {
-    headers: DEFAULT_HEADERS
+    headers: DEFAULT_HEADERS,
   });
   const wordlist = await response.json();
   return wordlist;
@@ -84,26 +108,32 @@ const addWord = async (wordlistId, name) => {
   const response = await fetch(`${conf.api.wordlists}/${wordlistId}/words`, {
     headers: DEFAULT_HEADERS,
     method: "POST",
-    body: JSON.stringify({ name })
+    body: JSON.stringify({ name }),
   });
   return response.headers.get("link");
 };
 
 const deleteWord = async (wordlistId, wordId) => {
-  const response = await fetch(`${conf.api.wordlists}/${wordlistId}/words/${wordId}`, {
-    headers: DEFAULT_HEADERS,
-    method: "DELETE"
-  });
+  const response = await fetch(
+    `${conf.api.wordlists}/${wordlistId}/words/${wordId}`,
+    {
+      headers: DEFAULT_HEADERS,
+      method: "DELETE",
+    }
+  );
 
   return response.ok;
 };
 
 const updateWord = async (wordlistId, wordId, name) => {
-  const response = await fetch(`${conf.api.wordlists}/${wordlistId}/words/${wordId}`, {
-    headers: DEFAULT_HEADERS,
-    method: "PATCH",
-    body: JSON.stringify({ name })
-  });
+  const response = await fetch(
+    `${conf.api.wordlists}/${wordlistId}/words/${wordId}`,
+    {
+      headers: DEFAULT_HEADERS,
+      method: "PATCH",
+      body: JSON.stringify({ name }),
+    }
+  );
 
   return response.ok;
 };
@@ -112,24 +142,26 @@ const updateWord = async (wordlistId, wordId, name) => {
  *
  * @param {String} wordlistId Id of the wordlist to be excluded
  */
-const deleteWordlist = async wordlistId => {
+const deleteWordlist = async (wordlistId) => {
   const response = await fetch(`${conf.api.wordlists}/${wordlistId}`, {
     headers: DEFAULT_HEADERS,
-    method: "DELETE"
+    method: "DELETE",
   });
 
   return response.ok;
 };
 
 const getWords = async (wordlistId, skip, stopIdx) => {
-  const response = await fetch(`${conf.api.wordlists}/${wordlistId}/words?skip=${skip}&limit=${stopIdx}`, {
-    headers: DEFAULT_HEADERS
-  });
+  const response = await fetch(
+    `${conf.api.wordlists}/${wordlistId}/words?skip=${skip}&limit=${stopIdx}`,
+    {
+      headers: DEFAULT_HEADERS,
+    }
+  );
 
   const words = await response.json();
   return words;
 };
-
 
 const api = {
   save,

@@ -13,7 +13,9 @@
  */
 async function getAvailableSubtitleLanguages(url) {
   const videoId = _extractVideoIdFromUrl(url);
-  const response = await fetch(`http://video.google.com/timedtext?type=list&v=${videoId}`);
+  const response = await fetch(
+    `http://video.google.com/timedtext?type=list&v=${videoId}`
+  );
   if (!response.ok) {
     throw new Error(response.statusText);
   }
@@ -53,10 +55,18 @@ async function getAvailableSubtitleLanguages(url) {
 async function getVideoDetails(url) {
   const videoId = _extractVideoIdFromUrl(url);
   const fullUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${process.env.REACT_APP_YOUTUBE_API_KEY}`;
-  const response = await fetch(fullUrl, { headers: { Accept: "application/json" } });
+  const response = await fetch(fullUrl, {
+    headers: { Accept: "application/json" },
+  });
   const jsonResponse = await response.json(); // TODO handle problem here
   const item = jsonResponse.items[0].snippet;
-  const { title, description, thumbnails, defaultAudioLanguage, channelTitle } = item;
+  const {
+    title,
+    description,
+    thumbnails,
+    defaultAudioLanguage,
+    channelTitle,
+  } = item;
   return { title, description, thumbnails, defaultAudioLanguage, channelTitle };
 }
 
@@ -65,7 +75,6 @@ async function getVideoDetails(url) {
  * @returns {Set<String>} A set of words from the subtitle
  */
 async function getWordsFromVideoSubtitle(downloadUrl, minLength) {
-
   const response = await fetch(downloadUrl);
   if (!response.ok) {
     throw new Error(response.statusText);
@@ -80,9 +89,10 @@ async function getWordsFromVideoSubtitle(downloadUrl, minLength) {
     const node = elements.item(i);
     let line = node.textContent;
     if (line && line.trim()) {
-      line = line.replace(/<font[^>]*>/ig, "").replace(/<\/font>/ig, "")
-      line.split(/\s+/) // spliting by white space chars
-        .forEach(word => words.add(word));
+      line = line.replace(/<font[^>]*>/gi, "").replace(/<\/font>/gi, "");
+      line
+        .split(/\s+/) // spliting by white space chars
+        .forEach((word) => words.add(word));
     }
   }
   return words;
@@ -114,10 +124,17 @@ function _getXmlDocumentFromString(xmlString) {
  */
 function _extractVideoIdFromUrl(url) {
   const youtubeUrl = new URL(url);
-  const videoId = (youtubeUrl.host === 'youtu.be') ? youtubeUrl.pathname.slice(1) : youtubeUrl.searchParams.get("v");
+  const videoId =
+    youtubeUrl.host === "youtu.be"
+      ? youtubeUrl.pathname.slice(1)
+      : youtubeUrl.searchParams.get("v");
   return videoId;
 }
 
-const api = { getWordsFromVideoSubtitle, getAvailableSubtitleLanguages, getVideoDetails };
+const api = {
+  getWordsFromVideoSubtitle,
+  getAvailableSubtitleLanguages,
+  getVideoDetails,
+};
 
 export default api;

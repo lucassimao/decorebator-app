@@ -1,13 +1,13 @@
-import Snackbar from '@material-ui/core/Snackbar';
-import PropTypes from 'proptypes';
+import Snackbar from "@material-ui/core/Snackbar";
+import PropTypes from "proptypes";
 import React, { useState } from "react";
-import { connect } from 'react-redux';
+import { connect } from "react-redux";
 import { CLEAR_SNACKBAR } from "../../redux/deprecated/snackbar";
-import SnackbarContentWrapper from './SnackBarContentWrapper';
+import SnackbarContentWrapper from "./SnackBarContentWrapper";
 
 function AppSnackbar(props) {
-  const { message, variant, clearSnackbar } = props
-  const [anchorOrigin,] = useState({ vertical: 'bottom', horizontal: 'center' });
+  const { message, variant, clearSnackbar } = props;
+  const [anchorOrigin] = useState({ vertical: "bottom", horizontal: "center" });
 
   return (
     <Snackbar
@@ -23,20 +23,23 @@ function AppSnackbar(props) {
       />
     </Snackbar>
   );
-
 }
 
-
 const mapDispatchToProps = (dispatch) => ({
-  clearSnackbar: () => dispatch({ type: CLEAR_SNACKBAR })
-})
+  clearSnackbar: () => dispatch({ type: CLEAR_SNACKBAR }),
+});
 
 AppSnackbar.propTypes = {
   variant: PropTypes.string,
   message: PropTypes.string,
   clearSnackbar: PropTypes.func,
-}
+};
 
-export const SuccessSnackbar = connect(() => ({ variant: 'success' }), mapDispatchToProps)(AppSnackbar)
-export const ErrorSnackbar = connect(() => ({ variant: 'error' }), mapDispatchToProps)(AppSnackbar)
-
+export const SuccessSnackbar = connect(
+  () => ({ variant: "success" }),
+  mapDispatchToProps
+)(AppSnackbar);
+export const ErrorSnackbar = connect(
+  () => ({ variant: "error" }),
+  mapDispatchToProps
+)(AppSnackbar);

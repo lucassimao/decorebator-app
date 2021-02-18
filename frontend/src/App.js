@@ -7,22 +7,32 @@ import { ErrorSnackbar, SuccessSnackbar } from "./components/ui/AppSnackbar";
 import ProgressModal from "./components/ui/ProgressModal";
 import HomeScreen from "./screens/Home";
 
-const identity = (arg) => arg
-const EmptyWordlistScreen = lazy(() => import("./screens/EmptyWordlist").then(identity));
-const YoutubeWordlistScreen = lazy(() => import("./screens/YoutubeWordlist").then(identity));
-const FileWordlistScreen = lazy(() => import("./screens/FileWordlist").then(identity));
-const EditWordlistScreen = lazy(() => import("./screens/EditWordlist").then(identity));
-const NewWordlistScreen = lazy(() => import("./screens/NewWordlist").then(identity));
+const identity = (arg) => arg;
+const EmptyWordlistScreen = lazy(() =>
+  import("./screens/EmptyWordlist").then(identity)
+);
+const YoutubeWordlistScreen = lazy(() =>
+  import("./screens/YoutubeWordlist").then(identity)
+);
+const FileWordlistScreen = lazy(() =>
+  import("./screens/FileWordlist").then(identity)
+);
+const EditWordlistScreen = lazy(() =>
+  import("./screens/EditWordlist").then(identity)
+);
+const NewWordlistScreen = lazy(() =>
+  import("./screens/NewWordlist").then(identity)
+);
 const QuizzScreen = lazy(() => import("./screens/Quizz").then(identity));
-const UrlWordlistScreen = lazy(() => import("./screens/UrlWordlist").then(identity));
+const UrlWordlistScreen = lazy(() =>
+  import("./screens/UrlWordlist").then(identity)
+);
 
-const useStyles = makeStyles(theme => ({
-
+const useStyles = makeStyles((theme) => ({
   wrapper: {
     padding: theme.spacing(2, 0),
-    height: '100vh',
-  }
-
+    height: "100vh",
+  },
 }));
 
 const spinner = <ProgressModal title="Loading ..." />;
@@ -53,7 +63,7 @@ function App(props) {
             </Route>
             <Route path="/wordlists/:id/quizzes">
               <QuizzScreen />
-            </Route> 
+            </Route>
             <Route path="/wordlists/:id">
               <EditWordlistScreen />
             </Route>
@@ -71,14 +81,21 @@ function App(props) {
   );
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   snackbar: state.snackbar,
-  progressModal: state.progressModal
+  progressModal: state.progressModal,
 });
 
 App.propTypes = {
-  snackbar: PropTypes.shape({ success: PropTypes.bool, error: PropTypes.bool, message: PropTypes.string }),
-  progressModal: PropTypes.shape({ title: PropTypes.string, message: PropTypes.string })
-}
+  snackbar: PropTypes.shape({
+    success: PropTypes.bool,
+    error: PropTypes.bool,
+    message: PropTypes.string,
+  }),
+  progressModal: PropTypes.shape({
+    title: PropTypes.string,
+    message: PropTypes.string,
+  }),
+};
 
 export default connect(mapStateToProps, null)(App);

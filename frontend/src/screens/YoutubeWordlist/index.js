@@ -1,2 +1,2 @@
-import { YoutubeWordlistScreen } from './YoutubeWordlist';
-export default YoutubeWordlistScreen
+import { YoutubeWordlistScreen } from "./YoutubeWordlist";
+export default YoutubeWordlistScreen;

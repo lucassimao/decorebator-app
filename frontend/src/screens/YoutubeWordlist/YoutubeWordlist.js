@@ -7,26 +7,32 @@ import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import ClearIcon from "@material-ui/icons/Clear";
-import PropTypes from 'proptypes';
+import PropTypes from "proptypes";
 import React, { useReducer, useRef } from "react";
 import { connect } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
-import { HIDE_PROGRESS_MODAL, SHOW_PROGRESS_MODAL } from "../../redux/deprecated/progressModal";
-import { SET_ERROR_SNACKBAR, SET_SUCCESS_SNACKBAR } from "../../redux/deprecated/snackbar";
+import {
+  HIDE_PROGRESS_MODAL,
+  SHOW_PROGRESS_MODAL,
+} from "../../redux/deprecated/progressModal";
+import {
+  SET_ERROR_SNACKBAR,
+  SET_SUCCESS_SNACKBAR,
+} from "../../redux/deprecated/snackbar";
 import wordlistService from "../../services/wordlist.service";
 import youtubeService from "../../services/youtube.service";
-import Form from './components/Form';
-import { INITIAL_STATE, reducer } from './reducer';
+import Form from "./components/Form";
+import { INITIAL_STATE, reducer } from "./reducer";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   container: {
     maxHeight: "100%",
     display: "flex",
     flexDirection: "column",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
   },
   header: {
-    position: "relative"
+    position: "relative",
   },
   form: {
     marginTop: theme.spacing(2),
@@ -36,20 +42,20 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(3, 2),
     boxShadow: "0 7px 14px rgba(0,0,0,0.25)",
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
   },
   mainButton: {
-    marginTop: theme.spacing(5)
+    marginTop: theme.spacing(5),
   },
   urlInputEndAdornment: {
-    paddingRight: 0
-  }
+    paddingRight: 0,
+  },
 }));
 
 const MenuLink = React.forwardRef((props, ref) => (
   <Link to="/wordlists/menu" innerRef={ref} {...props} />
 ));
-MenuLink.displayName = 'MenuLink'
+MenuLink.displayName = "MenuLink";
 
 const URL_REGEXP = new RegExp("^((https|http)://(www.)?)?youtu");
 
@@ -72,29 +78,34 @@ function Screen(props) {
     if (showForm) {
       return createNewWordlist();
     } else {
-
       if (URL_REGEXP.test(url)) {
-        dispatch({ type: 'SHOW_FORM' })
+        dispatch({ type: "SHOW_FORM" });
       } else {
-        onError('Use a valid Youtube URL');
+        onError("Use a valid Youtube URL");
         clearVideoUrl();
       }
     }
-  }
+  };
 
   const createNewWordlist = async () => {
     try {
-
-      const { url, subtitle: {languageCode, downloadUrl }, minWordLength } = state;
+      const {
+        url,
+        subtitle: { languageCode, downloadUrl },
+        minWordLength,
+      } = state;
 
       showProgressModal("Wait ...", "Obtaining video details ...");
       const { title, description } = await youtubeService.getVideoDetails(url);
 
       showProgressModal("Wait ...", "Downloading subtitle ...");
-      const set = await youtubeService.getWordsFromVideoSubtitle(downloadUrl, minWordLength);
+      const set = await youtubeService.getWordsFromVideoSubtitle(
+        downloadUrl,
+        minWordLength
+      );
       const words = Array.from(set)
         .sort()
-        .map(name => ({ name }));
+        .map((name) => ({ name }));
 
       showProgressModal("Wait ...", "Creating your wordlist ...");
       const wordlist = {
@@ -105,7 +116,7 @@ function Screen(props) {
         language: languageCode,
         isPrivate: true,
         minWordLength,
-        onlyNewWords: state.onlyNewWords
+        onlyNewWords: state.onlyNewWords,
       };
       const resourceUri = await wordlistService.save(wordlist);
 
@@ -120,9 +131,8 @@ function Screen(props) {
     }
   };
 
-
   const clearVideoUrl = () => {
-    dispatch({ type: 'RESET' })
+    dispatch({ type: "RESET" });
     urlTextFieldRef.current.focus();
   };
 
@@ -148,7 +158,6 @@ function Screen(props) {
       </Typography>
 
       <div className={classes.form}>
-
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <TextField
@@ -157,22 +166,24 @@ function Screen(props) {
               autoFocus
               name="url"
               value={state.url}
-              onChange={(evt) => dispatch({ type: 'SET_URL', url: evt.target.value })}
+              onChange={(evt) =>
+                dispatch({ type: "SET_URL", url: evt.target.value })
+              }
               InputProps={
                 state.url
                   ? {
-                    classes: { adornedEnd: classes.urlInputEndAdornment },
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="clear youtube video's url"
-                          onClick={clearVideoUrl}
-                        >
-                          <ClearIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    )
-                  }
+                      classes: { adornedEnd: classes.urlInputEndAdornment },
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="clear youtube video's url"
+                            onClick={clearVideoUrl}
+                          >
+                            <ClearIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }
                   : null
               }
               inputRef={urlTextFieldRef}
@@ -191,26 +202,26 @@ function Screen(props) {
           variant="extended"
           color="primary"
         >
-          {state.showForm ? 'Save' : 'Search subtitles'}
+          {state.showForm ? "Save" : "Search subtitles"}
         </Fab>
       </div>
     </Container>
   );
 }
 
-const mapDispatchToProps = dispatch => ({
-  onSuccess: message => dispatch({ type: SET_SUCCESS_SNACKBAR, message }),
-  onError: message => dispatch({ type: SET_ERROR_SNACKBAR, message }),
+const mapDispatchToProps = (dispatch) => ({
+  onSuccess: (message) => dispatch({ type: SET_SUCCESS_SNACKBAR, message }),
+  onError: (message) => dispatch({ type: SET_ERROR_SNACKBAR, message }),
   showProgressModal: (title, description) =>
     dispatch({ type: SHOW_PROGRESS_MODAL, description, title }),
-  hideProgressModal: () => dispatch({ type: HIDE_PROGRESS_MODAL })
+  hideProgressModal: () => dispatch({ type: HIDE_PROGRESS_MODAL }),
 });
 
 Screen.propTypes = {
   onError: PropTypes.func,
   showProgressModal: PropTypes.func,
   hideProgressModal: PropTypes.func,
-  onSuccess: PropTypes.func
-}
+  onSuccess: PropTypes.func,
+};
 
 export const YoutubeWordlistScreen = connect(null, mapDispatchToProps)(Screen);

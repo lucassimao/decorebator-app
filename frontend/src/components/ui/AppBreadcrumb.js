@@ -3,39 +3,38 @@ import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 import Typography from "@material-ui/core/Typography";
 import HomeIcon from "@material-ui/icons/Home";
 import React from "react";
-import ListAltRoundedIcon from '@material-ui/icons/ListAltRounded';
+import ListAltRoundedIcon from "@material-ui/icons/ListAltRounded";
 import { Link, useRouteMatch } from "react-router-dom";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   breadcrumbs: {
     backgroundColor: theme.palette.grey[200],
-    padding: theme.spacing(1)
+    padding: theme.spacing(1),
   },
   link: {
     display: "flex",
-    textDecoration: "none"
+    textDecoration: "none",
   },
   navegableLink: {
-    color: "inherit"
+    color: "inherit",
   },
   icon: {
     marginRight: theme.spacing(0.5),
     width: 20,
-    height: 20
-  }
+    height: 20,
+  },
 }));
 
 // breadcrumbs by route
 const items = {
   "/wordlists/new": [{ icon: ListAltRoundedIcon, text: "New wordlist" }],
-  "/wordlists/:id": [{ icon: ListAltRoundedIcon, text: "Wordlist" }]
+  "/wordlists/:id": [{ icon: ListAltRoundedIcon, text: "Wordlist" }],
 };
 
 export default function AppBreadcrumb(props) {
   const classes = useStyles();
   const routeMatch = useRouteMatch(Object.keys(items));
   const breadcrumbs = routeMatch ? items[routeMatch.path] : [];
-
 
   return (
     <Breadcrumbs className={classes.breadcrumbs} aria-label="breadcrumb">

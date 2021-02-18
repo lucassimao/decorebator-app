@@ -7,22 +7,20 @@ import AccountBoxRoundedIcon from "@material-ui/icons/AccountBoxRounded";
 import React from "react";
 import { useRouteMatch } from "react-router-dom";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {},
   title: {
     flexGrow: 1,
     textAlign: "center",
     "& span": {
-      fontSize: theme.typography.caption.fontSize
-    }
+      fontSize: theme.typography.caption.fontSize,
+    },
   },
   buttonWrapper: {
     position: "absolute",
-    right: theme.spacing(1)
+    right: theme.spacing(1),
   },
 }));
-
-
 
 export default function TopBar() {
   const classes = useStyles();

@@ -1,3 +1,3 @@
-import {EditWordlistScreen} from './EditWordlist'
+import { EditWordlistScreen } from "./EditWordlist";
 
-export default EditWordlistScreen
+export default EditWordlistScreen;

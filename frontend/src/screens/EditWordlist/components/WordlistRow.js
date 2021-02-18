@@ -6,10 +6,10 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import PropTypes from "prop-types";
 import React, { useEffect, useRef, useState } from "react";
 
-const useSyles = makeStyles(theme => ({
+const useSyles = makeStyles((theme) => ({
   icon: {
-    padding: theme.spacing(0.5)
-  }
+    padding: theme.spacing(0.5),
+  },
 }));
 
 const InputHOC = ({ defaultValue, updateWord, wordId }) => {
@@ -28,12 +28,19 @@ const InputHOC = ({ defaultValue, updateWord, wordId }) => {
     // eslint-disable-next-line
   }, []);
 
-  const handleOnChange = evt => {
+  const handleOnChange = (evt) => {
     setNewName(evt.target.value);
     ref.current = evt.target.value;
   };
 
-  return <InputBase autoComplete="off" onBlur={handleOnChange} onChange={handleOnChange} value={newName} />;
+  return (
+    <InputBase
+      autoComplete="off"
+      onBlur={handleOnChange}
+      onChange={handleOnChange}
+      value={newName}
+    />
+  );
 };
 
 const WordlistRow = ({ index, style, deleteWord, updateWord, word }) => {
@@ -42,9 +49,17 @@ const WordlistRow = ({ index, style, deleteWord, updateWord, word }) => {
     return (
       <ListItem style={style}>
         <div>
-          <InputHOC updateWord={updateWord} wordId={word.id} defaultValue={word.name} />
+          <InputHOC
+            updateWord={updateWord}
+            wordId={word.id}
+            defaultValue={word.name}
+          />
           <ListItemSecondaryAction>
-            <IconButton onClick={() => deleteWord(word.id)} edge="end" className={classes.icon}>
+            <IconButton
+              onClick={() => deleteWord(word.id)}
+              edge="end"
+              className={classes.icon}
+            >
               <DeleteIcon />
             </IconButton>
           </ListItemSecondaryAction>
@@ -64,11 +79,13 @@ WordlistRow.propTypes = {
   index: PropTypes.number.isRequired,
   style: PropTypes.object,
   deleteWord: PropTypes.func.isRequired,
-  updateWord: PropTypes.func
+  updateWord: PropTypes.func,
 };
 
 InputHOC.propTypes = {
-  defaultValue: PropTypes.string, updateWord: PropTypes.func, wordId: PropTypes.number
+  defaultValue: PropTypes.string,
+  updateWord: PropTypes.func,
+  wordId: PropTypes.number,
 };
 
 export default WordlistRow;

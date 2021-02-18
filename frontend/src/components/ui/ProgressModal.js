@@ -3,9 +3,9 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import Modal from "@material-ui/core/Modal";
 import { makeStyles } from "@material-ui/core/styles";
 import React from "react";
-import PropTypes from 'proptypes'
+import PropTypes from "proptypes";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   paper: {
     position: "absolute",
     width: "fit-content",
@@ -14,16 +14,16 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(0, 2, 3, 2),
     top: "50%",
     left: "50%",
-    transform: "translate(-50%, -50%)"
+    transform: "translate(-50%, -50%)",
   },
   description: {
-    marginLeft: theme.spacing(2)
+    marginLeft: theme.spacing(2),
   },
   modalBody: {
     display: "flex",
     justifyContent: "center",
-    alignItems: "center"
-  }
+    alignItems: "center",
+  },
 }));
 
 export default function ProgressModal(props) {
@@ -47,7 +47,11 @@ export default function ProgressModal(props) {
         <div className={classes.modalBody}>
           <CircularProgress />
           {description && (
-            <Typography className={classes.description} id="modal-description" variant="subtitle1">
+            <Typography
+              className={classes.description}
+              id="modal-description"
+              variant="subtitle1"
+            >
               {description}
             </Typography>
           )}
@@ -59,5 +63,5 @@ export default function ProgressModal(props) {
 
 ProgressModal.propTypes = {
   title: PropTypes.string,
-    description: PropTypes.string
+  description: PropTypes.string,
 };

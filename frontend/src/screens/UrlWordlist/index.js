@@ -1,2 +1,2 @@
-import { UrlWordlistScreen } from './UrlWordlist';
-export default UrlWordlistScreen
+import { UrlWordlistScreen } from "./UrlWordlist";
+export default UrlWordlistScreen;

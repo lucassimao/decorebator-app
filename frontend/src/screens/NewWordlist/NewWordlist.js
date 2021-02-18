@@ -13,43 +13,43 @@ import YoutubeImage from "../../img/youtube.jpg";
 import TextFileFormatsImage from "../../img/textfileFormats.png";
 import UrlInternetImage from "../../img/urlinternet.jpg";
 
-
-
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   header: {
     position: "relative",
   },
   main: {
     display: "flex",
-    flexDirection: 'column',
-    justifyContent: 'space-around'
+    flexDirection: "column",
+    justifyContent: "space-around",
   },
   card: {
-    margin: theme.spacing(1, 0)
-  }
+    margin: theme.spacing(1, 0),
+  },
 }));
-
-
 
 export function NewWordlistScreen() {
   const classes = useStyles();
   return (
     <Container>
-
       <header className={classes.header}>
-        <IconButton component={Link} to='/' size="medium" color="primary"
-          style={{ position: "absolute", top: -5, left: 0, fontWeight: "bold" }}>
+        <IconButton
+          component={Link}
+          to="/"
+          size="medium"
+          color="primary"
+          style={{ position: "absolute", top: -5, left: 0, fontWeight: "bold" }}
+        >
           <ArrowBackIcon />
         </IconButton>
 
         <Typography variant="h5" style={{ fontWeight: "bold" }} align="center">
           Choose a type
-      </Typography>
+        </Typography>
       </header>
 
       <main className={classes.main}>
         <Card raised={true} className={classes.card}>
-          <CardActionArea component={Link} to='/wordlists/new'>
+          <CardActionArea component={Link} to="/wordlists/new">
             <CardMedia
               component="img"
               alt="Create empty wordlist"
@@ -70,7 +70,7 @@ export function NewWordlistScreen() {
         </Card>
 
         <Card raised={true} className={classes.card}>
-          <CardActionArea component={Link} to='/wordlists/new-from-url'>
+          <CardActionArea component={Link} to="/wordlists/new-from-url">
             <CardMedia
               component="img"
               alt="Create wordlist from an URL"
@@ -88,10 +88,10 @@ export function NewWordlistScreen() {
               </Typography>
             </CardContent>
           </CardActionArea>
-        </Card>        
+        </Card>
 
         <Card raised={true} className={classes.card}>
-          <CardActionArea  component={Link} to='/wordlists/new-from-youtube'>
+          <CardActionArea component={Link} to="/wordlists/new-from-youtube">
             <CardMedia
               component="img"
               alt="Create wordlist from youtube"
@@ -112,7 +112,7 @@ export function NewWordlistScreen() {
         </Card>
 
         <Card raised className={classes.card}>
-          <CardActionArea component={Link} to='/wordlists/new-from-file'>
+          <CardActionArea component={Link} to="/wordlists/new-from-file">
             <CardMedia
               component="img"
               alt="Create wordlist from a file"
@@ -126,15 +126,13 @@ export function NewWordlistScreen() {
                 File
               </Typography>
               <Typography variant="body2" color="textSecondary" component="p">
-                Create a new wordlist from any of the following file formats: 
+                Create a new wordlist from any of the following file formats:
                 txt, html, csv, rtf, doc, docx, ppt, pptx, pdf or epub
               </Typography>
             </CardContent>
           </CardActionArea>
         </Card>
-
       </main>
     </Container>
   );
 }
-

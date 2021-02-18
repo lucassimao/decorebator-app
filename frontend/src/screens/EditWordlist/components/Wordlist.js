@@ -1,19 +1,22 @@
 import { makeStyles } from "@material-ui/core";
-import PropTypes from 'proptypes';
+import PropTypes from "proptypes";
 import React, { useRef, useState } from "react";
 import { connect } from "react-redux";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList } from "react-window";
 import InfiniteLoader from "react-window-infinite-loader";
-import { HIDE_PROGRESS_MODAL, SHOW_PROGRESS_MODAL } from "../../../redux/deprecated/progressModal";
+import {
+  HIDE_PROGRESS_MODAL,
+  SHOW_PROGRESS_MODAL,
+} from "../../../redux/deprecated/progressModal";
 import { SET_ERROR_SNACKBAR } from "../../../redux/deprecated/snackbar";
 import service from "../../../services/wordlist.service";
 import WordlistRow from "./WordlistRow";
 
-const useSyles = makeStyles(theme => ({
+const useSyles = makeStyles((theme) => ({
   list: {
-    backgroundColor: "#fff"
-  }
+    backgroundColor: "#fff",
+  },
 }));
 
 function Component({
@@ -22,13 +25,13 @@ function Component({
   showProgressModal,
   hideProgressModal,
   onWordExcluded,
-  wordsCount = 0
+  wordsCount = 0,
 }) {
   const classes = useSyles();
   const rootElementRef = useRef();
   let [words, setWords] = useState([]);
 
-  const isItemLoaded = idx => Boolean(words[idx]);
+  const isItemLoaded = (idx) => Boolean(words[idx]);
 
   const loadMoreItems = async (startIndex, stopIndex) => {
     const quantity = stopIndex - startIndex + 1;
@@ -38,12 +41,12 @@ function Component({
     setWords(Array.from(words));
   };
 
-  const deleteWord = async wordId => {
+  const deleteWord = async (wordId) => {
     showProgressModal("Wait", "Deleting word ...");
     await service.deleteWord(wordlistId, wordId);
 
     if (rootElementRef.current) {
-      setWords(words.filter(w => w.id !== wordId));
+      setWords(words.filter((w) => w.id !== wordId));
       hideProgressModal();
     }
 
@@ -56,8 +59,10 @@ function Component({
     try {
       await service.updateWord(wordlistId, wordId, newName);
       if (rootElementRef.current) {
-        setWords(currentWords =>
-          currentWords.map(w => (w.id === wordId ? { id: wordId, name: newName } : w))
+        setWords((currentWords) =>
+          currentWords.map((w) =>
+            w.id === wordId ? { id: wordId, name: newName } : w
+          )
         );
       }
     } catch (error) {
@@ -69,7 +74,11 @@ function Component({
   return (
     <AutoSizer ref={rootElementRef}>
       {({ height, width }) => (
-        <InfiniteLoader isItemLoaded={isItemLoaded} itemCount={wordsCount} loadMoreItems={loadMoreItems}>
+        <InfiniteLoader
+          isItemLoaded={isItemLoaded}
+          itemCount={wordsCount}
+          loadMoreItems={loadMoreItems}
+        >
           {({ onItemsRendered, ref }) => (
             <FixedSizeList
               className={classes.list}
@@ -98,10 +107,11 @@ function Component({
   );
 }
 
-const mapDispatchToProps = dispatch => ({
-  showProgressModal: (title, description) => dispatch({ type: SHOW_PROGRESS_MODAL, description, title }),
+const mapDispatchToProps = (dispatch) => ({
+  showProgressModal: (title, description) =>
+    dispatch({ type: SHOW_PROGRESS_MODAL, description, title }),
   hideProgressModal: () => dispatch({ type: HIDE_PROGRESS_MODAL }),
-  onError: message => dispatch({ type: SET_ERROR_SNACKBAR, message })
+  onError: (message) => dispatch({ type: SET_ERROR_SNACKBAR, message }),
 });
 
 Component.propTypes = {
@@ -111,9 +121,8 @@ Component.propTypes = {
   onSuccess: PropTypes.func,
   onWordExcluded: PropTypes.func,
   wordsCount: PropTypes.number,
-  wordlistId : PropTypes.number
-}
-
+  wordlistId: PropTypes.number,
+};
 
 const Wordlist = connect(null, mapDispatchToProps)(Component);
 export default Wordlist;

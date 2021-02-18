@@ -1,3 +1,3 @@
-import {EmptyWordlistScreen} from './EmptyWordlist'
+import { EmptyWordlistScreen } from "./EmptyWordlist";
 
-export default EmptyWordlistScreen
+export default EmptyWordlistScreen;

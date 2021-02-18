@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 export const SAVE_QUIZZ_RESULT = gql`
   mutation SaveQuizzResult($quizzId: ID!, $success: Boolean!) {
@@ -14,19 +14,19 @@ export const NEXT_QUIZZ_QUERY = gql`
       text
       rightOptionIdx
       audioFile
-      options{
-      	... on Lemma{
+      options {
+        ... on Lemma {
           name
         }
-        ... on Sentence{
+        ... on Sentence {
           text
         }
       }
-      word{
+      word {
         name
         lexicalCategory
         id
       }
-    }    
+    }
   }
 `;
