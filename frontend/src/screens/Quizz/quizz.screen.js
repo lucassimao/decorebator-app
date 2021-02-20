@@ -31,7 +31,7 @@ export const QuizzScreen = () => {
 
   const [saveQuizzResult] = useMutation(SAVE_QUIZZ_RESULT);
 
-  const [fetchNextQuery, { called, loading, data }] = useLazyQuery(
+  const [fetchNextQuery, { called, loading, data,error }] = useLazyQuery(
     NEXT_QUIZZ_QUERY,
     {
       fetchPolicy: "network-only",
@@ -130,11 +130,14 @@ export const QuizzScreen = () => {
         <Card raised={true} className={classes.card}>
           <CardActionArea>
             <CardContent>
-              {!data?.nextQuizz ? (
+
+              {error && (
                 <Typography gutterBottom variant="h6">
-                  Still processing this wordlist, try another one please
+                  {error.message}
                 </Typography>
-              ) : (
+              )}
+
+                {data && (
                 <>
                   <Typography gutterBottom variant="h6">
                     {title}

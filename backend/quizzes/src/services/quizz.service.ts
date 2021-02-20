@@ -7,6 +7,7 @@ import LemmaService from "./lemma.service";
 import SenseService from "./sense.service";
 import WordService from "./word.service";
 import stringSimilarity from "string-similarity";
+import logger from "../logger";
 
 const OPTIONS_LENGTH = 4;
 interface QuizzWithOptions<T> {
@@ -43,37 +44,35 @@ export default class QuizzService {
     let quizz = null;
     let sense = null;
 
-    if (!word) {
-      quizz = await QuizzService.getLeastRecentlyTried(
-        ownerId,
-        quizzType,
-        wordlistId
-      );
-      word = quizz?.word;
-      sense = quizz?.sense;
-    } else {
+    if (word?.id) {
       if (!word?.lemmas?.length) throw new Error("no lemmas!");
       const lemma = word?.lemmas[0];
 
       if (!lemma?.senses?.length) throw new Error("no senses!");
       sense = lemma.senses[0];
-    }
 
-    if (quizz) {
-      await QuizzService.refreshUpdatedAt(Number(quizz.id));
-    } else {
-      if (!word?.id) {
-        throw new Error("invalid word");
-      }
       if (!sense?.id) {
         throw new Error("invalid sense");
       }
+
       quizz = await QuizzService.registerNew(
         word.id,
         ownerId,
         quizzType,
         sense.id
       );
+    } else {
+      quizz = await QuizzService.getLeastRecentlyTried(
+        ownerId,
+        quizzType,
+        wordlistId
+      );
+      if (!quizz) {
+        throw new Error("No word or quizz available");
+      }
+      word = quizz.word;
+      sense = quizz.sense;
+      await QuizzService.refreshUpdatedAt(Number(quizz.id));
     }
 
     return { ...quizz, word, sense };
@@ -173,21 +172,43 @@ export default class QuizzService {
       where: { ownerId },
     });
 
-    // [Synonym -> WordFromMeaning -> WordFromAudio -> MeaningFromWord -> FillSentence]
+    const sequence = [
+      QuizzType.Synonym,
+      QuizzType.WordFromMeaning,
+      QuizzType.WordFromAudio,
+      QuizzType.MeaningFromWord,
+      QuizzType.FillSentence,
+    ];
 
-    switch (lastQuizz?.type) {
-      case QuizzType.Synonym:
-        return QuizzService.nextWordFromMeaningQuizz(ownerId, wordlistId);
-      case QuizzType.WordFromMeaning:
-        return QuizzService.nextWordFromAudioQuizz(ownerId, wordlistId);
-      case QuizzType.WordFromAudio:
-        return QuizzService.nextMeaningFromWordQuizz(ownerId, wordlistId);
-      case QuizzType.MeaningFromWord:
-        return QuizzService.nextFillSentenceQuizz(ownerId, wordlistId);
-      case QuizzType.FillSentence:
-      default:
-        return QuizzService.nextSynonymQuizz(ownerId, wordlistId);
-    }
+    const lastQuizzTypeIdx = lastQuizz
+      ? sequence.indexOf(lastQuizz.type)
+      : sequence.length - 1;
+    let quizzTypeIdx = lastQuizzTypeIdx;
+
+    do {
+      quizzTypeIdx =
+        quizzTypeIdx + 1 === sequence.length ? 0 : quizzTypeIdx + 1;
+
+      try {
+        logger.debug(`Trying to find quizz ${sequence[quizzTypeIdx]}`);
+        const quizz = await QuizzService.nextQuizz(
+          ownerId,
+          wordlistId,
+          sequence[quizzTypeIdx]
+        );
+        if (quizz) {
+          return quizz;
+        }
+      } catch (error) {
+        logger.error(`No ${sequence[quizzTypeIdx]} quizz found`, {
+          error,
+          ownerId,
+          wordlistId,
+        });
+      }
+    } while (quizzTypeIdx !== lastQuizzTypeIdx);
+
+    throw new Error("No quizz available");
   }
 
   static async nextFillSentenceQuizz(
