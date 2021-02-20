@@ -17,58 +17,8 @@ interface QuizzWithOptions<T> {
   audioFile?: string;
 }
 
-const __loadOrCreateQuizz = async (
-  ownerId: number,
-  quizzType: QuizzType,
-  wordlistId?: number
-): Promise<Quizz> => {
-  let word = await WordService.getNextWordForQuizz(
-    ownerId,
-    quizzType,
-    wordlistId
-  );
-
-  let quizz = null;
-  let sense = null;
-
-  if (!word) {
-    quizz = await QuizzService.getLeastRecentlyTried(
-      ownerId,
-      quizzType,
-      wordlistId
-    );
-    word = quizz?.word;
-    sense = quizz?.sense;
-  } else {
-    if (!word?.lemmas?.length) throw new Error("no lemmas!");
-    const lemma = word?.lemmas[0];
-
-    if (!lemma?.senses?.length) throw new Error("no senses!");
-    sense = lemma.senses[0];
-  }
-
-  if (quizz) {
-    await QuizzService.refreshUpdatedAt(Number(quizz.id));
-  } else {
-    if (!word?.id) {
-      throw new Error("invalid word");
-    }
-    if (!sense?.id) {
-      throw new Error("invalid sense");
-    }
-    quizz = await QuizzService.registerNew(
-      word.id,
-      ownerId,
-      quizzType,
-      sense.id
-    );
-  }
-
-  return { ...quizz, word, sense };
-};
-
-const QuizzService = {
-  registerGuess: async (quizzId: number, success: boolean): Promise<void> => {
+export default class QuizzService {
+  static async registerGuess(quizzId: number, success: boolean): Promise<void> {
     const quizzRepository = getRepository(Quizz);
     const payload: QueryDeepPartialEntity<Quizz> = {
       totalGuesses: () => "total_guesses+1",
@@ -77,13 +27,64 @@ const QuizzService = {
       payload.hits = () => "hits+1";
     }
     await quizzRepository.update(quizzId, payload);
-  },
-  registerNew: async (
+  }
+
+  private static async loadOrCreateQuizz(
+    ownerId: number,
+    quizzType: QuizzType,
+    wordlistId?: number
+  ): Promise<Quizz> {
+    let word = await WordService.getNextWordForQuizz(
+      ownerId,
+      quizzType,
+      wordlistId
+    );
+
+    let quizz = null;
+    let sense = null;
+
+    if (!word) {
+      quizz = await QuizzService.getLeastRecentlyTried(
+        ownerId,
+        quizzType,
+        wordlistId
+      );
+      word = quizz?.word;
+      sense = quizz?.sense;
+    } else {
+      if (!word?.lemmas?.length) throw new Error("no lemmas!");
+      const lemma = word?.lemmas[0];
+
+      if (!lemma?.senses?.length) throw new Error("no senses!");
+      sense = lemma.senses[0];
+    }
+
+    if (quizz) {
+      await QuizzService.refreshUpdatedAt(Number(quizz.id));
+    } else {
+      if (!word?.id) {
+        throw new Error("invalid word");
+      }
+      if (!sense?.id) {
+        throw new Error("invalid sense");
+      }
+      quizz = await QuizzService.registerNew(
+        word.id,
+        ownerId,
+        quizzType,
+        sense.id
+      );
+    }
+
+    return { ...quizz, word, sense };
+  }
+
+  private static async registerNew(
     wordId: number,
     ownerId: number,
     type: QuizzType,
     senseId: number
-  ): Promise<Quizz> => {
+  ): Promise<Quizz> {
     const quizzRepository = getRepository(Quizz);
     return quizzRepository.save({
       ownerId,
@@ -93,18 +94,18 @@ const QuizzService = {
       hits: 0,
       totalGuesses: 0,
     });
-  },
+  }
 
-  refreshUpdatedAt: async (quizzId: number): Promise<void> => {
+  static async refreshUpdatedAt(quizzId: number): Promise<void> {
     const quizzRepository = getRepository(Quizz);
     await quizzRepository.update(quizzId, {});
-  },
+  }
 
-  getLeastRecentlyTried: async (
+  static async getLeastRecentlyTried(
     ownerId: number,
     quizzType: QuizzType,
     wordlistId?: number
-  ): Promise<Quizz | undefined> => {
+  ): Promise<Quizz | undefined> {
     const quizzRepository = getRepository(Quizz);
 
     const queryBuilder = await quizzRepository
@@ -142,13 +143,13 @@ const QuizzService = {
       queryBuilder.andWhere("wordlist.id=:wordlistId", { wordlistId });
     }
     return queryBuilder.orderBy("quizz.updatedAt", "ASC").getOne();
-  },
+  }
 
-  nextQuizz: async (
+  static async nextQuizz(
     ownerId: number,
     wordlistId?: number,
     type?: string
-  ): Promise<QuizzWithOptions<string | Lemma>> => {
+  ): Promise<QuizzWithOptions<string | Lemma>> {
     if (type) {
       switch (type) {
         case QuizzType.Synonym:
@@ -187,13 +188,13 @@ const QuizzService = {
       default:
         return QuizzService.nextSynonymQuizz(ownerId, wordlistId);
     }
-  },
+  }
 
-  nextFillSentenceQuizz: async (
+  static async nextFillSentenceQuizz(
     ownerId: number,
     wordlistId?: number
-  ): Promise<QuizzWithOptions<string>> => {
-    const quizz = await __loadOrCreateQuizz(
+  ): Promise<QuizzWithOptions<string>> {
+    const quizz = await QuizzService.loadOrCreateQuizz(
       ownerId,
       QuizzType.FillSentence,
       wordlistId
@@ -227,13 +228,13 @@ const QuizzService = {
     }
 
     return { quizz, options, rightOptionIdx, text: example };
-  },
+  }
 
-  nextMeaningFromWordQuizz: async (
+  static async nextMeaningFromWordQuizz(
     ownerId: number,
     wordlistId?: number
-  ): Promise<QuizzWithOptions<string>> => {
-    const quizz = await __loadOrCreateQuizz(
+  ): Promise<QuizzWithOptions<string>> {
+    const quizz = await QuizzService.loadOrCreateQuizz(
       ownerId,
       QuizzType.MeaningFromWord,
       wordlistId
@@ -256,13 +257,13 @@ const QuizzService = {
     options.splice(rightOptionIdx, 0, definition);
 
     return { quizz, options, rightOptionIdx };
-  },
+  }
 
-  nextWordFromMeaningQuizz: async (
+  static async nextWordFromMeaningQuizz(
     ownerId: number,
     wordlistId?: number
-  ): Promise<QuizzWithOptions<Lemma>> => {
-    const quizz = await __loadOrCreateQuizz(
+  ): Promise<QuizzWithOptions<Lemma>> {
+    const quizz = await QuizzService.loadOrCreateQuizz(
       ownerId,
       QuizzType.WordFromMeaning,
       wordlistId
@@ -292,13 +293,13 @@ const QuizzService = {
     options.splice(rightOptionIdx, 0, lemma);
 
     return { quizz, options, rightOptionIdx, text: definition };
-  },
+  }
 
-  nextSynonymQuizz: async (
+  static async nextSynonymQuizz(
     ownerId: number,
     wordlistId?: number
-  ): Promise<QuizzWithOptions<Lemma>> => {
-    const quizz = await __loadOrCreateQuizz(
+  ): Promise<QuizzWithOptions<Lemma>> {
+    const quizz = await QuizzService.loadOrCreateQuizz(
       ownerId,
       QuizzType.Synonym,
       wordlistId
@@ -328,13 +329,13 @@ const QuizzService = {
     options.splice(rightOptionIdx, 0, synonym);
 
     return { quizz, options, rightOptionIdx };
-  },
+  }
 
-  nextWordFromAudioQuizz: async (
+  static async nextWordFromAudioQuizz(
     ownerId: number,
     wordlistId?: number
-  ): Promise<QuizzWithOptions<Lemma>> => {
-    const quizz = await __loadOrCreateQuizz(
+  ): Promise<QuizzWithOptions<Lemma>> {
+    const quizz = await QuizzService.loadOrCreateQuizz(
       ownerId,
       QuizzType.WordFromAudio,
       wordlistId
@@ -372,7 +373,5 @@ const QuizzService = {
       rightOptionIdx,
       audioFile: pronunciation.audioFile,
     };
-  },
-};
-
-export default QuizzService;
+  }
+}
