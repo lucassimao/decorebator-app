@@ -90,7 +90,7 @@ export default class WordApiService {
                         .of(word.id)
                         .add(sense.lemma);  
                     } catch (error) {
-                        this.logger.error('Skipping lemma to word linking',error,{error,sense, word})
+                        this.logger.error('Skipping lemma to word linking',{error,sense, word})
                     }
                 }
     
