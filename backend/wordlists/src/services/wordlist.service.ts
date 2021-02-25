@@ -245,7 +245,8 @@ const __extractWordsFromBuffer = async (
           .toLowerCase()
           .split(/\s+/)
           .map(word => word.trim())
-          .filter(string => string.length > 0);
+          .filter(string => string.length > 0)
+          .sort();
         resolve(allWords);
       }
     });

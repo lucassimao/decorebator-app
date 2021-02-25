@@ -1,6 +1,6 @@
 import { makeStyles } from "@material-ui/core";
 import PropTypes from "proptypes";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { connect } from "react-redux";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList } from "react-window";
@@ -28,24 +28,42 @@ function Component({
   wordsCount = 0,
 }) {
   const classes = useSyles();
-  const rootElementRef = useRef();
-  let [words, setWords] = useState([]);
+  const fixedSizeListRef = useRef();
+  const wordsCountRef = useRef(-1);
 
+  const [words, setWords] = useState([]);
   const isItemLoaded = (idx) => Boolean(words[idx]);
+
+  useEffect(() => {
+    if (!fixedSizeListRef.current) return;
+    if (wordsCountRef.current === -1) {
+      wordsCountRef.current = wordsCount;
+      return;
+    }
+
+    if (wordsCount > wordsCountRef.current) {
+      fixedSizeListRef.current.scrollToItem(wordsCount);
+    }
+    wordsCountRef.current = wordsCount;
+
+  },[wordsCount])
 
   const loadMoreItems = async (startIndex, stopIndex) => {
     const quantity = stopIndex - startIndex + 1;
     const items = await service.getWords(wordlistId, startIndex, quantity);
-    words.splice(startIndex, quantity, ...items);
-
-    setWords(Array.from(words));
+    const wordsArray = [...words];
+    for (let index = 0; index < items.length; index++) {
+      wordsArray[index+startIndex] = items[index];
+    }
+    setWords(wordsArray)
   };
+
 
   const deleteWord = async (wordId) => {
     showProgressModal("Wait", "Deleting word ...");
     await service.deleteWord(wordlistId, wordId);
 
-    if (rootElementRef.current) {
+    if (fixedSizeListRef.current) {
       setWords(words.filter((w) => w.id !== wordId));
       hideProgressModal();
     }
@@ -58,7 +76,7 @@ function Component({
   const updateWord = async (wordId, newName) => {
     try {
       await service.updateWord(wordlistId, wordId, newName);
-      if (rootElementRef.current) {
+      if (fixedSizeListRef.current) {
         setWords((currentWords) =>
           currentWords.map((w) =>
             w.id === wordId ? { id: wordId, name: newName } : w
@@ -72,7 +90,7 @@ function Component({
   };
 
   return (
-    <AutoSizer ref={rootElementRef}>
+    <AutoSizer>
       {({ height, width }) => (
         <InfiniteLoader
           isItemLoaded={isItemLoaded}
@@ -88,7 +106,10 @@ function Component({
               itemData={words}
               itemSize={45}
               width={width}
-              ref={ref}
+              ref={list => {
+                ref(list); 
+                fixedSizeListRef.current = list; 
+              }}
             >
               {({ index, style }) => (
                 <WordlistRow

@@ -27,12 +27,12 @@ const getWords = async (
   limit: number
 ) => {
   if (Number.isInteger(skip) && Number.isInteger(limit)) {
-    return getRepository(Word).find({ where: { wordlistId }, skip, take: limit });
+    return getRepository(Word).find({ where: { wordlistId }, skip, take: limit, order:{id:'ASC'} });
   } else {
     logger.warn(
       `Ignoring pagination args: idWordlist ${wordlistId} skip: ${skip} limit: ${limit}`
     );
-    return getRepository(Word).find({ where: { wordlistId } });
+    return getRepository(Word).find({ where: { wordlistId }, order:{id:'ASC'} });
   }
 };
 
