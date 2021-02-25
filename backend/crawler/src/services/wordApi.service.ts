@@ -51,6 +51,7 @@ export default class WordApiService {
                 const sense = new Sense()
                 sense.definitions = [result.definition];
                 sense.examples = result.examples;
+
                 if (result.synonyms) {
                     this.logger.debug(`[${tag}] Processing ${result.synonyms.length} synonyms`);
                     sense.synonyms = await Promise.all(result.synonyms.map(async synonym => {
@@ -61,6 +62,7 @@ export default class WordApiService {
                         return lemma;
                     }))
                 }
+
                 if (result.antonyms) {
                     this.logger.debug(`[${tag}] Processing ${result.antonyms.length} antonyms`);
                     sense.antonyms = await Promise.all(result.antonyms.map(async antonym => {
@@ -88,10 +90,8 @@ export default class WordApiService {
                         .of(word.id)
                         .add(sense.lemma);  
                     } catch (error) {
-                        this.logger.debug('Error while adding ' + sense.lemma + " to " + word);
-                        this.logger.error(error,{sense, word})
+                        this.logger.error('Skipping lemma to word linking',error,{error,sense, word})
                     }
-          
                 }
     
                 await entityManager.getRepository(Sense).save(sense);
