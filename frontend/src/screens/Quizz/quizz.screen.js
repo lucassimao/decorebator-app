@@ -1,37 +1,42 @@
-import clsx from "clsx";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import {
-  Card,
+  Button, Card,
   CardActionArea,
   CardContent,
   Container,
+  Grid,
   IconButton,
-  Typography,
+  Typography
 } from "@material-ui/core";
+import CardActions from '@material-ui/core/CardActions';
 import { ArrowBack } from "@material-ui/icons";
+import QueuePlayNextIcon from "@material-ui/icons/QueuePlayNext";
+import clsx from "clsx";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link as RouterLink, useParams } from "react-router-dom";
 import {
   HIDE_PROGRESS_MODAL,
-  SHOW_PROGRESS_MODAL,
+  SHOW_PROGRESS_MODAL
 } from "../../redux/deprecated/progressModal";
 import {
   CLEAR_SNACKBAR,
-  SET_ERROR_SNACKBAR,
+  SET_ERROR_SNACKBAR
 } from "../../redux/deprecated/snackbar";
 import { NEXT_QUIZZ_QUERY, SAVE_QUIZZ_RESULT } from "./graphql";
 import { useStyles } from "./quizz.styles";
+
 
 export const QuizzScreen = () => {
   const classes = useStyles();
   const { id } = useParams();
   const dispatch = useDispatch();
   const [clickedOptionIdx, setClickedOptionIdx] = useState(null);
+  const [isNextQuizzButtonVisible, setNextQuizzButtonVisible] = useState(false);
 
   const [saveQuizzResult] = useMutation(SAVE_QUIZZ_RESULT);
 
-  const [fetchNextQuery, { called, loading, data,error }] = useLazyQuery(
+  const [fetchNextQuery, { called, loading, data, error }] = useLazyQuery(
     NEXT_QUIZZ_QUERY,
     {
       fetchPolicy: "network-only",
@@ -65,17 +70,26 @@ export const QuizzScreen = () => {
     const isCorrect = clickedOptionIdx === data.nextQuizz.rightOptionIdx;
 
     setClickedOptionIdx(clickedOptionIdx);
-    if (!isCorrect) {
+    if (isCorrect) {
+      setTimeout(() => {
+        fetchNextQuery();
+        setClickedOptionIdx(null);
+        dispatch({ type: CLEAR_SNACKBAR });
+      }, 500);
+    } else {
       dispatch({ type: SET_ERROR_SNACKBAR, message: "Wrong option" });
+      setNextQuizzButtonVisible(true);
     }
-    const interval = isCorrect ? 500 : 1800;
-    setTimeout(() => {
-      fetchNextQuery();
-      setClickedOptionIdx(null);
-      dispatch({ type: CLEAR_SNACKBAR });
-    }, interval);
+
     saveQuizzResult({ variables: { quizzId, success: isCorrect } });
   };
+
+  const onClickNextQuizz = () => {
+    fetchNextQuery();
+    setClickedOptionIdx(null);
+    dispatch({ type: CLEAR_SNACKBAR });    
+    setNextQuizzButtonVisible(false);
+  }
 
   let title;
   let audioFile;
@@ -137,7 +151,7 @@ export const QuizzScreen = () => {
                 </Typography>
               )}
 
-                {data && (
+              {data && (
                 <>
                   <Typography gutterBottom variant="h6">
                     {title}
@@ -169,11 +183,11 @@ export const QuizzScreen = () => {
                             classes.quizzItem,
                             hasUserClicked
                               ? {
-                                  [classes.quizzItemCorrect]:
-                                    idx === rightOptionIdx,
-                                  [classes.quizzItemWrong]:
-                                    idx === clickedOptionIdx,
-                                }
+                                [classes.quizzItemCorrect]:
+                                  idx === rightOptionIdx,
+                                [classes.quizzItemWrong]:
+                                  idx === clickedOptionIdx,
+                              }
                               : null
                           )}
                           key={key}
@@ -187,6 +201,15 @@ export const QuizzScreen = () => {
               )}
             </CardContent>
           </CardActionArea>
+
+          { isNextQuizzButtonVisible && <CardActions disableSpacing>
+            <Grid container direction='row' justify='flex-end'>
+              <Button size="small" color="primary" onClick={onClickNextQuizz}>
+                <QueuePlayNextIcon style={{marginRight: '10px'}} /> Next Quizz
+            </Button>
+            </Grid>
+          </CardActions>}
+
         </Card>
       </main>
     </Container>
