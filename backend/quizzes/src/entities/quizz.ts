@@ -8,6 +8,7 @@ import {
 } from "typeorm";
 import QuizzType from "./quizzType";
 import Sense from "./sense";
+import SenseDetail from "./senseDetail";
 import User from "./user";
 import Word from "./word";
 
@@ -51,4 +52,10 @@ export default class Quizz {
 
   @Column()
   senseId?: number;
+
+  @ManyToOne(() => SenseDetail)
+  senseDetail?: SenseDetail;
+
+  @Column()
+  senseDetailId?: number;
 }

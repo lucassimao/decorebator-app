@@ -5,6 +5,8 @@ import winston from 'winston';
 import Lemma from "../entities/lemma";
 import Pronunciation from "../entities/Pronunciation";
 import Sense from "../entities/sense";
+import SenseDetail from '../entities/senseDetail';
+import SenseDetailType from '../entities/senseDetailType';
 import defaultLogger from "../logger";
 import LemmaService from "../services/lemma.service";
 import { LanguageCode } from "../types/languageCode";
@@ -172,8 +174,16 @@ const OxfordDictionaryService = {
                             continue
                         }
                         
-                        const examples = sense.examples?.map(example => example.text)
                         const synonyms: Lemma[] = [];
+                        const senseDetails: SenseDetail[] = [];
+
+                        sense.examples?.forEach(example => {
+                            senseDetails.push({detail: example.text, type: SenseDetailType.EXAMPLE})
+                        })
+
+                        definitions.forEach(definition => {
+                            senseDetails.push({detail: definition, type: SenseDetailType.DEFINITION})
+                        })
 
                         for (const synonym of (sense.synonyms ?? [])) {
                             if (synonym.text === lexicalEntry.text || synonyms.find(s => s.name === synonym.text)) continue;
@@ -192,7 +202,7 @@ const OxfordDictionaryService = {
                         }
 
                         logger.debug(`[${tag}] found ${antonyms.length} antonyms ...`);
-                        senses.push({ definitions: [...definitions], examples, synonyms, antonyms })
+                        senses.push({ details: senseDetails, synonyms, antonyms })
                     }
 
                 }

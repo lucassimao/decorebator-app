@@ -1,22 +1,18 @@
 import { getRepository } from "typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
+import QuizzWithOptions from "../dtos/quizzWithOptions";
 import Lemma from "../entities/lemma";
 import Quizz from "../entities/quizz";
 import QuizzType from "../entities/quizzType";
-import LemmaService from "./lemma.service";
-import SenseService from "./sense.service";
-import WordService from "./word.service";
-import stringSimilarity from "string-similarity";
+import SenseDetailType from "../entities/senseDetailType";
 import logger from "../logger";
+import LemmaService from "./lemma.service";
+import FillSentenceQuizzService from "./strategies/fillSentenceQuizz.service";
+import MeaningFromWordQuizzService from "./strategies/meaningFromWordQuizz.service";
+import WordFromMeaningQuizzService from "./strategies/wordFromMeaningQuizz.service";
+import WordService from "./word.service";
 
-const OPTIONS_LENGTH = 4;
-interface QuizzWithOptions<T> {
-  quizz: Quizz;
-  options: T[];
-  rightOptionIdx: number;
-  text?: string;
-  audioFile?: string;
-}
+export const OPTIONS_LENGTH = 4;
 
 export default class QuizzService {
   static async registerGuess(quizzId: number, success: boolean): Promise<void> {
@@ -30,7 +26,7 @@ export default class QuizzService {
     await quizzRepository.update(quizzId, payload);
   }
 
-  private static async loadOrCreateQuizz(
+  static async loadOrCreateQuizz(
     ownerId: number,
     quizzType: QuizzType,
     wordlistId?: number
@@ -125,14 +121,23 @@ export default class QuizzService {
         break;
       case QuizzType.WordFromMeaning:
       case QuizzType.MeaningFromWord:
-        queryBuilder.addSelect(["sense.definitions"]);
+        queryBuilder.innerJoin(
+          "sense.details",
+          "detail",
+          "detail.type = :type",
+          { type: SenseDetailType.DEFINITION }
+        );
         break;
       case QuizzType.Synonym:
         queryBuilder.innerJoinAndSelect("sense.synonyms", "synonym");
         break;
       case QuizzType.FillSentence:
-        queryBuilder.andWhere("array_length(sense.examples,1)>0");
-        queryBuilder.addSelect(["sense.examples"]);
+        queryBuilder.innerJoin(
+          "sense.details",
+          "detail",
+          "detail.type = :type",
+          { type: SenseDetailType.EXAMPLE }
+        );
         break;
       default:
         break;
@@ -154,13 +159,13 @@ export default class QuizzService {
         case QuizzType.Synonym:
           return QuizzService.nextSynonymQuizz(ownerId, wordlistId);
         case QuizzType.WordFromMeaning:
-          return QuizzService.nextWordFromMeaningQuizz(ownerId, wordlistId);
+          return WordFromMeaningQuizzService.next(ownerId, wordlistId);
         case QuizzType.WordFromAudio:
           return QuizzService.nextWordFromAudioQuizz(ownerId, wordlistId);
         case QuizzType.MeaningFromWord:
-          return QuizzService.nextMeaningFromWordQuizz(ownerId, wordlistId);
+          return MeaningFromWordQuizzService.next(ownerId, wordlistId);
         case QuizzType.FillSentence:
-          return QuizzService.nextFillSentenceQuizz(ownerId, wordlistId);
+          return FillSentenceQuizzService.next(ownerId, wordlistId);
         default:
           throw new Error("unexpected type: " + type);
       }
@@ -173,8 +178,8 @@ export default class QuizzService {
     });
 
     const sequence = [
-      QuizzType.Synonym,
       QuizzType.WordFromMeaning,
+      QuizzType.Synonym,
       QuizzType.WordFromAudio,
       QuizzType.MeaningFromWord,
       QuizzType.FillSentence,
@@ -209,111 +214,6 @@ export default class QuizzService {
     } while (quizzTypeIdx !== lastQuizzTypeIdx);
 
     throw new Error("No quizz available");
-  }
-
-  static async nextFillSentenceQuizz(
-    ownerId: number,
-    wordlistId?: number
-  ): Promise<QuizzWithOptions<string>> {
-    const quizz = await QuizzService.loadOrCreateQuizz(
-      ownerId,
-      QuizzType.FillSentence,
-      wordlistId
-    );
-    const sense = quizz.sense;
-
-    if (!sense) throw new Error("no sense");
-    if (!sense.examples?.length) throw new Error("no examples");
-    if (!sense.lemma) throw new Error("no lemma");
-
-    const exampleIdx = Math.floor(Math.random() * sense.examples.length);
-    const example = sense.examples[exampleIdx];
-
-    const lemma = sense.lemma;
-    const randomLemmas = await LemmaService.getRandomLemmasForWord(
-      quizz.wordId,
-      OPTIONS_LENGTH,
-      lemma?.lexicalCategory
-    );
-    const options = randomLemmas.map((lemma) => lemma.name);
-
-    const rightOptionIdx = Math.floor(Math.random() * OPTIONS_LENGTH);
-    const regex = new RegExp(`\b${lemma.name}\b`);
-    if (regex.test(example)) {
-      options.splice(rightOptionIdx, 0, lemma.name);
-    } else {
-      const {
-        bestMatch: { target },
-      } = stringSimilarity.findBestMatch(lemma.name, example.split(" "));
-      options.splice(rightOptionIdx, 0, target);
-    }
-
-    return { quizz, options, rightOptionIdx, text: example };
-  }
-
-  static async nextMeaningFromWordQuizz(
-    ownerId: number,
-    wordlistId?: number
-  ): Promise<QuizzWithOptions<string>> {
-    const quizz = await QuizzService.loadOrCreateQuizz(
-      ownerId,
-      QuizzType.MeaningFromWord,
-      wordlistId
-    );
-    const sense = quizz.sense;
-
-    if (!sense) throw new Error("no sense");
-
-    const allDefinitions = sense.definitions ?? [];
-    const definitionIdx = Math.floor(Math.random() * allDefinitions.length);
-    const definition = allDefinitions[definitionIdx];
-
-    const lemma = sense.lemma;
-    const options = await SenseService.getRandomDefinitions(
-      OPTIONS_LENGTH,
-      lemma?.lexicalCategory
-    );
-
-    const rightOptionIdx = Math.floor(Math.random() * OPTIONS_LENGTH);
-    options.splice(rightOptionIdx, 0, definition);
-
-    return { quizz, options, rightOptionIdx };
-  }
-
-  static async nextWordFromMeaningQuizz(
-    ownerId: number,
-    wordlistId?: number
-  ): Promise<QuizzWithOptions<Lemma>> {
-    const quizz = await QuizzService.loadOrCreateQuizz(
-      ownerId,
-      QuizzType.WordFromMeaning,
-      wordlistId
-    );
-    const sense = quizz.sense;
-
-    if (!sense) throw new Error("no sense");
-    if (!quizz.wordId) throw new Error("no wordId");
-
-    const lemma = sense.lemma;
-    if (!lemma) throw new Error("no lemma");
-
-    const allDefinitions = sense.definitions ?? [];
-    const definitionIdx = Math.floor(Math.random() * allDefinitions.length);
-    const definition = allDefinitions[definitionIdx];
-
-    const options = await LemmaService.getRandomLemmasForWord(
-      quizz.wordId,
-      OPTIONS_LENGTH,
-      lemma.lexicalCategory
-    );
-    if (!options?.length) {
-      throw new Error("no options");
-    }
-
-    const rightOptionIdx = Math.floor(Math.random() * OPTIONS_LENGTH);
-    options.splice(rightOptionIdx, 0, lemma);
-
-    return { quizz, options, rightOptionIdx, text: definition };
   }
 
   static async nextSynonymQuizz(

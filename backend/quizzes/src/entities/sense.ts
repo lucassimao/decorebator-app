@@ -9,6 +9,7 @@ import {
 } from "typeorm";
 import Lemma from "./lemma";
 import Quizz from "./quizz";
+import SenseDetail from "./senseDetail";
 
 @Entity()
 export default class Sense {
@@ -16,11 +17,8 @@ export default class Sense {
   @PrimaryGeneratedColumn()
   id?: number;
 
-  @Column("text", { array: true, select: false })
-  definitions?: string[];
-
-  @Column("text", { array: true, nullable: true, select: false })
-  examples?: string[];
+  @OneToMany(() => SenseDetail, (detail) => detail.sense)
+  details?: SenseDetail[];
 
   @ManyToMany(() => Lemma, { cascade: true })
   @JoinTable()

@@ -1,6 +1,7 @@
 import { Brackets, getRepository, SelectQueryBuilder } from "typeorm";
 import Quizz from "../entities/quizz";
 import QuizzType from "../entities/quizzType";
+import SenseDetailType from "../entities/senseDetailType";
 import Word from "../entities/word";
 
 export const notExistsQuery = <T>(builder: SelectQueryBuilder<T>): string =>
@@ -44,14 +45,25 @@ const WordService = {
         break;
       case QuizzType.WordFromMeaning:
       case QuizzType.MeaningFromWord:
-        queryBuilder.addSelect(["sense.definitions"]);
+        //only lemmas which senses have definitions
+        queryBuilder.innerJoin(
+          "sense.details",
+          "detail",
+          "detail.type = :type",
+          { type: SenseDetailType.DEFINITION }
+        );
         break;
       case QuizzType.Synonym:
         queryBuilder.innerJoinAndSelect("sense.synonyms", "synonym"); //only lemmas with synonym
         break;
       case QuizzType.FillSentence:
-        queryBuilder.andWhere("array_length(sense.examples,1)>0");
-        queryBuilder.addSelect(["sense.examples"]);
+        //only lemmas which senses have examples
+        queryBuilder.innerJoin(
+          "sense.details",
+          "detail",
+          "detail.type = :type",
+          { type: SenseDetailType.EXAMPLE }
+        );
         break;
       default:
         break;

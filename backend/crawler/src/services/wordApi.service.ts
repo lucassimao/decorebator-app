@@ -3,6 +3,7 @@ import { getConnection, Like } from "typeorm";
 import winston from "winston";
 import Lemma from "../entities/lemma";
 import Sense from "../entities/sense";
+import SenseDetailType from '../entities/senseDetailType';
 import Word from "../entities/word";
 import defaultLogger from "../logger";
 import { LanguageCode } from "../types/languageCode";
@@ -49,8 +50,7 @@ export default class WordApiService {
     
             for (const result of response.results) {
                 const sense = new Sense()
-                sense.definitions = [result.definition];
-                sense.examples = result.examples;
+                sense.details = [{detail: result.definition,type: SenseDetailType.DEFINITION}, ...result.examples?.map(example => ({detail:example, type: SenseDetailType.EXAMPLE}))]
 
                 if (result.synonyms) {
                     this.logger.debug(`[${tag}] Processing ${result.synonyms.length} synonyms`);

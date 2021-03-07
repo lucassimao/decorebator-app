@@ -1,6 +1,6 @@
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import Lemma from "./lemma";
-
+import SenseDetail from "./senseDetail";
 @Entity()
 export default class Sense{
 
@@ -8,11 +8,8 @@ export default class Sense{
     @PrimaryGeneratedColumn()
     id?: number;
 
-    @Column("text",{array:true})
-    definitions?: string[]
-
-    @Column("text",{array:true,nullable:true})
-    examples?: string[]
+    @OneToMany(() => SenseDetail, detail => detail.sense,{cascade: true})
+    details?: SenseDetail[];
 
     @ManyToMany(() => Lemma,{cascade: true})
     @JoinTable()
