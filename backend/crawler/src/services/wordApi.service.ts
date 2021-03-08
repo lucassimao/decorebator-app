@@ -33,8 +33,8 @@ export default class WordApiService {
 
     private logger: winston.Logger;
 
-    constructor(logger?: winston.Logger){
-        this.logger = logger ?? defaultLogger; 
+    constructor(logger?: winston.Logger) {
+        this.logger = logger ?? defaultLogger;
     }
 
     async mapResultToLemmas(word: WordDTO, response: SuccessfulReponse): Promise<boolean> {
@@ -42,70 +42,80 @@ export default class WordApiService {
         return await getConnection().transaction(async entityManager => {
 
             const lemmaRepository = entityManager.getRepository(Lemma);
-            const {languageCode: language} = word;
+            const { languageCode: language } = word;
             const provider = 'wordsApi';
             const tag = `${word.name}(${language}) - ${provider}`;
-            
+
             this.logger.debug(`[${tag}] Processing ${response.results.length} result(s)`);
-    
+
             for (const result of response.results) {
                 const sense = new Sense()
-                sense.details = [{detail: result.definition,type: SenseDetailType.DEFINITION}, ...result.examples?.map(example => ({detail:example, type: SenseDetailType.EXAMPLE}))]
-
-                if (result.synonyms) {
-                    this.logger.debug(`[${tag}] Processing ${result.synonyms.length} synonyms`);
-                    sense.synonyms = await Promise.all(result.synonyms.map(async synonym => {
-                        let lemma = await lemmaRepository.findOne({ name: synonym, language: Like(`${language}%`) })
-                        if (!lemma) {
-                            lemma = await lemmaRepository.save({ provider, language, name: synonym, lexicalCategory: 'unknow' })
-                        }
-                        return lemma;
-                    }))
-                }
-
-                if (result.antonyms) {
-                    this.logger.debug(`[${tag}] Processing ${result.antonyms.length} antonyms`);
-                    sense.antonyms = await Promise.all(result.antonyms.map(async antonym => {
-                        let lemma = await lemmaRepository.findOne({ name: antonym, language: Like(`${language}%`) })
-                        if (!lemma) {
-                            lemma = await lemmaRepository.save({ provider, language, name: antonym, lexicalCategory: 'unknow' })
-                        }
-                        return lemma;
-                    }))
-                }
                 sense.lemma = await lemmaRepository.findOne({ name: word.name, language: Like(`${language}%`), lexicalCategory: result.partOfSpeech })
+
                 if (!sense.lemma) {
                     this.logger.debug(`[${tag}] Creating new lemma`);
-                    sense.lemma = await lemmaRepository.save({ name: word.name, language, provider,
-                        lexicalCategory: result.partOfSpeech })
+                    sense.lemma = await lemmaRepository.save({
+                        name: word.name, language, provider,
+                        lexicalCategory: result.partOfSpeech
+                    })
                 } else {
                     this.logger.debug(`[${tag}] Lemma found`);
                 }
-    
-                if (word.id){
-                    try {
-                        await entityManager
-                        .createQueryBuilder()
-                        .relation(Word, "lemmas")
-                        .of(word.id)
-                        .add(sense.lemma);  
-                    } catch (error) {
-                        this.logger.error('Skipping lemma to word linking',{error,sense, word})
-                    }
+
+                const details = [{ detail: result.definition, type: SenseDetailType.DEFINITION }]
+                for (const example of result.examples) {
+                    details.push({ detail: example, type: SenseDetailType.EXAMPLE })
                 }
-    
-                await entityManager.getRepository(Sense).save(sense);
+
+                const {id: senseId} = await entityManager.getRepository(Sense).save({...sense, details});
+
+
+                this.logger.debug(`[${tag}] Processing ${result.synonyms?.length ?? 0} synonyms`);
+
+                for (const synonym of (result.synonyms ?? [])) {
+
+                    let lemma = await lemmaRepository.findOne({ name: synonym, language: Like(`${language}%`) })
+                    if (!lemma) {
+                        lemma = await lemmaRepository.save({ provider, language, name: synonym, lexicalCategory: 'unknow' })
+                    }
+                    await entityManager.query('insert into sense_synonyms_lemma(sense_id,lemma_id) values ($1,$2)  ON CONFLICT DO NOTHING',
+                        [senseId, lemma.id]);
+
+                }
+
+
+                this.logger.debug(`[${tag}] Processing ${result.antonyms?.length ?? 0} antonyms`);
+
+                for (const antonym of (result.antonyms ?? [])) {
+
+                    let lemma = await lemmaRepository.findOne({ name: antonym, language: Like(`${language}%`) })
+                    if (!lemma) {
+                        lemma = await lemmaRepository.save({ provider, language, name: antonym, lexicalCategory: 'unknow' })
+                    }
+
+                    await entityManager.query('insert into sense_antonyms_lemma(sense_id,lemma_id) values ($1,$2)  ON CONFLICT DO NOTHING',
+                        [senseId, lemma.id]);
+
+                }
+
+
+                if (word.id) {
+                    // since RelationQueryBuilder doesn't support on conflict yet
+                    await entityManager.query('insert into word_lemmas_lemma(word_id,lemma_id) values ($1,$2)  ON CONFLICT DO NOTHING',
+                        [word.id, sense.lemma.id]);
+                }
+
                 this.logger.debug(`[${tag}] Sense saved`);
             }
 
             return true
         })
-        
-     
+
+
 
     }
 
-    async search(word: string, language: LanguageCode): Promise<SuccessfulReponse|undefined> {
+    async search(word: string, language: LanguageCode): Promise<SuccessfulReponse | undefined> {
         const tag = `${word}(${language})`;
 
         try {
@@ -117,7 +127,7 @@ export default class WordApiService {
                 if (error.response) {
                     const { response: { data, status, headers } } = error;
                     this.logger.debug(`[${tag}] Request made and server responded with error ...`, { data, status, headers });
-                    if (data.message === 'word not found'){
+                    if (data.message === 'word not found') {
                         return;
                     }
                 } else if (error.request) {
