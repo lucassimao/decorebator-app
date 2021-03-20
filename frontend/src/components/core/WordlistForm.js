@@ -61,16 +61,19 @@ export default function WordlistForm({
     defaultValues: {
       minWordLength: allowMinWordLength ? DEFAULT_MIN_WORD_LENGTH : 1,
       allowOnlyNewWords: false,
+      oneWordPerLine: false
     },
   });
 
   const transformAndSubmitData = (data, event) => {
+    let wordlist = data;
     if (data.file) {
       const description = data.description?.trim()
-        ? data.description
-        : data.file[0].name;
-      onSubmit({ ...data, description, file: data.file[0] });
-    } else onSubmit(data);
+      ? data.description
+      : data.file[0].name;
+      wordlist = { ...data, description, file: data.file[0] };
+    }
+    onSubmit(wordlist);
   };
 
   useEffect(() => {
@@ -133,7 +136,7 @@ export default function WordlistForm({
 
         {allowMinWordLength && (
           <Grid item xs={12}>
-            <Typography gutterBottom>Minimum word length</Typography>
+            <Typography>Minimum word length</Typography>
             <Slider
               step={1}
               marks
@@ -166,7 +169,7 @@ export default function WordlistForm({
 
         {allowFileUpload && (
           <Grid item xs={12}>
-            <InputLabel style={{ marginBottom: "10px" }} htmlFor="file">
+            <InputLabel style={{ marginBottom: "15px" }} htmlFor="file">
               File
             </InputLabel>
             <input
@@ -184,6 +187,16 @@ export default function WordlistForm({
               name="file"
               type="file"
             />
+            <FormControlLabel style={{ marginTop: "10px" }}
+              control={
+                <Switch
+                  name="oneWordPerLine"
+                  defaultValue={false}
+                  inputRef={register}
+                />
+              }
+              label="One word per line"
+            />            
             {errors.file && (
               <FormHelperText variant="filled" error>
                 {errors.file.message}

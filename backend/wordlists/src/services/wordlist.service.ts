@@ -15,6 +15,7 @@ type WordlistDTO = Partial<Wordlist> & {
   onlyNewWords: boolean;
   base64EncodedFile: string;
   url?: string;
+  oneWordPerLine: boolean;
 };
 
 type ListDTO = {
@@ -65,10 +66,11 @@ const list = (
  */
 const save = async (wordlistDTO: WordlistDTO, user: User) => {
   const repository = getRepository(Wordlist);
-
+  
   const {
     minWordLength = 1,
     onlyNewWords = false,
+    oneWordPerLine = false,
     base64EncodedFile,
     url,
     ...wordlist
@@ -82,7 +84,7 @@ const save = async (wordlistDTO: WordlistDTO, user: User) => {
       wordlistDTO.base64EncodedFile
     );
     var t0 = performance.now();
-    words = await __extractWordsFromBuffer(buffer, fileType);
+    words = await __extractWordsFromBuffer(buffer, fileType,oneWordPerLine);
     var t1 = performance.now();
 
     fileInfo = {
@@ -224,8 +226,21 @@ const __parseBase64EncodedFile = (base64EncodedFile: string) => {
  */
 const __extractWordsFromBuffer = async (
   buffer: Buffer,
-  fileType: string
+  fileType: string,
+  oneWordPerLine= false
 ): Promise<Array<string>> => {
+  if (oneWordPerLine){
+    const allWords = buffer.toString('utf8')
+        .toLowerCase()
+        .split(/\n/)
+        .map(word => word.trim())
+        .filter(string => string.length > 0)
+        .sort();
+
+      console.log(allWords,allWords.length);
+        
+    return allWords;
+  }
   return new Promise((resolve, reject) => {
     //TODO<backend> buffer size should be bigger for paying users
     const options = {
@@ -241,6 +256,7 @@ const __extractWordsFromBuffer = async (
         logger.error(`Error while extracting text from a ${fileType}`, error);
         reject(error);
       } else {
+        
         const allWords = text
           .toLowerCase()
           .split(/\s+/)

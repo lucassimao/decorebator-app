@@ -26,6 +26,7 @@ const save = async (wordlist) => {
     words,
     onlyNewWords = false,
     minWordLength = 1,
+    oneWordPerLine = false
   } = wordlist;
   if (base64EncodedFile && words) {
     throw new Error(
@@ -46,6 +47,7 @@ const save = async (wordlist) => {
       words,
       onlyNewWords,
       minWordLength,
+      oneWordPerLine
     }),
     headers: DEFAULT_HEADERS,
   });
