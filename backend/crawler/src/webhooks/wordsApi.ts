@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
+import { Like } from "typeorm";
 import { createHttpRequestLogger } from "../logger";
-import WordApiService from "../services/wordApi.service";
+import LemmaService from "../services/lemma.service";
+import WordApiService,{PROVIDER} from "../services/wordApi.service";
 import { PubSubMessage } from "../types/pubSubMessage";
 import { WordDTO } from "../types/word.dto";
 
@@ -27,14 +29,24 @@ export const wordsApiCrawler = async (req: Request, response: Response): Promise
         throw new Error(`Invalid languageCode ${word.languageCode}`);
     }
 
+    const existingLemmas = await LemmaService.findAllBy({ provider: PROVIDER, name: word.name, language: Like(`${word.languageCode}%`)})
+    const isRefreshRequired = !existingLemmas?.length || existingLemmas.some(lemma => lemma.isRefreshRequired())
+
+
     try {
-        const sevice = new WordApiService(logger);
-        const result = await sevice.search(word.name,'en');
-        if (result){
-            await sevice.mapResultToLemmas(word, result)
+        if (isRefreshRequired) {
+            const sevice = new WordApiService(logger);
+            const result = await sevice.search(word.name,'en');
+            if (result){
+                await sevice.mapResultToLemmas(word, result)
+            }            
+        } else {
+            logger.debug(`No refresh required  ...`,{word})
         }
+
         response.sendStatus(200);
     } catch (error) {
+        logger.error('Error while processing word', error);
         response.sendStatus(500);
     }
 

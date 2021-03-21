@@ -237,8 +237,6 @@ const __extractWordsFromBuffer = async (
         .filter(string => string.length > 0)
         .sort();
 
-      console.log(allWords,allWords.length);
-        
     return allWords;
   }
   return new Promise((resolve, reject) => {

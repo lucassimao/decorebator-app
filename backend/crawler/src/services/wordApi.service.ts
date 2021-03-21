@@ -29,6 +29,9 @@ const axiosConfig: AxiosRequestConfig = {
     },
 };
 
+export const PROVIDER = 'wordsApi';
+
+
 export default class WordApiService {
 
     private logger: winston.Logger;
@@ -43,8 +46,7 @@ export default class WordApiService {
 
             const lemmaRepository = entityManager.getRepository(Lemma);
             const { languageCode: language } = word;
-            const provider = 'wordsApi';
-            const tag = `${word.name}(${language}) - ${provider}`;
+            const tag = `${word.name}(${language}) - ${PROVIDER}`;
 
             this.logger.debug(`[${tag}] Processing ${response.results.length} result(s)`);
 
@@ -55,7 +57,7 @@ export default class WordApiService {
                 if (!sense.lemma) {
                     this.logger.debug(`[${tag}] Creating new lemma`);
                     sense.lemma = await lemmaRepository.save({
-                        name: word.name, language, provider,
+                        name: word.name, language, provider: PROVIDER,
                         lexicalCategory: result.partOfSpeech
                     })
                 } else {
@@ -63,7 +65,7 @@ export default class WordApiService {
                 }
 
                 const details = [{ detail: result.definition, type: SenseDetailType.DEFINITION }]
-                for (const example of result.examples) {
+                for (const example of (result.examples ?? [])) {
                     details.push({ detail: example, type: SenseDetailType.EXAMPLE })
                 }
 
@@ -76,7 +78,7 @@ export default class WordApiService {
 
                     let lemma = await lemmaRepository.findOne({ name: synonym, language: Like(`${language}%`) })
                     if (!lemma) {
-                        lemma = await lemmaRepository.save({ provider, language, name: synonym, lexicalCategory: 'unknow' })
+                        lemma = await lemmaRepository.save({ provider: PROVIDER, language, name: synonym, lexicalCategory: 'unknow' })
                     }
                     await entityManager.query('insert into sense_synonyms_lemma(sense_id,lemma_id) values ($1,$2)  ON CONFLICT DO NOTHING',
                         [senseId, lemma.id]);
@@ -90,7 +92,7 @@ export default class WordApiService {
 
                     let lemma = await lemmaRepository.findOne({ name: antonym, language: Like(`${language}%`) })
                     if (!lemma) {
-                        lemma = await lemmaRepository.save({ provider, language, name: antonym, lexicalCategory: 'unknow' })
+                        lemma = await lemmaRepository.save({ provider: PROVIDER, language, name: antonym, lexicalCategory: 'unknow' })
                     }
 
                     await entityManager.query('insert into sense_antonyms_lemma(sense_id,lemma_id) values ($1,$2)  ON CONFLICT DO NOTHING',
