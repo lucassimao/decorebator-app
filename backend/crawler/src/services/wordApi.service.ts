@@ -4,11 +4,12 @@ import winston from "winston";
 import Lemma from "../entities/lemma";
 import Sense from "../entities/sense";
 import SenseDetailType from '../entities/senseDetailType';
-import Word from "../entities/word";
 import defaultLogger from "../logger";
 import { LanguageCode } from "../types/languageCode";
 import { WordDTO } from "../types/word.dto";
 import { SuccessfulReponse } from "../types/wordApiResponse";
+import moment from 'moment';
+import LemmaService from './lemma.service';
 
 const apiKey = process.env.WORDS_API_KEY;
 if (!apiKey) {
@@ -41,26 +42,29 @@ export default class WordApiService {
     }
 
     async mapResultToLemmas(word: WordDTO, response: SuccessfulReponse): Promise<boolean> {
+        const name = word.name.toLowerCase();
 
         return await getConnection().transaction(async entityManager => {
 
             const lemmaRepository = entityManager.getRepository(Lemma);
             const { languageCode: language } = word;
-            const tag = `${word.name}(${language}) - ${PROVIDER}`;
+            const tag = `${name}(${language}) - ${PROVIDER}`;
 
             this.logger.debug(`[${tag}] Processing ${response.results.length} result(s)`);
 
             for (const result of response.results) {
                 const sense = new Sense()
-                sense.lemma = await lemmaRepository.findOne({ name: word.name, language: Like(`${language}%`), lexicalCategory: result.partOfSpeech })
+                const lexicalCategory = result.partOfSpeech;
+                sense.lemma = await lemmaRepository.findOne({ name, language: Like(`${language}%`), lexicalCategory })
 
-                if (!sense.lemma) {
+                if (!sense.lemma?.id) {
                     this.logger.debug(`[${tag}] Creating new lemma`);
                     sense.lemma = await lemmaRepository.save({
-                        name: word.name, language, provider: PROVIDER,
+                        name, language, provider: PROVIDER,
                         lexicalCategory: result.partOfSpeech
                     })
                 } else {
+                    await lemmaRepository.update(sense.lemma.id,{updatedAt: new Date()})
                     this.logger.debug(`[${tag}] Lemma found`);
                 }
 
@@ -71,14 +75,15 @@ export default class WordApiService {
 
                 const {id: senseId} = await entityManager.getRepository(Sense).save({...sense, details});
 
-
                 this.logger.debug(`[${tag}] Processing ${result.synonyms?.length ?? 0} synonyms`);
 
                 for (const synonym of (result.synonyms ?? [])) {
 
-                    let lemma = await lemmaRepository.findOne({ name: synonym, language: Like(`${language}%`) })
+                    let lemma = await lemmaRepository.findOne({ name: synonym, language: Like(`${language}%`),lexicalCategory })
                     if (!lemma) {
-                        lemma = await lemmaRepository.save({ provider: PROVIDER, language, name: synonym, lexicalCategory: 'unknow' })
+                        lemma = await lemmaRepository.save({ provider: PROVIDER, 
+                            updatedAt: moment().subtract(100, 'days').toDate(),
+                            language, name: synonym, lexicalCategory })
                     }
                     await entityManager.query('insert into sense_synonyms_lemma(sense_id,lemma_id) values ($1,$2)  ON CONFLICT DO NOTHING',
                         [senseId, lemma.id]);
@@ -90,9 +95,11 @@ export default class WordApiService {
 
                 for (const antonym of (result.antonyms ?? [])) {
 
-                    let lemma = await lemmaRepository.findOne({ name: antonym, language: Like(`${language}%`) })
+                    let lemma = await lemmaRepository.findOne({ name: antonym,lexicalCategory, language: Like(`${language}%`) })
                     if (!lemma) {
-                        lemma = await lemmaRepository.save({ provider: PROVIDER, language, name: antonym, lexicalCategory: 'unknow' })
+                        lemma = await lemmaRepository.save({ provider: PROVIDER, language, 
+                            updatedAt: moment().subtract(100, 'days').toDate(),
+                            name: antonym, lexicalCategory })
                     }
 
                     await entityManager.query('insert into sense_antonyms_lemma(sense_id,lemma_id) values ($1,$2)  ON CONFLICT DO NOTHING',

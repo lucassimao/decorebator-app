@@ -19,6 +19,7 @@ export const wordsApiCrawler = async (req: Request, response: Response): Promise
     let word: WordDTO
     try {
         word = JSON.parse(Buffer.from(pubSubMessage.data, 'base64').toString());
+        word = {...word, name: word.name.toLowerCase()};
     } catch (error) {
         logger.error('Error while decoding body', error);
         response.sendStatus(400);
@@ -32,13 +33,14 @@ export const wordsApiCrawler = async (req: Request, response: Response): Promise
     const existingLemmas = await LemmaService.findAllBy({ provider: PROVIDER, name: word.name, language: Like(`${word.languageCode}%`)})
     const isRefreshRequired = !existingLemmas?.length || existingLemmas.some(lemma => lemma.isRefreshRequired())
 
-
     try {
         if (isRefreshRequired) {
             const sevice = new WordApiService(logger);
             const result = await sevice.search(word.name,'en');
-            if (result){
+            if (result?.results?.length){
                 await sevice.mapResultToLemmas(word, result)
+            } else {
+                logger.debug(`No results for ${word.name}  ...`,{word})
             }            
         } else {
             logger.debug(`No refresh required  ...`,{word})

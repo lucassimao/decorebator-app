@@ -34,6 +34,7 @@ export const oxfordDictionaryCrawler = async (req: Request, response: Response):
     let word: WordDTO
     try {
         word = JSON.parse(Buffer.from(pubSubMessage.data, 'base64').toString());
+        word = {...word, name: word.name.toLowerCase()};
     } catch (error) {
         logger.error('Error while decoding body', error);
         response.sendStatus(400);
