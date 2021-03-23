@@ -30,8 +30,8 @@ const UrlWordlistScreen = lazy(() =>
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
+    margin:0,
     padding: theme.spacing(2, 0),
-    height: "100vh",
   },
 }));
 

@@ -1,17 +1,17 @@
-import { Fab, makeStyles } from "@material-ui/core";
+import { Button, makeStyles } from "@material-ui/core";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import Grid from "@material-ui/core/Grid";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
-import TextField from "@material-ui/core/TextField";
-import clsx from "clsx";
-import Typography from "@material-ui/core/Typography";
 import Slider from "@material-ui/core/Slider";
+import Switch from "@material-ui/core/Switch";
+import TextField from "@material-ui/core/TextField";
+import Typography from "@material-ui/core/Typography";
+import clsx from "clsx";
 import PropTypes from "proptypes";
 import React, { useEffect } from "react";
 import useForm from "react-hook-form";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Switch from "@material-ui/core/Switch";
 
 // TODO<frontend> this limit should increase for paying users
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
@@ -38,9 +38,6 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: "0 7px 14px rgba(0,0,0,0.25)",
     display: "flex",
     flexDirection: "column",
-  },
-  btnSave: {
-    marginTop: theme.spacing(5),
   },
   inputFile: {
     width: "100%",
@@ -69,8 +66,8 @@ export default function WordlistForm({
     let wordlist = data;
     if (data.file) {
       const description = data.description?.trim()
-      ? data.description
-      : data.file[0].name;
+        ? data.description
+        : data.file[0].name;
       wordlist = { ...data, description, file: data.file[0] };
     }
     onSubmit(wordlist);
@@ -196,7 +193,7 @@ export default function WordlistForm({
                 />
               }
               label="One word per line"
-            />            
+            />
             {errors.file && (
               <FormHelperText variant="filled" error>
                 {errors.file.message}
@@ -204,16 +201,20 @@ export default function WordlistForm({
             )}
           </Grid>
         )}
+
+        <Grid item xs={12}>
+          <Button
+            size="large"
+            className={classes.btnSave}
+            type="submit"
+            fullWidth
+            variant="contained" color="primary"
+          >
+            Save
+      </Button>
+        </Grid>
       </Grid>
-      <Fab
-        size="large"
-        className={classes.btnSave}
-        type="submit"
-        variant="extended"
-        color="primary"
-      >
-        Save
-      </Fab>
+
     </form>
   );
 }

@@ -114,58 +114,59 @@ function Screen(props) {
 
   return (
     wordlist && (
-      <Grid wrap="nowrap" direction="column" className={classes.grid} container>
-        <Grid className={classes.gridItem} item xs={12}>
-          <AppBreadcrumb />
-        </Grid>
-        <Grid className={`${classes.gridItem} ${classes.title}`} item xs={12}>
-          <span>
-            {/* {wordlist.isPrivate ? (
-              <VpnLockRoundedIcon className={classes.titleIcon} />
-            ) : (
-              <PublicIcon className={classes.titleIcon} />
-            )} */}
-
-            <Typography display="inline" variant="h6">
-              {wordlist.name}
-            </Typography>
-          </span>
-          <IconButton onClick={deleteWordlist} edge="end">
-            <DeleteIcon />
-          </IconButton>
-        </Grid>
-        <Grid className={classes.gridItem} item xs={12}>
-          <Typography variant="caption">
-            {wordsCount} {wordlist.language.toLowerCase()} word(s)
-          </Typography>
-        </Grid>
-        {wordlist.description && (
+      <div style={{height: '95vh',padding:0,margin:0}}>
+        <Grid wrap="nowrap" direction="column" className={classes.grid} container>
           <Grid className={classes.gridItem} item xs={12}>
-            <Typography variant="caption" className={classes.description}>
-              {wordlist.description}
+            <AppBreadcrumb />
+          </Grid>
+          <Grid className={`${classes.gridItem} ${classes.title}`} item xs={12}>
+            <span>
+              {/* {wordlist.isPrivate ? (
+                <VpnLockRoundedIcon className={classes.titleIcon} />
+              ) : (
+                <PublicIcon className={classes.titleIcon} />
+              )} */}
+              <Typography display="inline" variant="h6">
+                {wordlist.name}
+              </Typography>
+            </span>
+            <IconButton onClick={deleteWordlist} edge="end">
+              <DeleteIcon />
+            </IconButton>
+          </Grid>
+          <Grid className={classes.gridItem} item xs={12}>
+            <Typography variant="caption">
+              {wordsCount} {wordlist.language.toLowerCase()} word(s)
             </Typography>
           </Grid>
-        )}
-        <Grid className={classes.gridItem} item xs={12}>
-          <TextField
-            margin="dense"
-            fullWidth
-            autoComplete="off"
-            autoFocus
-            name="name"
-            label="Add a new word or expression ..."
-            onKeyDown={onTextFieldKeyDown}
-            variant="outlined"
-          />
+          {wordlist.description && (
+            <Grid className={classes.gridItem} item xs={12}>
+              <Typography variant="caption" className={classes.description}>
+                {wordlist.description}
+              </Typography>
+            </Grid>
+          )}
+          <Grid className={classes.gridItem} item xs={12}>
+            <TextField
+              margin="dense"
+              fullWidth
+              autoComplete="off"
+              autoFocus
+              name="name"
+              label="Add a new word or expression ..."
+              onKeyDown={onTextFieldKeyDown}
+              variant="outlined"
+            />
+          </Grid>
+          <Grid className={classes.gridItem} item xs={12} style={{ flexGrow: 1 }}>
+            <Wordlist
+              onWordExcluded={onWordExcludedListener}
+              wordsCount={wordsCount}
+              wordlistId={wordlist.id}
+            />
+          </Grid>
         </Grid>
-        <Grid className={classes.gridItem} item xs={12} style={{ flexGrow: 1 }}>
-          <Wordlist
-            onWordExcluded={onWordExcludedListener}
-            wordsCount={wordsCount}
-            wordlistId={wordlist.id}
-          />
-        </Grid>
-      </Grid>
+      </div>
     )
   );
 }
