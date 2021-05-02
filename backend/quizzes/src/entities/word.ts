@@ -17,7 +17,7 @@ export default class Word {
   id?: number;
 
   @Column({ nullable: false })
-  name?: string;
+  name!: string;
 
   @OneToMany(() => Quizz, (quizz) => quizz.word, { lazy: true })
   quizzes?: Quizz[];

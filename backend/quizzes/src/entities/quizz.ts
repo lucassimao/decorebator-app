@@ -58,4 +58,7 @@ export default class Quizz {
 
   @Column()
   senseDetailId?: number;
+
+  @Column()
+  esSearchAfter?: number;
 }

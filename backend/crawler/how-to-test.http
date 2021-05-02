@@ -1,0 +1,22 @@
+### Auth
+curl "https://decorebator-auth-6bzynn6uxa-uc.a.run.app/signin" \
+-H "content-type: application/json" \
+-d '{"login":"lsimaocosta@gmail.com","password":"123"}'
+    
+
+
+# Use this to create a payload like the pub sub one
+# echo '{"languageCode":"en","name":"tear down","id": 12714}' | base64
+
+
+### Publish 'put through' to oxforddictionaries
+curl -d '{"message":{"data":"eyJsYW5ndWFnZUNvZGUiOiJlbiIsIm5hbWUiOiJwdXQgdGhyb3VnaCIsImlkIjogMTI3MTV9Cg=="}}' 
+    -H "content-type: application/json" 
+    http://localhost:3005/words/oxforddictionaries
+
+
+### Push 'put through' to news crawler
+
+curl "http://localhost:3004/words/news" -H 'Content-Type: application/json' 
+-d'{"message":{"data":"eyJsYW5ndWFnZUNvZGUiOiJlbiIsIm5hbWUiOiJzbG93IGRvd24ifQo="}}'
+

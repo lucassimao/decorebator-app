@@ -1,5 +1,23 @@
 version: '3'
 services:
+  es:
+    build:
+      context: ./devops
+      dockerfile: elasticsearch.Dockerfile
+    container_name: elasticsearch
+    environment:
+      - node.name=es01
+      - bootstrap.memory_lock=true
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
   auth:
     environment:
       - DB_URL
@@ -66,3 +84,6 @@ services:
       - "postgres_data:/var/lib/postgresql/data"
 volumes: 
   postgres_data:
+    driver: local
+  es_data:
+    driver: local  

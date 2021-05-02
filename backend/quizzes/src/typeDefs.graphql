@@ -3,6 +3,7 @@ enum QuizzType{
     WORD_FROM_MEANING,
     MEANING_FROM_WORD,
     FILL_SENTENCE,
+    FILL_NEWS_SENTENCE,
     PHRASAL_VERB,
     PREPOSITION,
     WORD_FROM_AUDIO
@@ -16,7 +17,7 @@ type Lemma{
 type Word{
     id: ID!
     name: String!
-    lexicalCategory: String!
+    lexicalCategory: String
 }
 
 type Sentence{

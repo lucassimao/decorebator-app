@@ -1,4 +1,18 @@
 {
     "java.configuration.updateBuildConfiguration": "automatic",
-    "editor.formatOnSave": false
+    "editor.formatOnSave": false,
+    "search.exclude": {
+        "**/node_modules": true,
+      },
+      "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/**": true,
+      },
+      "files.exclude": {
+        "**/.git": true,
+        "**/.DS_Store": true,
+        "**/.vscode": true,
+        "**/node_modules": true,
+      }
 }

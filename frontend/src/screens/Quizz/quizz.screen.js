@@ -110,11 +110,15 @@ export const QuizzScreen = () => {
       case "MEANING_FROM_WORD":
         title = `Meaning of ${word.name} (${word.lexicalCategory}):`;
         break;
+      case "FILL_NEWS_SENTENCE": 
       case "FILL_SENTENCE": {
         const target = options[rightOptionIdx].text;
         const placeholder = [...Array(target.length)].map((_) => "_").join("");
-        title =
-          text.replace(target, placeholder) + ` (${word.lexicalCategory}):`;
+        title = text.replace(target, placeholder);
+        if (word.lexicalCategory?.trim())
+          title += ` (${word.lexicalCategory}):`
+        else
+          title += ': ';
         break;
       }
       default:

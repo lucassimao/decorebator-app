@@ -1,0 +1,122 @@
+
+### Create singest pipeline
+
+curl -X PUT "http://localhost:9200/_ingest/pipeline/decorebator?pretty" -H 'Content-Type: application/json' -d'
+{
+  "description" : "decorebator crawled content",
+  "processors" : [
+    {
+      "gsub": {
+        "field": "_source.content",
+        "pattern": "Skip to content|Sign in|SKIP TO CONTENT|SKIP TO SITE INDEX|SUBSCRIBE NOW|LOG IN|ADVERTISEMENT|[\n\t]",
+        "replacement": ""
+      },
+      "set": {
+        "field": "_source.timestamp",
+        "value": "{{_ingest.timestamp}}"
+      }            
+    }
+  ]
+}
+'
+
+### Deletes index
+curl -XDELETE "http://localhost:9200/decorebator-en"
+
+
+### Creates the index
+
+curl -X PUT "http://localhost:9200/decorebator-en" -H 'Content-Type: application/json' -d'
+{ 
+  "mappings": {
+    "properties": {
+      "content": {
+        "type": "text",
+        "term_vector": "with_positions_offsets",
+        "analyzer":"english"
+      },
+      "timestamp": {
+        "type": "date"
+      }      
+    }
+  }
+}
+'
+
+### Send data
+curl -d'@went-through4.json' -H"content-type: application/json" http://localhost:9200/my-index-2/_doc?pipeline=attachment
+
+### Tests the analyzer
+curl -X POST "http://localhost:9200/my-index-2/_analyze?pretty" -H 'Content-Type: application/json' -d'
+{
+  "field": "attachment.content", 
+  "text": "boys \n\nalways\n here"
+}
+'
+
+### Tests pipeline
+curl -X POST "http://localhost:9200/decorebator-en/_doc?pretty&pipeline=decorebator" -H 'Content-Type: application/json' -d'
+{
+  "content": "boys \n\nalways\n here\t nao é sporadically mesmo.SKIP TO CONTENT",
+  "link":"http://google.com"
+}
+
+
+### Tests pipeline
+curl "http://localhost:9200/decorebator-en/_search" -H 'Content-Type: application/json' -d'
+{
+  "query":{"match" : { "_id" : "https://www.nytimes.com/2021/02/11/world/vaccines-are-the-new-diplomatic-currency-and-other-news-from-around-the-world.html?searchResultPosition=1"}}
+}
+
+### search query
+
+curl -X GET "http://localhost:9200/decorebator-en/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+  #  "from":2,
+   "size":1,
+  #  "query": {"match" : { "content" : {"query": "put about"}} }, 
+   "query": {"match_phrase" : { "content" : "tear down"} },
+   "highlight": {
+     "order": "score",
+     "boundary_scanner_locale":"en-US",
+     "boundary_scanner":"sentence",
+     "fields": {
+       "content": {
+         "type": "fvh"
+       }
+     }
+   },
+  "track_total_hits": false,
+  "_source": false,
+  "sort": ["_doc"],
+  "search_after": [0]
+  # "sort": [ {"timestamp": {"order": "asc" }}]
+   #"fields": ["timestamp"]          
+}
+'
+
+### Counting
+
+curl -X GET "http://localhost:9200/decorebator-en/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+  "size":0,
+   "query": {
+     "bool": {
+       "minimum_should_match": 1,
+       "should": [
+         {"match_phrase" : { "content" : "tear down"} }
+         #{"match" : { "attachment.content" : {"query": "orchestrate"}} }
+       ]
+     }
+   },
+  "track_total_hits": 50,
+  "_source": false
+}
+'
+#### test
+
+curl -X GET "http://localhost:9200/decorebator-en/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+  "size":2
+}
+'

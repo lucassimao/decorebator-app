@@ -74,11 +74,11 @@ export default class QuizzService {
     return { ...quizz, word, sense };
   }
 
-  private static async registerNew(
+  static async registerNew(
     wordId: number,
     ownerId: number,
     type: QuizzType,
-    senseId: number
+    senseId?: number
   ): Promise<Quizz> {
     const quizzRepository = getRepository(Quizz);
     return quizzRepository.save({
@@ -107,8 +107,9 @@ export default class QuizzService {
       .createQueryBuilder("quizz")
       .innerJoinAndSelect("quizz.word", "word")
       .innerJoin("word.wordlist", "wordlist")
-      .innerJoinAndSelect("quizz.sense", "sense")
-      .innerJoinAndSelect("sense.lemma", "lemma")
+      .leftJoinAndSelect("quizz.sense", "sense")
+      .leftJoinAndSelect("quizz.senseDetail", "senseDetail")
+      .leftJoinAndSelect("sense.lemma", "lemma")
       .where("wordlist.owner_id =:ownerId", { ownerId })
       .andWhere("quizz.type=:quizzType", { quizzType });
 
@@ -164,6 +165,7 @@ export default class QuizzService {
           return QuizzService.nextWordFromAudioQuizz(ownerId, wordlistId);
         case QuizzType.MeaningFromWord:
           return MeaningFromWordQuizzService.next(ownerId, wordlistId);
+        case QuizzType.FillNewsSentence:
         case QuizzType.FillSentence:
           return FillSentenceQuizzService.next(ownerId, wordlistId);
         default:

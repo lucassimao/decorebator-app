@@ -1,5 +1,4 @@
 import Lemma from "../entities/lemma";
-import QuizzType from "../entities/quizzType";
 import {
   Lemma as GraphQLLemma,
   Option as GraphQLOption,

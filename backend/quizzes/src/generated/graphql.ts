@@ -28,6 +28,7 @@ export enum QuizzType {
   WordFromMeaning = "WORD_FROM_MEANING",
   MeaningFromWord = "MEANING_FROM_WORD",
   FillSentence = "FILL_SENTENCE",
+  FillNewsSentence = "FILL_NEWS_SENTENCE",
   PhrasalVerb = "PHRASAL_VERB",
   Preposition = "PREPOSITION",
   WordFromAudio = "WORD_FROM_AUDIO",
@@ -43,7 +44,7 @@ export type Word = {
   __typename?: "Word";
   id: Scalars["ID"];
   name: Scalars["String"];
-  lexicalCategory: Scalars["String"];
+  lexicalCategory?: Maybe<Scalars["String"]>;
 };
 
 export type Sentence = {
@@ -255,7 +256,11 @@ export type WordResolvers<
 > = {
   id?: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
   name?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  lexicalCategory?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  lexicalCategory?: Resolver<
+    Maybe<ResolversTypes["String"]>,
+    ParentType,
+    ContextType
+  >;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
