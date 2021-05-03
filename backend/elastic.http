@@ -70,12 +70,12 @@ curl "http://localhost:9200/decorebator-en/_search" -H 'Content-Type: applicatio
 
 ### search query
 
-curl -X GET "http://localhost:9200/decorebator-en/_search?pretty" -H 'Content-Type: application/json' -d'
+curl -X GET "http://34.70.12.183:9200/decorebator-en/_search?pretty" -H 'Content-Type: application/json' -d'
 {
   #  "from":2,
-   "size":1,
-  #  "query": {"match" : { "content" : {"query": "put about"}} }, 
-   "query": {"match_phrase" : { "content" : "tear down"} },
+  #  "size":1,
+   "query": {"match" : { "content" : {"query": "hoard"}} }, 
+  #  "query": {"match_phrase" : { "content" : "tear down"} },
    "highlight": {
      "order": "score",
      "boundary_scanner_locale":"en-US",
