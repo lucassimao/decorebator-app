@@ -53,7 +53,8 @@ export default class NewsCrawlerService{
 
     async *getLatestNewsForWord(word: string): AsyncGenerator<NewsArticle>{
 
-        const browser = await puppeteer.launch({ executablePath: process.env.CHROMIUM_PATH, headless: true, ignoreDefaultArgs: ['--disable-extensions'], args: ['--start-maximized','--disable-dev-shm-usage','--no-sandbox'] });
+        const browser = await puppeteer.launch({timeout:0, executablePath: process.env.CHROMIUM_PATH, headless: true, 
+            ignoreDefaultArgs: ['--disable-extensions'], args: ['--start-maximized','--disable-dev-shm-usage','--no-sandbox'] });
         const page = await browser.newPage();
         await page.setRequestInterception(true);
         page.on('request', onRequestInterceptor);        
