@@ -1,4 +1,10 @@
-FROM node:14.15.1-alpine3.12
+FROM node:15.5.0-alpine3.10
+
+RUN apk add --no-cache udev ttf-freefont chromium git
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
+ENV CHROMIUM_PATH /usr/bin/chromium-browser
+
+#FROM node:14.15.1-alpine3.12
 
 COPY tsconfig.json package* /srv/crawler/
 COPY src /srv/crawler/src
