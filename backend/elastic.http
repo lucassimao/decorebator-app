@@ -1,7 +1,7 @@
 
 ### Create singest pipeline
 
-curl -X PUT "http://localhost:9200/_ingest/pipeline/decorebator?pretty" -H 'Content-Type: application/json' -d'
+curl -X PUT "http://34.70.12.183:9200/_ingest/pipeline/decorebator?pretty" -H 'Content-Type: application/json' -d'
 {
   "description" : "decorebator crawled content",
   "processors" : [
@@ -21,7 +21,7 @@ curl -X PUT "http://localhost:9200/_ingest/pipeline/decorebator?pretty" -H 'Cont
 '
 
 ### Deletes index
-curl -XDELETE "http://localhost:9200/decorebator-en"
+curl -XDELETE "http://34.67.56.163:9200/decorebator-en"
 
 
 ### Creates the index

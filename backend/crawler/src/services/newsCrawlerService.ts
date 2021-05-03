@@ -51,9 +51,9 @@ export default class NewsCrawlerService{
 
     constructor(private logger: Logger){ }
 
-    async *getLatestNewsForLemma(lemma: string): AsyncGenerator<NewsArticle>{
+    async *getLatestNewsForWord(word: string): AsyncGenerator<NewsArticle>{
 
-        const browser = await puppeteer.launch({ headless: true, args: ['--start-maximized','--disable-dev-shm-usage','--no-sandbox'] });
+        const browser = await puppeteer.launch({ headless: true, ignoreDefaultArgs: ['--disable-extensions'], args: ['--start-maximized','--disable-dev-shm-usage','--no-sandbox'] });
         const page = await browser.newPage();
         await page.setRequestInterception(true);
         page.on('request', onRequestInterceptor);        
@@ -65,8 +65,8 @@ export default class NewsCrawlerService{
 
                 const {url, searchResultItemSelector, contentSelector} = mapping[newsOutlet];
     
-                const searchUrl = url(`"${lemma}"`)
-                this.logger.debug(`Searching for ${lemma} at ${newsOutlet} ...`,{searchUrl});
+                const searchUrl = url(`"${word}"`)
+                this.logger.debug(`Searching for ${word} at ${newsOutlet} ...`,{searchUrl});
                 await page.goto(searchUrl);
                 
                 await page.waitForSelector(searchResultItemSelector)
@@ -80,7 +80,7 @@ export default class NewsCrawlerService{
                     links.push(link)
                 }
                 
-                this.logger.debug(`Found ${links.length} results for ${lemma} at ${newsOutlet} ...`);
+                this.logger.debug(`Found ${links.length} results for ${word} at ${newsOutlet} ...`);
                 
                 for (const link of links) {
                     await page.goto(link);

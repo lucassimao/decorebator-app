@@ -30,7 +30,8 @@ export const newsCrawler = async (req: Request, response: Response): Promise<voi
 
         const hasEnough = await elasticSearchService.hasEnough(word.name, word.languageCode)
         if (!hasEnough){
-            const generator = new NewsCrawlerService(logger).getLatestNewsForLemma(word.name);
+            response.sendStatus(200);
+            const generator = new NewsCrawlerService(logger).getLatestNewsForWord(word.name);
             const articles : NewsArticle[] = []
             for await (const article of generator) {
                 articles.push(article)
@@ -38,8 +39,8 @@ export const newsCrawler = async (req: Request, response: Response): Promise<voi
             elasticSearchService.bulkInsert(articles,word.languageCode)
         } else {
             logger.debug(`${word.name} has enough data ... skiping`)
+            response.sendStatus(200);
         }
-        response.sendStatus(200);
     } catch (error) {
         logger.error('Error while processing word', error);
         response.sendStatus(500);
