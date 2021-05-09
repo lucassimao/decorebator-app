@@ -185,6 +185,7 @@ export default class QuizzService {
       QuizzType.WordFromAudio,
       QuizzType.MeaningFromWord,
       QuizzType.FillSentence,
+      QuizzType.FillNewsSentence,
     ];
 
     const lastQuizzTypeIdx = lastQuizz
