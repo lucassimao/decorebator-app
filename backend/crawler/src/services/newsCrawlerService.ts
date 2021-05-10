@@ -6,20 +6,21 @@ type Mapping = {
     [newsOutlet: string]: {url: (word: string) => string, searchResultItemSelector: string, contentSelector: string }
 }
 const mapping : Mapping = {
-    // WASHINGTON_POST: {
-    //     url: (word: string) => `https://www.washingtonpost.com/newssearch/?btn-search=&sort=Date&query=${encodeURIComponent(word)}&datefilter=All%20Since%202005`,
-    //     selector: 'div.pb-feed-headline p a[data-ng-bind-html="doc.headline"]'
-    // },
+    HITHER_AND_THITHER: {
+        url: (word: string) => `https://hitherandthither.net/?s=${encodeURIComponent(word)}`,
+        searchResultItemSelector: 'li.grid-element a',
+        contentSelector: 'div.post-body p'
+    },
 
     WALL_STREET_JOURNAL: {
         url: (word: string) => `https://www.wsj.com/search?isToggleOn=true&operator=AND&sort=date-desc&duration=1y&query=${encodeURIComponent(word)}`,
         searchResultItemSelector: 'article[class*="WSJTheme--story"] h3[class*="WSJTheme--headline"] a',
         contentSelector: 'main .wsj-snippet-body'
     },
-    THE_ECONOMIST: {
-        url: (word: string) => `https://www.economist.com/search?sort=date&q=${encodeURIComponent(word)}`,
-        searchResultItemSelector:'ol#search-results li a._search-result',
-        contentSelector: 'p.article__body-text'
+    READING_MY_TEA_LEAVES: {
+        url: (word: string) => `https://readingmytealeaves.com/?s=${encodeURIComponent(word)}`,
+        searchResultItemSelector:'div.post-header h2 a',
+        contentSelector: 'div.post-entry p'
     },
     THE_NEW_YORKER: {
         url: (word: string) => `https://www.newyorker.com/search/q/${encodeURIComponent(word)}/n,n`,

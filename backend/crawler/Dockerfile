@@ -4,8 +4,7 @@ RUN apk add --no-cache udev ttf-freefont chromium git nss freetype harfbuzz ca-c
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 ENV CHROMIUM_PATH /usr/bin/chromium-browser
 
-#FROM node:14.15.1-alpine3.12
-
+RUN npm install -g npm@latest
 COPY tsconfig.json package* /srv/crawler/
 COPY src /srv/crawler/src
 
