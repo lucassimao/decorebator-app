@@ -103,8 +103,7 @@ export default class NewsCrawlerService{
                     if (process.env.NODE_ENV === 'development') {
                         await page.screenshot({path: '/tmp/screenshot.png'});
                     }
-                    this.logger.error(`Error while searching for ${word} at ${newsOutlet} ...`,{searchUrl});
-                    throw error;
+                    this.logger.error(`Error while searching for ${word} at ${newsOutlet} ...`,{searchUrl, error});
                 }
 
             }
