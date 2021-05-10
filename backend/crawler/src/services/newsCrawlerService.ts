@@ -62,51 +62,53 @@ export default class NewsCrawlerService{
         page.setViewport({ width: 1800, height: 800, isMobile: false })
 
 
-        try {
+        let searchUrl;
             for (const newsOutlet in mapping) {
+                try {
 
-                const {url, searchResultItemSelector, contentSelector} = mapping[newsOutlet];
-    
-                const searchUrl = url(`"${word}"`)
-                this.logger.debug(`Searching for ${word} at ${newsOutlet} ...`,{searchUrl});
-                await page.goto(searchUrl);
-                
-                await page.waitForSelector(searchResultItemSelector)
-                const anchors = await page.$$(searchResultItemSelector);
-                
-                const links: string[] = []
-                for (const anchor of anchors) {
-                    const property = await anchor.getProperty('href')
-                    const value = await property?.jsonValue() as string
-                    const link = value?.trim();
-                    links.push(link)
-                }
-                
-                this.logger.debug(`Found ${links.length} results for ${word} at ${newsOutlet} ...`);
-                
-                for (const link of links) {
-                    await page.goto(link);
-                    const contentElements = await page.$$(contentSelector);
-                    const textPieces = []
-                    for (const element of contentElements) {
-                        const innerTextProperty = await element.getProperty('innerText');
-                        const innerText = await innerTextProperty?.jsonValue() as string;
-                        textPieces.push(innerText)
+                    const {url, searchResultItemSelector, contentSelector} = mapping[newsOutlet];
+        
+                    searchUrl  = url(`"${word}"`)
+                    this.logger.debug(`Searching for ${word} at ${newsOutlet} ...`,{searchUrl});
+                    await page.goto(searchUrl);
+                    
+                    await page.waitForSelector(searchResultItemSelector)
+                    const anchors = await page.$$(searchResultItemSelector);
+                    
+                    const links: string[] = []
+                    for (const anchor of anchors) {
+                        const property = await anchor.getProperty('href')
+                        const value = await property?.jsonValue() as string
+                        const link = value?.trim();
+                        links.push(link)
                     }
-                    yield {content: textPieces.join('\n'), link}
+                    
+                    this.logger.debug(`Found ${links.length} results for ${word} at ${newsOutlet} ...`);
+                    
+                    for (const link of links) {
+                        await page.goto(link);
+                        const contentElements = await page.$$(contentSelector);
+                        const textPieces = []
+                        for (const element of contentElements) {
+                            const innerTextProperty = await element.getProperty('innerText');
+                            const innerText = await innerTextProperty?.jsonValue() as string;
+                            textPieces.push(innerText)
+                        }
+                        yield {content: textPieces.join('\n'), link}
+                    }
+        
+                    this.logger.debug(`Finshed fetching ${newsOutlet} ...`);
+    
+                } catch (error) {
+                    if (process.env.NODE_ENV === 'development') {
+                        await page.screenshot({path: '/tmp/screenshot.png'});
+                    }
+                    this.logger.error(`Error while searching for ${word} at ${newsOutlet} ...`,{searchUrl});
+                    throw error;
                 }
-    
-                this.logger.debug(`Finshed fetching ${newsOutlet} ...`);
-    
+
             }
-        } catch (error) {
-            if (process.env.NODE_ENV === 'development') {
-                await page.screenshot({path: '/tmp/screenshot.png'});
-            }
-            throw error;
-        } finally {
-            browser.close();   
-        }
+        browser.close();   
 
     }
 
