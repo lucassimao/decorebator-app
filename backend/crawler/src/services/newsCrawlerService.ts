@@ -69,7 +69,7 @@ const onRequestInterceptor = (request: any) => {
 };
 
 export default class NewsCrawlerService {
-  constructor(private logger: Logger) {}
+  constructor(private logger: Logger) { }
 
   async *getLatestNewsForWord(word: string): AsyncGenerator<NewsArticle> {
     const browser = await puppeteer.launch({
@@ -97,9 +97,7 @@ export default class NewsCrawlerService {
         this.logger.debug(`Searching for ${word} at ${newsOutlet} ...`, {
           searchUrl,
         });
-        await page.goto(searchUrl);
-
-        await page.waitForSelector(searchResultItemSelector);
+        await page.goto(searchUrl, { waitUntil: 'domcontentloaded' });
         const anchors = await page.$$(searchResultItemSelector);
 
         const links: string[] = [];
@@ -115,7 +113,7 @@ export default class NewsCrawlerService {
         );
 
         for (const link of links) {
-          await page.goto(link);
+          await page.goto(link, { waitUntil: 'domcontentloaded' });
           const contentElements = await page.$$(contentSelector);
           const textPieces = [];
           for (const element of contentElements) {
