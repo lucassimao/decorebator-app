@@ -1,3 +1,1 @@
-import { QuizzScreen } from "./quizz.screen";
-
-export default QuizzScreen;
+export { QuizzScreen } from "./QuizzScreen";

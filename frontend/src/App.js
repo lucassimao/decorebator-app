@@ -23,14 +23,16 @@ const EditWordlistScreen = lazy(() =>
 const NewWordlistScreen = lazy(() =>
   import("./screens/NewWordlist").then(identity)
 );
-const QuizzScreen = lazy(() => import("./screens/Quizz").then(identity));
+const QuizzScreen = lazy(() =>
+  import("./screens/Quizz").then((module) => ({ default: module.QuizzScreen }))
+);
 const UrlWordlistScreen = lazy(() =>
   import("./screens/UrlWordlist").then(identity)
 );
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
-    margin:0,
+    margin: 0,
     padding: theme.spacing(2, 0),
   },
 }));

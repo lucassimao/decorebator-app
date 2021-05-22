@@ -45,19 +45,17 @@ function Component({
       fixedSizeListRef.current.scrollToItem(wordsCount);
     }
     wordsCountRef.current = wordsCount;
-
-  },[wordsCount])
+  }, [wordsCount]);
 
   const loadMoreItems = async (startIndex, stopIndex) => {
     const quantity = stopIndex - startIndex + 1;
     const items = await service.getWords(wordlistId, startIndex, quantity);
     const wordsArray = [...words];
     for (let index = 0; index < items.length; index++) {
-      wordsArray[index+startIndex] = items[index];
+      wordsArray[index + startIndex] = items[index];
     }
-    setWords(wordsArray)
+    setWords(wordsArray);
   };
-
 
   const deleteWord = async (wordId) => {
     showProgressModal("Wait", "Deleting word ...");
@@ -106,9 +104,9 @@ function Component({
               itemData={words}
               itemSize={45}
               width={width}
-              ref={list => {
-                ref(list); 
-                fixedSizeListRef.current = list; 
+              ref={(list) => {
+                ref(list);
+                fixedSizeListRef.current = list;
               }}
             >
               {({ index, style }) => (

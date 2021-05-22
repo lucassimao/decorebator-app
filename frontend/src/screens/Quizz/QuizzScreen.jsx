@@ -1,31 +1,31 @@
 import { useLazyQuery, useMutation } from "@apollo/client";
 import {
-  Button, Card,
+  Button,
+  Card,
   CardActionArea,
   CardContent,
   Container,
   Grid,
-  IconButton,
-  Typography
+  Typography,
 } from "@material-ui/core";
-import CardActions from '@material-ui/core/CardActions';
-import { ArrowBack } from "@material-ui/icons";
+import CardActions from "@material-ui/core/CardActions";
 import QueuePlayNextIcon from "@material-ui/icons/QueuePlayNext";
 import clsx from "clsx";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { Link as RouterLink, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   HIDE_PROGRESS_MODAL,
-  SHOW_PROGRESS_MODAL
+  SHOW_PROGRESS_MODAL,
 } from "../../redux/deprecated/progressModal";
 import {
   CLEAR_SNACKBAR,
-  SET_ERROR_SNACKBAR
+  SET_ERROR_SNACKBAR,
 } from "../../redux/deprecated/snackbar";
 import { NEXT_QUIZZ_QUERY, SAVE_QUIZZ_RESULT } from "./graphql";
 import { useStyles } from "./quizz.styles";
-
+import { QuizzHeader } from "./QuizzHeader";
+import { QuizzTitle } from "./QuizzTitle";
 
 export const QuizzScreen = () => {
   const classes = useStyles();
@@ -34,13 +34,22 @@ export const QuizzScreen = () => {
   const [clickedOptionIdx, setClickedOptionIdx] = useState(null);
   const [isNextQuizzButtonVisible, setNextQuizzButtonVisible] = useState(false);
 
+  const [selectedQuizzTypes, setSelectedQuizzTypes] = useState({
+    SYNONYM: true,
+    WORD_FROM_MEANING: true,
+    MEANING_FROM_WORD: true,
+    FILL_SENTENCE: true,
+    FILL_NEWS_SENTENCE: true,
+    WORD_FROM_AUDIO: true,
+  });
+
   const [saveQuizzResult] = useMutation(SAVE_QUIZZ_RESULT);
 
   const [fetchNextQuery, { called, loading, data, error }] = useLazyQuery(
     NEXT_QUIZZ_QUERY,
     {
       fetchPolicy: "network-only",
-      variables: { input: { wordlistId: id } },
+      variables: { input: { wordlistId: id , types: Object.entries(selectedQuizzTypes).filter(([_,value]) => value).map(([key]) => key) } },
     }
   );
 
@@ -87,68 +96,21 @@ export const QuizzScreen = () => {
   const onClickNextQuizz = () => {
     fetchNextQuery();
     setClickedOptionIdx(null);
-    dispatch({ type: CLEAR_SNACKBAR });    
+    dispatch({ type: CLEAR_SNACKBAR });
     setNextQuizzButtonVisible(false);
-  }
-
-  let title;
-  let audioFile;
-
-  if (data?.nextQuizz) {
-    const { type, word, text, options, rightOptionIdx } = data.nextQuizz;
-    switch (type) {
-      case "WORD_FROM_AUDIO":
-        title = `Select the word you hear:`;
-        audioFile = data.nextQuizz.audioFile;
-        break;
-      case "SYNONYM":
-        title = `Related or synonym for ${word.name} (${word.lexicalCategory}):`;
-        break;
-      case "WORD_FROM_MEANING":
-        title = `${text} (${word.lexicalCategory}):`;
-        break;
-      case "MEANING_FROM_WORD":
-        title = `Meaning of ${word.name} (${word.lexicalCategory}):`;
-        break;
-      case "FILL_NEWS_SENTENCE": 
-      case "FILL_SENTENCE": {
-        const target = options[rightOptionIdx].text;
-        const placeholder = [...Array(target.length)].map((_) => "_").join("");
-        title = text.replace(target, placeholder);
-        if (word.lexicalCategory?.trim())
-          title += ` (${word.lexicalCategory}):`
-        else
-          title += ': ';
-        break;
-      }
-      default:
-        throw new Error(`unexpected type: ${type}`);
-    }
-  }
+  };
 
   return (
     <Container>
-      <header className={classes.header}>
-        <IconButton
-          component={RouterLink}
-          to="/"
-          size="medium"
-          color="primary"
-          style={{ position: "absolute", top: -5, left: 0, fontWeight: "bold" }}
-        >
-          <ArrowBack />
-        </IconButton>
-
-        <Typography variant="h5" style={{ fontWeight: "bold" }} align="center">
-          Quizz
-        </Typography>
-      </header>
+      <QuizzHeader
+        onChangeQuizTypeSelection={setSelectedQuizzTypes}
+        quizzTypeSelection={selectedQuizzTypes}
+      />
 
       <main className={classes.main}>
         <Card raised={true} className={classes.card}>
           <CardActionArea>
             <CardContent>
-
               {error && (
                 <Typography gutterBottom variant="h6">
                   {error.message}
@@ -157,16 +119,14 @@ export const QuizzScreen = () => {
 
               {data && (
                 <>
-                  <Typography gutterBottom variant="h6">
-                    {title}
-                  </Typography>
+                  <QuizzTitle quizz={data.nextQuizz} />
 
-                  {audioFile && (
+                  {data.nextQuizz.audioFile && (
                     <audio
                       controls
                       autobuffer="true"
                       preload="auto"
-                      src={audioFile}
+                      src={data.nextQuizz.audioFile}
                     />
                   )}
 
@@ -187,11 +147,11 @@ export const QuizzScreen = () => {
                             classes.quizzItem,
                             hasUserClicked
                               ? {
-                                [classes.quizzItemCorrect]:
-                                  idx === rightOptionIdx,
-                                [classes.quizzItemWrong]:
-                                  idx === clickedOptionIdx,
-                              }
+                                  [classes.quizzItemCorrect]:
+                                    idx === rightOptionIdx,
+                                  [classes.quizzItemWrong]:
+                                    idx === clickedOptionIdx,
+                                }
                               : null
                           )}
                           key={key}
@@ -206,14 +166,16 @@ export const QuizzScreen = () => {
             </CardContent>
           </CardActionArea>
 
-          { isNextQuizzButtonVisible && <CardActions disableSpacing>
-            <Grid container direction='row' justify='flex-end'>
-              <Button size="small" color="primary" onClick={onClickNextQuizz}>
-                <QueuePlayNextIcon style={{marginRight: '10px'}} /> Next Quizz
-            </Button>
-            </Grid>
-          </CardActions>}
-
+          {isNextQuizzButtonVisible && (
+            <CardActions disableSpacing>
+              <Grid container direction="row" justify="flex-end">
+                <Button size="small" color="primary" onClick={onClickNextQuizz}>
+                  <QueuePlayNextIcon style={{ marginRight: "10px" }} /> Next
+                  Quizz
+                </Button>
+              </Grid>
+            </CardActions>
+          )}
         </Card>
       </main>
     </Container>

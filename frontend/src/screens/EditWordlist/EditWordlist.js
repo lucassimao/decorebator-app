@@ -114,8 +114,13 @@ function Screen(props) {
 
   return (
     wordlist && (
-      <div style={{height: '95vh',padding:0,margin:0}}>
-        <Grid wrap="nowrap" direction="column" className={classes.grid} container>
+      <div style={{ height: "95vh", padding: 0, margin: 0 }}>
+        <Grid
+          wrap="nowrap"
+          direction="column"
+          className={classes.grid}
+          container
+        >
           <Grid className={classes.gridItem} item xs={12}>
             <AppBreadcrumb />
           </Grid>
@@ -158,7 +163,12 @@ function Screen(props) {
               variant="outlined"
             />
           </Grid>
-          <Grid className={classes.gridItem} item xs={12} style={{ flexGrow: 1 }}>
+          <Grid
+            className={classes.gridItem}
+            item
+            xs={12}
+            style={{ flexGrow: 1 }}
+          >
             <Wordlist
               onWordExcluded={onWordExcludedListener}
               wordsCount={wordsCount}

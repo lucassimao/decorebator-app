@@ -58,7 +58,7 @@ export default function WordlistForm({
     defaultValues: {
       minWordLength: allowMinWordLength ? DEFAULT_MIN_WORD_LENGTH : 1,
       allowOnlyNewWords: false,
-      oneWordPerLine: false
+      oneWordPerLine: false,
     },
   });
 
@@ -184,7 +184,8 @@ export default function WordlistForm({
               name="file"
               type="file"
             />
-            <FormControlLabel style={{ marginTop: "10px" }}
+            <FormControlLabel
+              style={{ marginTop: "10px" }}
               control={
                 <Switch
                   name="oneWordPerLine"
@@ -208,13 +209,13 @@ export default function WordlistForm({
             className={classes.btnSave}
             type="submit"
             fullWidth
-            variant="contained" color="primary"
+            variant="contained"
+            color="primary"
           >
             Save
-      </Button>
+          </Button>
         </Grid>
       </Grid>
-
     </form>
   );
 }
