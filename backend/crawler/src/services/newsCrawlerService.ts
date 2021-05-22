@@ -1,4 +1,4 @@
-import puppeteer from "puppeteer";
+import puppeteer, { Browser } from "puppeteer";
 import { Logger } from "winston";
 import NewsArticle from "../types/newsArticle";
 
@@ -58,9 +58,7 @@ const mapping: Mapping = {
 
 const onRequestInterceptor = (request: any) => {
   if (
-    ["image" /*'stylesheet', 'font', 'other'*/].indexOf(
-      request.resourceType()
-    ) !== -1
+    ["image", 'stylesheet', 'font'].includes(request.resourceType())
   ) {
     request.abort();
   } else {
@@ -69,19 +67,25 @@ const onRequestInterceptor = (request: any) => {
 };
 
 export default class NewsCrawlerService {
+  static browser: Browser;
+
   constructor(private logger: Logger) { }
 
   async *getLatestNewsForWord(word: string): AsyncGenerator<NewsArticle> {
-    const browser = await puppeteer.launch({
-      executablePath: process.env.CHROMIUM_PATH,
-      headless: true,
-      args: [
-        "--disable-dev-shm-usage",
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-      ],
-    });
-    const page = await browser.newPage();
+    if (!NewsCrawlerService.browser) {
+      NewsCrawlerService.browser = await puppeteer.launch({
+        executablePath: process.env.CHROMIUM_PATH,
+        headless: true,
+        args: [
+          "--disable-dev-shm-usage",
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+        ],
+      });
+    }
+
+
+    const page = await NewsCrawlerService.browser.newPage();
     await page.setRequestInterception(true);
     page.on("request", onRequestInterceptor);
     page.setViewport({ width: 1800, height: 800, isMobile: false });
@@ -135,6 +139,6 @@ export default class NewsCrawlerService {
         );
       }
     }
-    browser.close();
+    // browser.close();
   }
 }

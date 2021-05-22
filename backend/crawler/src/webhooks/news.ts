@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { createHttpRequestLogger } from "../logger";
 import ElasticSearchService from "../services/elasticSearch.service";
 import NewsCrawlerService from "../services/newsCrawlerService";
+import WikipediaService from "../services/wikipediaService";
 import NewsArticle from "../types/newsArticle";
 import { PubSubMessage } from "../types/pubSubMessage";
 import { WordDTO } from "../types/word.dto";
@@ -41,6 +42,12 @@ export const newsCrawler = async (
       for await (const article of generator) {
         articles.push(article);
       }
+
+      const wikiGenerator = new WikipediaService(logger).getArticlesForWord(word.name);
+      for await (const article of wikiGenerator) {
+        articles.push(article);
+      }
+
       elasticSearchService.bulkInsert(articles, word.languageCode);
     } else {
       logger.debug(`${word.name} has enough data ... skiping`);
