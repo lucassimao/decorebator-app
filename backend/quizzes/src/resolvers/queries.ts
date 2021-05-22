@@ -31,7 +31,7 @@ export const nextQuizz = async (
   const result = await QuizzService.nextQuizz(
     userId,
     parseInt(args.input?.wordlistId ?? ""),
-    args.input?.type as string
+    args.input?.types as string[]
   );
   const { quizz, options, rightOptionIdx, text, audioFile } = result;
   const { word, sense } = quizz;

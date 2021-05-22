@@ -54,7 +54,7 @@ export type Sentence = {
 };
 
 export type QuizzInput = {
-  type?: Maybe<QuizzType>;
+  types?: Maybe<Array<Maybe<QuizzType>>>;
   wordlistId?: Maybe<Scalars["ID"]>;
 };
 

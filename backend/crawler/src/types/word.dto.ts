@@ -1,6 +1,6 @@
 import { LanguageCode } from "./languageCode";
-export interface WordDTO{
-    id?: number;
-    languageCode: LanguageCode;
-    name: string;
+export interface WordDTO {
+  id?: number;
+  languageCode: LanguageCode;
+  name: string;
 }

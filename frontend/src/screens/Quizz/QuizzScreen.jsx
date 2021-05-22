@@ -49,7 +49,14 @@ export const QuizzScreen = () => {
     NEXT_QUIZZ_QUERY,
     {
       fetchPolicy: "network-only",
-      variables: { input: { wordlistId: id , types: Object.entries(selectedQuizzTypes).filter(([_,value]) => value).map(([key]) => key) } },
+      variables: {
+        input: {
+          wordlistId: id,
+          types: Object.entries(selectedQuizzTypes)
+            .filter(([_, value]) => value)
+            .map(([key]) => key),
+        },
+      },
     }
   );
 

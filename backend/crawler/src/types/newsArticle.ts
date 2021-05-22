@@ -1,6 +1,6 @@
 type NewsArticle = {
-    link: string
-    content: string
-}
+  link: string;
+  content: string;
+};
 
-export default NewsArticle
+export default NewsArticle;

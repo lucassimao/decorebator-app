@@ -235,12 +235,16 @@
         "fields": null,
         "inputFields": [
           {
-            "name": "type",
+            "name": "types",
             "description": null,
             "type": {
-              "kind": "ENUM",
-              "name": "QuizzType",
-              "ofType": null
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "QuizzType",
+                "ofType": null
+              }
             },
             "defaultValue": null
           },

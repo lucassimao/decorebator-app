@@ -1,5 +1,6 @@
-enum SenseDetailType{
-    DEFINITION='definition', EXAMPLE='example'
+enum SenseDetailType {
+  DEFINITION = "definition",
+  EXAMPLE = "example",
 }
 
 export default SenseDetailType;

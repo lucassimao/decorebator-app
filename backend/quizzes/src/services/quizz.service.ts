@@ -1,4 +1,4 @@
-import { getRepository } from "typeorm";
+import { getRepository, In } from "typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 import QuizzWithOptions from "../dtos/quizzWithOptions";
 import Lemma from "../entities/lemma";
@@ -153,31 +153,9 @@ export default class QuizzService {
   static async nextQuizz(
     ownerId: number,
     wordlistId?: number,
-    type?: string
+    types?: string[]
   ): Promise<QuizzWithOptions<string | Lemma>> {
-    if (type) {
-      switch (type) {
-        case QuizzType.Synonym:
-          return QuizzService.nextSynonymQuizz(ownerId, wordlistId);
-        case QuizzType.WordFromMeaning:
-          return WordFromMeaningQuizzService.next(ownerId, wordlistId);
-        case QuizzType.WordFromAudio:
-          return QuizzService.nextWordFromAudioQuizz(ownerId, wordlistId);
-        case QuizzType.MeaningFromWord:
-          return MeaningFromWordQuizzService.next(ownerId, wordlistId);
-        case QuizzType.FillNewsSentence:
-        case QuizzType.FillSentence:
-          return FillSentenceQuizzService.next(ownerId, wordlistId);
-        default:
-          throw new Error("unexpected type: " + type);
-      }
-    }
-
     const quizzRepository = getRepository(Quizz);
-    const lastQuizz = await quizzRepository.findOne({
-      order: { updatedAt: "DESC" },
-      where: { ownerId },
-    });
 
     const sequence = [
       QuizzType.WordFromMeaning,
@@ -188,6 +166,14 @@ export default class QuizzService {
       QuizzType.FillNewsSentence,
     ];
 
+    const lastQuizz = await quizzRepository.findOne({
+      order: { updatedAt: "DESC" },
+      where: { ownerId },
+    });
+
+    logger.debug(types);
+    logger.debug(`Last quizz type: ${lastQuizz?.type}`);
+
     const lastQuizzTypeIdx = lastQuizz
       ? sequence.indexOf(lastQuizz.type)
       : sequence.length - 1;
@@ -196,19 +182,35 @@ export default class QuizzService {
     do {
       quizzTypeIdx =
         quizzTypeIdx + 1 === sequence.length ? 0 : quizzTypeIdx + 1;
+      const nextType = sequence[quizzTypeIdx];
+      logger.debug(`Trying to find ${nextType} quizz`);
+
+      if (!types?.includes(nextType)) {
+        logger.debug(`${nextType} isn't in types list, skipping ...`);
+        continue;
+      }
 
       try {
-        logger.debug(`Trying to find quizz ${sequence[quizzTypeIdx]}`);
-        const quizz = await QuizzService.nextQuizz(
-          ownerId,
-          wordlistId,
-          sequence[quizzTypeIdx]
-        );
-        if (quizz) {
-          return quizz;
+        switch (nextType) {
+          case QuizzType.Synonym:
+            return await QuizzService.nextSynonymQuizz(ownerId, wordlistId);
+          case QuizzType.WordFromMeaning:
+            return await WordFromMeaningQuizzService.next(ownerId, wordlistId);
+          case QuizzType.WordFromAudio:
+            return await QuizzService.nextWordFromAudioQuizz(
+              ownerId,
+              wordlistId
+            );
+          case QuizzType.MeaningFromWord:
+            return await MeaningFromWordQuizzService.next(ownerId, wordlistId);
+          case QuizzType.FillNewsSentence:
+          case QuizzType.FillSentence:
+            return await FillSentenceQuizzService.next(ownerId, wordlistId);
+          default:
+            throw new Error("unexpected type: " + nextType);
         }
       } catch (error) {
-        logger.error(`No ${sequence[quizzTypeIdx]} quizz found`, {
+        logger.error(`No ${nextType} quizz found`, {
           error,
           ownerId,
           wordlistId,

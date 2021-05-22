@@ -55,6 +55,7 @@ services:
       - JWT_SECRET_KEY
       - DB_URL
       - PORT=4000
+      - ELASTIC_SEARCH_HOST
     depends_on: 
       - postgres
     build:

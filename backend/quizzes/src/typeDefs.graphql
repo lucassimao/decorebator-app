@@ -1,51 +1,51 @@
-enum QuizzType{
-    SYNONYM,
-    WORD_FROM_MEANING,
-    MEANING_FROM_WORD,
-    FILL_SENTENCE,
-    FILL_NEWS_SENTENCE,
-    PHRASAL_VERB,
-    PREPOSITION,
-    WORD_FROM_AUDIO
+enum QuizzType {
+  SYNONYM
+  WORD_FROM_MEANING
+  MEANING_FROM_WORD
+  FILL_SENTENCE
+  FILL_NEWS_SENTENCE
+  PHRASAL_VERB
+  PREPOSITION
+  WORD_FROM_AUDIO
 }
 
-type Lemma{
-    id: ID!
-    name: String!
+type Lemma {
+  id: ID!
+  name: String!
 }
 
-type Word{
-    id: ID!
-    name: String!
-    lexicalCategory: String
+type Word {
+  id: ID!
+  name: String!
+  lexicalCategory: String
 }
 
-type Sentence{
-    text: String!
-    href: String!
+type Sentence {
+  text: String!
+  href: String!
 }
 
-input QuizzInput{
-    type: QuizzType
-    wordlistId: ID
+input QuizzInput {
+  types: [QuizzType]
+  wordlistId: ID
 }
 
 union Option = Lemma | Sentence
 
-type Quizz{
-    id: ID!
-    type: QuizzType!
-    options: [Option]!
-    rightOptionIdx: Int!
-    word: Word
-    text: String
-    audioFile: String
+type Quizz {
+  id: ID!
+  type: QuizzType!
+  options: [Option]!
+  rightOptionIdx: Int!
+  word: Word
+  text: String
+  audioFile: String
 }
 
-type Query{
-    nextQuizz(input: QuizzInput): Quizz!
+type Query {
+  nextQuizz(input: QuizzInput): Quizz!
 }
 
-type Mutation{
-    saveQuizzGuess(quizzId: ID!, success: Boolean!): Boolean
+type Mutation {
+  saveQuizzGuess(quizzId: ID!, success: Boolean!): Boolean
 }
