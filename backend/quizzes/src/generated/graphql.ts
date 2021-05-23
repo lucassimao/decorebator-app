@@ -38,13 +38,14 @@ export type Lemma = {
   __typename?: "Lemma";
   id: Scalars["ID"];
   name: Scalars["String"];
+  lexicalCategory?: Maybe<Scalars["String"]>;
 };
 
 export type Word = {
   __typename?: "Word";
   id: Scalars["ID"];
   name: Scalars["String"];
-  lexicalCategory?: Maybe<Scalars["String"]>;
+  lemma?: Maybe<Lemma>;
 };
 
 export type Sentence = {
@@ -247,6 +248,11 @@ export type LemmaResolvers<
 > = {
   id?: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
   name?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  lexicalCategory?: Resolver<
+    Maybe<ResolversTypes["String"]>,
+    ParentType,
+    ContextType
+  >;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -256,11 +262,7 @@ export type WordResolvers<
 > = {
   id?: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
   name?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  lexicalCategory?: Resolver<
-    Maybe<ResolversTypes["String"]>,
-    ParentType,
-    ContextType
-  >;
+  lemma?: Resolver<Maybe<ResolversTypes["Lemma"]>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

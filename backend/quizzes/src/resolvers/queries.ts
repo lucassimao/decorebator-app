@@ -46,7 +46,9 @@ export const nextQuizz = async (
     word: {
       id: String(word?.id),
       name: String(word?.name),
-      lexicalCategory: String(sense?.lemma?.lexicalCategory),
+      lemma: sense?.lemma
+        ? { ...sense.lemma, id: String(sense.lemma.id) }
+        : null,
     },
   };
 };

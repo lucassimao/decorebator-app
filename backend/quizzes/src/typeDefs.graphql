@@ -12,12 +12,13 @@ enum QuizzType {
 type Lemma {
   id: ID!
   name: String!
+  lexicalCategory: String
 }
 
 type Word {
   id: ID!
   name: String!
-  lexicalCategory: String
+  lemma: Lemma
 }
 
 type Sentence {
