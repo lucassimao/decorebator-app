@@ -24,8 +24,11 @@ export const NEXT_QUIZZ_QUERY = gql`
       }
       word {
         name
-        lexicalCategory
         id
+        lemma {
+          name
+          lexicalCategory
+        }
       }
     }
   }

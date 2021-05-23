@@ -40,13 +40,13 @@ export const QuizzTitle = ({ quizz }) => {
         newTitle = `Select the word you hear:`;
         break;
       case "SYNONYM":
-        newTitle = `Related or synonym for ${word.name} (${word.lexicalCategory}):`;
+        newTitle = `Related or synonym for ${word.lemma.name} (${word.lemma.lexicalCategory}):`;
         break;
       case "WORD_FROM_MEANING":
-        newTitle = `${text} (${word.lexicalCategory}):`;
+        newTitle = `${text} (${word.lemma.lexicalCategory}):`;
         break;
       case "MEANING_FROM_WORD":
-        newTitle = `Meaning of ${word.name} (${word.lexicalCategory}):`;
+        newTitle = `Meaning of ${word.lemma.name} (${word.lemma.lexicalCategory}):`;
         break;
       case "FILL_NEWS_SENTENCE":
       case "FILL_SENTENCE": {
@@ -59,7 +59,8 @@ export const QuizzTitle = ({ quizz }) => {
         );
 
         newTitle = text.replace(target, placeholder);
-        if (type === "FILL_SENTENCE") newTitle += ` (${word.lexicalCategory}):`;
+        if (type === "FILL_SENTENCE")
+          newTitle += ` (${word.lemma.lexicalCategory}):`;
         else newTitle += ": ";
         break;
       }
