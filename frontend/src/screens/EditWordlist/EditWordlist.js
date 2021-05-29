@@ -13,6 +13,9 @@ import {
 import { SET_ERROR_SNACKBAR } from "../../redux/deprecated/snackbar";
 import service from "../../services/wordlist.service";
 import Wordlist from "./components/Wordlist";
+import { Container } from "@material-ui/core";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+import { Link } from "react-router-dom";
 
 const useSyles = makeStyles((theme) => ({
   grid: {
@@ -51,6 +54,9 @@ const useSyles = makeStyles((theme) => ({
     [theme.breakpoints.up("sm")]: {
       lineClamp: 5,
     },
+  },
+  header: {
+    position: "relative",
   },
 }));
 
@@ -112,72 +118,67 @@ function Screen(props) {
     setWordsCount((current) => current - 1);
   };
 
+  if (!wordlist) return null;
+
   return (
-    wordlist && (
-      <div style={{ height: "95vh", padding: 0, margin: 0 }}>
-        <Grid
-          wrap="nowrap"
-          direction="column"
-          className={classes.grid}
-          container
-        >
-          <Grid className={classes.gridItem} item xs={12}>
-            <AppBreadcrumb />
-          </Grid>
-          <Grid className={`${classes.gridItem} ${classes.title}`} item xs={12}>
-            <span>
-              {/* {wordlist.isPrivate ? (
-                <VpnLockRoundedIcon className={classes.titleIcon} />
-              ) : (
-                <PublicIcon className={classes.titleIcon} />
-              )} */}
-              <Typography display="inline" variant="h6">
-                {wordlist.name}
-              </Typography>
-            </span>
-            <IconButton onClick={deleteWordlist} edge="end">
+    <Container style={{ height: "95vh", padding: 0, margin: '0 auto' }}>
+      <Grid wrap="nowrap" direction="column" className={classes.grid} container>
+
+        <Grid className={classes.gridItem} item xs={12}>
+          <header className={classes.header}>
+            <IconButton
+              component={Link}
+              to="/"
+              size="medium"
+              color="primary"
+              style={{ position: "absolute", top: -5, left: 0, fontWeight: "bold" }}
+            >
+              <ArrowBackIcon />
+            </IconButton>
+
+            <Typography variant="h5" style={{ fontWeight: "bold", }} align="center">
+              Edit wordlist
+            </Typography>
+
+            <IconButton onClick={deleteWordlist} style={{ position: "absolute", top: -5, right: 0, fontWeight: "bold" }}>
               <DeleteIcon />
             </IconButton>
-          </Grid>
+          </header>
+        </Grid>
+
+        <Grid className={classes.gridItem} item xs={12}>
+          <Typography variant="caption">
+            {wordsCount} {wordlist.language.toLowerCase()} word(s) in  {wordlist.name}
+          </Typography>
+        </Grid>
+        {wordlist.description && (
           <Grid className={classes.gridItem} item xs={12}>
-            <Typography variant="caption">
-              {wordsCount} {wordlist.language.toLowerCase()} word(s)
+            <Typography variant="caption" className={classes.description}>
+              {wordlist.description}
             </Typography>
           </Grid>
-          {wordlist.description && (
-            <Grid className={classes.gridItem} item xs={12}>
-              <Typography variant="caption" className={classes.description}>
-                {wordlist.description}
-              </Typography>
-            </Grid>
-          )}
-          <Grid className={classes.gridItem} item xs={12}>
-            <TextField
-              margin="dense"
-              fullWidth
-              autoComplete="off"
-              autoFocus
-              name="name"
-              label="Add a new word or expression ..."
-              onKeyDown={onTextFieldKeyDown}
-              variant="outlined"
-            />
-          </Grid>
-          <Grid
-            className={classes.gridItem}
-            item
-            xs={12}
-            style={{ flexGrow: 1 }}
-          >
-            <Wordlist
-              onWordExcluded={onWordExcludedListener}
-              wordsCount={wordsCount}
-              wordlistId={wordlist.id}
-            />
-          </Grid>
+        )}
+        <Grid className={classes.gridItem} item xs={12}>
+          <TextField
+            margin="dense"
+            fullWidth
+            autoComplete="off"
+            autoFocus
+            name="name"
+            label="Add a new word or expression ..."
+            onKeyDown={onTextFieldKeyDown}
+            variant="outlined"
+          />
         </Grid>
-      </div>
-    )
+        <Grid className={classes.gridItem} item xs={12} style={{ flexGrow: 1 }}>
+          <Wordlist
+            onWordExcluded={onWordExcludedListener}
+            wordsCount={wordsCount}
+            wordlistId={wordlist.id}
+          />
+        </Grid>
+      </Grid>
+    </Container>
   );
 }
 

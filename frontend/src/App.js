@@ -30,10 +30,17 @@ const UrlWordlistScreen = lazy(() =>
   import("./screens/UrlWordlist").then(identity)
 );
 
+let TopBar = null;
+const isMobile = window.matchMedia("(max-width: 550px)").matches;
+
+if (!isMobile) {
+  TopBar = lazy(() => import("./components/TopBar").then(identity));
+}
+
 const useStyles = makeStyles((theme) => ({
   wrapper: {
     margin: 0,
-    padding: theme.spacing(2, 0),
+    padding: isMobile ? theme.spacing(2, 0) : theme.spacing(0, 0, 2, 0),
   },
 }));
 
@@ -47,6 +54,7 @@ function App(props) {
     <div className={classes.wrapper}>
       <Router>
         <Suspense fallback={spinner}>
+          {TopBar && <TopBar />}
           <Switch>
             <Route path="/wordlists/new-from-file">
               <FileWordlistScreen />
@@ -70,7 +78,7 @@ function App(props) {
               <EditWordlistScreen />
             </Route>
             <Route path="/">
-              <HomeScreen />
+              <HomeScreen isMobile={isMobile} />
             </Route>
           </Switch>
         </Suspense>
