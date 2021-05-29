@@ -1,9 +1,10 @@
 import puppeteer, { Browser } from "puppeteer";
 import { Logger } from "winston";
 import NewsArticle from "../types/newsArticle";
+import EnglishNewsSource from "../types/englishNewsSource";
 
 type Mapping = {
-  [newsOutlet: string]: {
+  [newsOutlet in keyof typeof EnglishNewsSource]: {
     url: (word: string) => string;
     searchResultItemSelector: string;
     contentSelector: string;
@@ -54,6 +55,12 @@ const mapping: Mapping = {
     searchResultItemSelector: 'ol[data-testid="search-results"] li a',
     contentSelector: "p.g-body",
   },
+  NY_MAG: {
+    url: (word: string) =>
+      `https://nymag.com/search.html?q=${encodeURIComponent(word)}`,
+    searchResultItemSelector: '.article a',
+    contentSelector: "section.body p",
+  }
 };
 
 const onRequestInterceptor = (request: any) => {
@@ -71,8 +78,9 @@ export default class NewsCrawlerService {
 
   constructor(private logger: Logger) { }
 
-  async *getLatestNewsForWord(word: string): AsyncGenerator<NewsArticle> {
+  async *getLatestNewsForWord(word: string, newsOutlet: EnglishNewsSource): AsyncGenerator<NewsArticle> {
     if (!NewsCrawlerService.browser) {
+
       NewsCrawlerService.browser = await puppeteer.launch({
         executablePath: process.env.CHROMIUM_PATH,
         headless: true,
@@ -91,53 +99,53 @@ export default class NewsCrawlerService {
     page.setViewport({ width: 1800, height: 800, isMobile: false });
 
     let searchUrl;
-    for (const newsOutlet in mapping) {
-      try {
-        const { url, searchResultItemSelector, contentSelector } = mapping[
-          newsOutlet
-        ];
+    try {
+      const { url, searchResultItemSelector, contentSelector } = mapping[
+        newsOutlet
+      ];
 
-        searchUrl = url(`"${word}"`);
-        this.logger.debug(`Searching for ${word} at ${newsOutlet} ...`, {
-          searchUrl,
-        });
-        await page.goto(searchUrl, { waitUntil: 'domcontentloaded' });
-        const anchors = await page.$$(searchResultItemSelector);
+      searchUrl = url(`"${word}"`);
+      this.logger.debug(`Searching for ${word} at ${newsOutlet} ...`, {
+        searchUrl,
+      });
+      await page.goto(searchUrl, { waitUntil: 'domcontentloaded' });
+      const anchors = await page.$$(searchResultItemSelector);
 
-        const links: string[] = [];
-        for (const anchor of anchors) {
-          const property = await anchor.getProperty("href");
-          const value = (await property?.jsonValue()) as string;
-          const link = value?.trim();
-          links.push(link);
-        }
-
-        this.logger.debug(
-          `Found ${links.length} results for ${word} at ${newsOutlet} ...`
-        );
-
-        for (const link of links) {
-          await page.goto(link, { waitUntil: 'domcontentloaded' });
-          const contentElements = await page.$$(contentSelector);
-          const textPieces = [];
-          for (const element of contentElements) {
-            const innerTextProperty = await element.getProperty("innerText");
-            const innerText = (await innerTextProperty?.jsonValue()) as string;
-            textPieces.push(innerText);
-          }
-          yield { content: textPieces.join("\n"), link };
-        }
-
-        this.logger.debug(`Finshed fetching ${newsOutlet} ...`);
-      } catch (error) {
-        if (process.env.NODE_ENV === "development") {
-          await page.screenshot({ path: "/tmp/screenshot.png" });
-        }
-        this.logger.error(
-          `Error while searching for ${word} at ${newsOutlet} ...`,
-          { searchUrl, error }
-        );
+      const links: string[] = [];
+      for (const anchor of anchors) {
+        const property = await anchor.getProperty("href");
+        const value = (await property?.jsonValue()) as string;
+        const link = value?.trim();
+        links.push(link);
       }
+
+      this.logger.debug(
+        `Found ${links.length} results for ${word} at ${newsOutlet} ...`
+      );
+
+      for (const link of links) {
+        await page.goto(link, { waitUntil: 'domcontentloaded' });
+        const contentElements = await page.$$(contentSelector);
+        const textPieces = [];
+        for (const element of contentElements) {
+          const innerTextProperty = await element.getProperty("innerText");
+          const innerText = (await innerTextProperty?.jsonValue()) as string;
+          textPieces.push(innerText);
+        }
+        yield { content: textPieces.join("\n"), link };
+      }
+
+      this.logger.debug(`Finshed fetching ${newsOutlet} ...`);
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        await page.screenshot({ path: "/tmp/screenshot.png" });
+      }
+      this.logger.error(
+        `Error while searching for ${word} at ${newsOutlet} ...`,
+        { searchUrl, error }
+      );
+    } finally {
+      page?.close()
     }
     // browser.close();
   }

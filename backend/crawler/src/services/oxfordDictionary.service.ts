@@ -152,8 +152,7 @@ const OxfordDictionaryService = {
 
     for (const headwordEntry of searchEntryResponse.results) {
       logger.debug(
-        `[${tag}] found ${
-          headwordEntry.lexicalEntries?.length ?? 0
+        `[${tag}] found ${headwordEntry.lexicalEntries?.length ?? 0
         } lexical entries ...`
       );
 
@@ -200,19 +199,18 @@ const OxfordDictionaryService = {
         // logger.debug(`[${tag}] found ${lexicalEntry.entries?.length ?? 0} entries ...`);
         for (const entry of lexicalEntry.entries ?? []) {
           logger.debug(
-            `[${tag}] found ${
-              entry.pronunciations?.length ?? 0
+            `[${tag}] found ${entry.pronunciations?.length ?? 0
             } pronunciations ...`
           );
 
-          entry.pronunciations?.forEach((pronunciation) =>
+          entry.pronunciations?.filter(pronunciation => pronunciation.audioFile)?.forEach((pronunciation) =>
             pronunciations.push({
               audioFile: pronunciation.audioFile,
               dialects: pronunciation.dialects,
               phoneticNotation: pronunciation.phoneticNotation,
               phoneticSpelling: pronunciation.phoneticSpelling,
             })
-          ) ?? [];
+          );
 
           logger.debug(
             `[${tag}] found ${entry.senses?.length ?? 0} senses ...`

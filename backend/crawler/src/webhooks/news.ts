@@ -3,9 +3,10 @@ import { createHttpRequestLogger } from "../logger";
 import ElasticSearchService from "../services/elasticSearch.service";
 import NewsCrawlerService from "../services/newsCrawlerService";
 import WikipediaService from "../services/wikipediaService";
+import WordService from "../services/word.service";
 import NewsArticle from "../types/newsArticle";
+import NewsTopicPayload from "../types/newsTopicPayload";
 import { PubSubMessage } from "../types/pubSubMessage";
-import { WordDTO } from "../types/word.dto";
 
 export const newsCrawler = async (
   req: Request,
@@ -19,38 +20,43 @@ export const newsCrawler = async (
     return;
   }
 
-  let word: WordDTO;
+  let payload: NewsTopicPayload;
   try {
-    word = JSON.parse(Buffer.from(pubSubMessage.data, "base64").toString());
-    word = { ...word, name: word.name.toLowerCase() };
+    payload = JSON.parse(Buffer.from(pubSubMessage.data, "base64").toString());
   } catch (error) {
     logger.error("Error while decoding body", error);
     response.sendStatus(400);
     return;
   }
+
+  if (!(await WordService.exists(payload.id))) {
+    response.sendStatus(400);
+    return
+  }
   const elasticSearchService = new ElasticSearchService(logger);
   try {
     const hasEnough = await elasticSearchService.hasEnough(
-      word.name,
-      word.languageCode
+      payload.name,
+      payload.languageCode
     );
     if (!hasEnough) {
       const generator = new NewsCrawlerService(logger).getLatestNewsForWord(
-        word.name
+        payload.name,
+        payload.source
       );
       const articles: NewsArticle[] = [];
       for await (const article of generator) {
         articles.push(article);
       }
 
-      const wikiGenerator = new WikipediaService(logger).getArticlesForWord(word.name);
-      for await (const article of wikiGenerator) {
-        articles.push(article);
-      }
+      // const wikiGenerator = new WikipediaService(logger).getArticlesForWord(payload.name);
+      // for await (const article of wikiGenerator) {
+      // articles.push(article);
+      // }
 
-      elasticSearchService.bulkInsert(articles, word.languageCode);
+      elasticSearchService.bulkInsert(articles, payload.languageCode);
     } else {
-      logger.debug(`${word.name} has enough data ... skiping`);
+      logger.debug(`${payload.name} has enough data ... skiping`);
     }
     response.sendStatus(200);
   } catch (error) {

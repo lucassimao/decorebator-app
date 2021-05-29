@@ -7,22 +7,6 @@ import WordService from "../services/word.service";
 import { PubSubMessage } from "../types/pubSubMessage";
 import { WordDTO } from "../types/word.dto";
 
-export const pushPlaceholdersToPubSub = async (
-  req: Request,
-  response: Response
-): Promise<void> => {
-  const logger = await createHttpRequestLogger(req);
-
-  try {
-    await OxfordDictionaryService.pushPlaceholdersToPubSub();
-    response.sendStatus(200);
-    return;
-  } catch (error) {
-    logger.error("problem pushing placeholders ...");
-    logger.error(error);
-    response.sendStatus(500);
-  }
-};
 
 export const oxfordDictionaryCrawler = async (
   req: Request,
@@ -44,6 +28,11 @@ export const oxfordDictionaryCrawler = async (
     logger.error("Error while decoding body", error);
     response.sendStatus(400);
     return;
+  }
+
+  if (!(await WordService.exists(word.id))) {
+    response.sendStatus(200);
+    return
   }
 
   if (
@@ -72,8 +61,7 @@ export const oxfordDictionaryCrawler = async (
       );
       if (searchEntryResponse) {
         logger.debug(
-          `[${tag}] found ${
-            searchEntryResponse.results?.length ?? 0
+          `[${tag}] found ${searchEntryResponse.results?.length ?? 0
           } head word entries ...`
         );
         existingLemmas = await OxfordDictionaryService.mapRetrieveEntryToLemmas(

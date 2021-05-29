@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Like } from "typeorm";
 import { createHttpRequestLogger } from "../logger";
 import LemmaService from "../services/lemma.service";
+import WordService from "../services/word.service";
 import WordApiService, { PROVIDER } from "../services/wordApi.service";
 import { PubSubMessage } from "../types/pubSubMessage";
 import { WordDTO } from "../types/word.dto";
@@ -26,6 +27,11 @@ export const wordsApiCrawler = async (
     logger.error("Error while decoding body", error);
     response.sendStatus(400);
     return;
+  }
+
+  if (!(await WordService.exists(word.id))) {
+    response.sendStatus(200);
+    return
   }
 
   if (

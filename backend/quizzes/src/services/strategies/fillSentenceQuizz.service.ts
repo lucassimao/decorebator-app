@@ -66,7 +66,7 @@ export default class FillSentenceQuizzService {
       );
       await quizzRepository.update(quizz.id, { esSearchAfter: sort });
 
-      const regex = /<em>(.+)<\/em>/;
+      const regex = /<em>(.+?)<\/em>/; //non-greedy
       const matchResult = example.match(regex);
       if (!matchResult?.length)
         throw new Error("invalid ES result: " + example);

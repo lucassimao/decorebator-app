@@ -3,6 +3,14 @@ import Lemma from "../entities/lemma";
 import Word from "../entities/word";
 
 const WordService = {
+  async exists(wordId?: number): Promise<boolean> {
+    if (!wordId) return false;
+
+    const repository = getRepository(Word);
+    const count = await repository.count({ where: { id: wordId } })
+    return count === 1
+  },
+
   async updateWordLemmas(wordId: number, lemmas: Lemma[]): Promise<boolean> {
     const repository = getRepository(Word);
     const wordWithLemmas = await repository

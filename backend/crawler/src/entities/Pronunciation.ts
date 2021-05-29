@@ -10,7 +10,7 @@ export default class Pronunciation {
   @Column({ nullable: true })
   audioFile?: string;
 
-  @Column("text", { array: true })
+  @Column("text", { array: true, nullable: true })
   dialects?: string[];
   @Column({ nullable: true })
   phoneticNotation?: string;
