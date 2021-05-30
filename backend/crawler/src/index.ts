@@ -29,7 +29,11 @@ const stopApp = async (details: any) => {
 
   const connection = getConnection();
   if (connection?.isConnected) {
-    await connection.close();
+    try {
+      await connection.close();
+    } catch (error) {
+      logger.warn("Error while closing db connection", { error });
+    }
   }
   if (server) {
     server.close();

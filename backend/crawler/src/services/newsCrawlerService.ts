@@ -79,7 +79,7 @@ export default class NewsCrawlerService {
   constructor(private logger: Logger) { }
 
   async *getLatestNewsForWord(word: string, newsOutlet: EnglishNewsSource): AsyncGenerator<NewsArticle> {
-    if (!NewsCrawlerService.browser) {
+    if (!NewsCrawlerService.browser?.isConnected) {
 
       NewsCrawlerService.browser = await puppeteer.launch({
         executablePath: process.env.CHROMIUM_PATH,
