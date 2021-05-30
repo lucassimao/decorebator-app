@@ -16,7 +16,7 @@ export const newsCrawler = async (
   const pubSubMessage: PubSubMessage = req.body?.message;
 
   if (!pubSubMessage) {
-    response.sendStatus(400);
+    response.sendStatus(204);
     return;
   }
 
@@ -25,12 +25,12 @@ export const newsCrawler = async (
     payload = JSON.parse(Buffer.from(pubSubMessage.data, "base64").toString());
   } catch (error) {
     logger.error("Error while decoding body", error);
-    response.sendStatus(400);
+    response.sendStatus(204);
     return;
   }
 
   if (!(await WordService.exists(payload.id))) {
-    response.sendStatus(400);
+    response.sendStatus(204);
     return
   }
   const elasticSearchService = new ElasticSearchService(logger);

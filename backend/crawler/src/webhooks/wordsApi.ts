@@ -15,7 +15,7 @@ export const wordsApiCrawler = async (
   const pubSubMessage: PubSubMessage = req.body?.message;
 
   if (!pubSubMessage) {
-    response.sendStatus(400);
+    response.sendStatus(204);
     return;
   }
 
@@ -25,12 +25,12 @@ export const wordsApiCrawler = async (
     word = { ...word, name: word.name.toLowerCase() };
   } catch (error) {
     logger.error("Error while decoding body", error);
-    response.sendStatus(400);
+    response.sendStatus(204);
     return;
   }
 
   if (!(await WordService.exists(word.id))) {
-    response.sendStatus(200);
+    response.sendStatus(204);
     return
   }
 

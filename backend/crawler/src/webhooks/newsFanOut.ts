@@ -32,7 +32,7 @@ export const newsFanOut = async (
     const pubSubMessage: PubSubMessage = req.body?.message;
 
     if (!pubSubMessage) {
-        response.sendStatus(400);
+        response.sendStatus(204);
         return;
     }
 
@@ -42,7 +42,7 @@ export const newsFanOut = async (
         word = { ...word, name: word.name.toLowerCase() };
     } catch (error) {
         logger.error("Error while decoding body", error);
-        response.sendStatus(400);
+        response.sendStatus(204);
         return;
     }
 

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 
 const getIndexNthWords = (count, begin, text) => {
   if (count < 0) {
-    let start = begin;
+    let start = Math.max(begin, 0);
     let wordsBefore = 0;
     while (wordsBefore < Math.abs(count) && start > 0) {
       if (text[start - 1] === " ") {
