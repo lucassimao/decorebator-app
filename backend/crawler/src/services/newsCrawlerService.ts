@@ -99,13 +99,15 @@ export default class NewsCrawlerService {
     page.setViewport({ width: 1800, height: 800, isMobile: false });
 
     let searchUrl;
+    const newsOutletName = EnglishNewsSource[newsOutlet]
+
     try {
       const { url, searchResultItemSelector, contentSelector } = mapping[
         newsOutlet
       ];
 
       searchUrl = url(`"${word}"`);
-      this.logger.debug(`Searching for ${word} at ${newsOutlet} ...`, {
+      this.logger.debug(`Searching for ${word} at ${newsOutletName} ...`, {
         searchUrl,
       });
       await page.goto(searchUrl, { waitUntil: 'domcontentloaded' });
@@ -120,7 +122,7 @@ export default class NewsCrawlerService {
       }
 
       this.logger.debug(
-        `Found ${links.length} results for ${word} at ${newsOutlet} ...`
+        `Found ${links.length} results for ${word} at ${newsOutletName} ...`
       );
 
       for (const link of links) {
@@ -135,13 +137,13 @@ export default class NewsCrawlerService {
         yield { content: textPieces.join("\n"), link };
       }
 
-      this.logger.debug(`Finshed fetching ${newsOutlet} ...`);
+      this.logger.debug(`Finshed fetching ${newsOutletName} ...`);
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
         await page.screenshot({ path: "/tmp/screenshot.png" });
       }
       this.logger.error(
-        `Error while searching for ${word} at ${newsOutlet} ...`,
+        `Error while searching for ${word} at ${newsOutletName} ...`,
         { searchUrl, error }
       );
     } finally {
