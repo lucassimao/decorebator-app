@@ -4,7 +4,7 @@ RUN apk add --no-cache udev ttf-freefont chromium git nss freetype harfbuzz ca-c
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 ENV CHROMIUM_PATH /usr/bin/chromium-browser
 
-COPY tsconfig.json package* /srv/crawler/
+COPY newrelic.js tsconfig.json package* /srv/crawler/
 COPY src /srv/crawler/src
 
 WORKDIR /srv/crawler

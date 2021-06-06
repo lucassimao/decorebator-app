@@ -1,0 +1,34 @@
+POST https://decorebator-quizz-6bzynn6uxa-uc.a.run.app/
+Content-Type: application/json
+Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2MTk4OTY0NTAsIm5iZiI6MTYxOTg5NjQ1MCwiZXhwIjoxNjIyNDg4NDUwLCJpc3MiOiJhdXRoLmRlY29yZWJhdG9yLmNvbSIsImF1ZGllbmNlIjoiZGVjb3JlYmF0b3IuY29tIiwidXNlcklkIjozLCJjbGFpbXMiOnsicm9sZSI6InVzZXIifX0.LTFSDcaWESG0s8is642uZLz8POkmzKrspfNAv-gHZzo
+X-REQUEST-TYPE: GraphQL
+
+query($input: QuizzInput) {
+    nextQuizz(input: $input) {
+        id
+        type
+        text
+        rightOptionIdx
+        audioFile
+        options {
+        ... on Lemma {
+            name
+        }
+        ... on Sentence {
+            text
+        }
+        }
+        word {
+        name
+        id
+        lemma {
+            name
+            lexicalCategory
+        }
+        }
+    }
+}
+
+{
+   "input":{ "types": ["FILL_NEWS_SENTENCE"], "wordlistId": 96}
+}

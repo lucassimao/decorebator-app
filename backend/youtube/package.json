@@ -22,11 +22,12 @@
   },
   "homepage": "https://github.com/lucassimao/decorebator-app#readme",
   "dependencies": {
-    "apollo-server": "^2.19.0",
+    "apollo-server": "^2.25.0",
     "class-validator": "^0.12.2",
     "gcp-metadata": "^4.2.1",
     "graphql": "^15.3.0",
     "jsonwebtoken": "^8.5.1",
+    "metadata-scraper": "^0.2.23",
     "morgan": "^1.10.0",
     "pg": "^8.5.1",
     "typeorm": "^0.2.29",

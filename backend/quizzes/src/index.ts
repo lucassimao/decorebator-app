@@ -1,3 +1,4 @@
+require('newrelic')
 import { GraphQLFileLoader } from "@graphql-tools/graphql-file-loader";
 import { loadSchemaSync } from "@graphql-tools/load";
 import { ApolloServer, ServerInfo } from "apollo-server";

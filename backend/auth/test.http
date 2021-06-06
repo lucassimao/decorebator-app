@@ -1,0 +1,12 @@
+@authProductionUrl = https://decorebator-auth-6bzynn6uxa-uc.a.run.app
+@authDevUrl = http://localhost:3001
+
+@authUrl = {{authDevUrl}}
+
+### Auth
+curl {{authUrl}}/signin \
+-H "content-type: application/json" \
+-d '{"login":"lsimaocosta@gmail.com","password":"123"}'
+    
+
+

@@ -64,7 +64,7 @@ async function searchSubtitles(videoId) {
     const options = { headers: { "Accept-Language": "en, en-uk" } };
     https
       .get(
-        `https://www.youtube.com/get_video_info?video_id=${videoId}`,
+        `https://www.youtube.com/get_video_info?video_id=${videoId}&html5=1`,
         options,
         (res) => {
           const { statusCode } = res;
@@ -86,7 +86,8 @@ async function searchSubtitles(videoId) {
                   );
                 }
 
-                const regex = /({"captionTracks":.*isTranslatable":(true|false)}])/;
+                const regex =
+                  /({"captionTracks":.*isTranslatable":(true|false)}])/;
                 const [match] = regex.exec(decodedData);
                 const { captionTracks } = JSON.parse(`${match}}`);
 

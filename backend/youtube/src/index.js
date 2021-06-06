@@ -13,9 +13,9 @@ if (!process.env.PORT) {
 let server = null;
 
 const stopApp = async (info) => {
-  if (typeof info !== 'string'){
-    logger.error('Stoping app due error',info)
-}
+  if (typeof info !== "string") {
+    logger.error("Stoping app due error", info);
+  }
   const connection = getConnection();
   if (connection?.isConnected) {
     await connection.close();
@@ -23,7 +23,7 @@ const stopApp = async (info) => {
   if (server) {
     server.stop();
   }
-  process.exit(info === 'SIGTERM' ? 0:-1)
+  process.exit(info === "SIGTERM" ? 0 : -1);
 };
 
 async function init() {
@@ -33,18 +33,18 @@ async function init() {
     typeDefs,
     resolvers,
     logger,
-    context: async ({req}) => {
+    context: async ({ req }) => {
       if (!req.headers?.authorization) return;
       const user = await AuthService.authenticate(req.headers.authorization);
       return { user };
-    },    
+    },
     cors: {
       origin: "*",
       allowedHeaders: "*",
       exposedHeaders: "*",
       credentials: true,
     },
-    introspection: true
+    introspection: true,
   });
   server.listen({ port: process.env.PORT }).then(({ url }) => {
     logger.info(`🚀 Server ready at ${url}`);
@@ -54,6 +54,6 @@ async function init() {
 process.once("SIGUSR2", stopApp);
 process.once("uncaughtException", stopApp);
 process.once("unhandledRejection", stopApp);
-process.once("SIGTERM", stopApp);    
+process.once("SIGTERM", stopApp);
 
 init();

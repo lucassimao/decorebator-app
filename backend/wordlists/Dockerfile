@@ -6,7 +6,7 @@ RUN apk add g++ make python2 git poppler-utils tesseract-ocr
 # RUN npm config set //npm.pkg.github.com/:_authToken $GITHUB_TOKEN
 
 COPY package* /srv/wordlists/
-COPY tsconfig.json /srv/wordlists/
+COPY newrelic.js tsconfig.json /srv/wordlists/
 
 WORKDIR /srv/wordlists
 RUN npm ci

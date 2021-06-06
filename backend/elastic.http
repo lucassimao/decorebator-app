@@ -70,12 +70,12 @@ curl "http://localhost:9200/decorebator-en/_search" -H 'Content-Type: applicatio
 
 ### search query
 
-curl -X GET "http://34.70.12.183:9200/decorebator-en/_search?pretty" -H 'Content-Type: application/json' -d'
+curl -X GET "http://34.122.90.48:9200/decorebator-en/_search?pretty" -H 'Content-Type: application/json' -d'
 {
   #  "from":2,
   #  "size":1,
-   "query": {"match" : { "content" : {"query": "hoard"}} }, 
-  #  "query": {"match_phrase" : { "content" : "tear down"} },
+   # "query": {"match" : { "content" : {"query": "aspirational"}} }, 
+   "query": {"match_phrase" : { "content" : "clock out"} },
    "highlight": {
      "order": "score",
      "boundary_scanner_locale":"en-US",
@@ -88,8 +88,8 @@ curl -X GET "http://34.70.12.183:9200/decorebator-en/_search?pretty" -H 'Content
    },
   "track_total_hits": false,
   "_source": false,
-  "sort": ["_doc"],
-  "search_after": [0]
+  "sort": ["_doc"]
+  # "search_after": [0]
   # "sort": [ {"timestamp": {"order": "asc" }}]
    #"fields": ["timestamp"]          
 }
@@ -104,7 +104,7 @@ curl -X GET "http://localhost:9200/decorebator-en/_search?pretty" -H 'Content-Ty
      "bool": {
        "minimum_should_match": 1,
        "should": [
-         {"match_phrase" : { "content" : "tear down"} }
+         {"match_phrase" : { "content" : "man up"} }
          #{"match" : { "attachment.content" : {"query": "orchestrate"}} }
        ]
      }

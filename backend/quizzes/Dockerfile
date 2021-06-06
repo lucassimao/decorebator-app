@@ -1,6 +1,6 @@
 FROM node:15.5.0-alpine3.10
 
-COPY tsconfig.json package* /srv/quizzes/
+COPY newrelic.js tsconfig.json package* /srv/quizzes/
 WORKDIR /srv/quizzes
 RUN npm ci
 

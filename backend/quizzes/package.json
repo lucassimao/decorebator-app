@@ -49,6 +49,7 @@
     "graphql": "^15.4.0",
     "graphql-tools": "^7.0.2",
     "jsonwebtoken": "^8.5.1",
+    "newrelic": "^7.5.0",
     "pg": "^8.5.1",
     "string-similarity": "^4.0.4",
     "typeorm": "^0.2.29",

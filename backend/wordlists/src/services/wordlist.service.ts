@@ -25,6 +25,7 @@ type ListDTO = {
 };
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_PAGE = 0;
+const ALLOWED_LANGUAGES = ["en", "fr", "de", "it", "pt", "es"]
 
 const topic: string = process.env.PUB_SUB_WORDS_TOPIC ?? ''
 if (!topic) {
@@ -66,7 +67,15 @@ const list = (
  */
 const save = async (wordlistDTO: WordlistDTO, user: User) => {
   const repository = getRepository(Wordlist);
-  
+
+  if (!wordlistDTO.language) {
+    throw new Error("Language is required");
+  }
+
+  if (!ALLOWED_LANGUAGES.includes(wordlistDTO.language)) {
+    throw new Error("Unsupported language: " + wordlistDTO.language);
+  }
+
   const {
     minWordLength = 1,
     onlyNewWords = false,
@@ -84,7 +93,7 @@ const save = async (wordlistDTO: WordlistDTO, user: User) => {
       wordlistDTO.base64EncodedFile
     );
     var t0 = performance.now();
-    words = await __extractWordsFromBuffer(buffer, fileType,oneWordPerLine);
+    words = await __extractWordsFromBuffer(buffer, fileType, oneWordPerLine);
     var t1 = performance.now();
 
     fileInfo = {
@@ -95,14 +104,14 @@ const save = async (wordlistDTO: WordlistDTO, user: User) => {
   } else if (url) {
 
     try {
-      const response = await axios({ method: 'get',url})
-      const root = parse( response.data);
+      const response = await axios({ method: 'get', url })
+      const root = parse(response.data);
       const title = root.querySelector('title').text;
       words = await __extractWordsFromBuffer(Buffer.from(response.data), 'text/html');
-      if (!wordlist.description){
+      if (!wordlist.description) {
         wordlist.description = title;
       }
-    } catch (error) { 
+    } catch (error) {
       logger.error('Error while requesting ' + url);
       if (error.response) {
         logger.error(`Request was made but the server responded with a status code ${error.response.status}`)
@@ -113,7 +122,7 @@ const save = async (wordlistDTO: WordlistDTO, user: User) => {
       }
     }
 
-  } 
+  }
   else if (Array.isArray(wordlistDTO.words)) {
     words = wordlistDTO.words?.map(({ name }) => name).filter(notEmpty);
   }
@@ -196,7 +205,7 @@ const getWithWords = async (id: number, user: User) =>
 const update = async (id: number, updateObj: DeepPartial<Wordlist>) =>
   getRepository(Wordlist).update(id, updateObj);
 
-const remove = async (id: number) =>  getRepository(Wordlist).delete(id)
+const remove = async (id: number) => getRepository(Wordlist).delete(id)
 
 /**
  * Checks if a string contains a valid binary file
@@ -227,18 +236,9 @@ const __parseBase64EncodedFile = (base64EncodedFile: string) => {
 const __extractWordsFromBuffer = async (
   buffer: Buffer,
   fileType: string,
-  oneWordPerLine= false
+  oneWordPerLine = false
 ): Promise<Array<string>> => {
-  if (oneWordPerLine){
-    const allWords = buffer.toString('utf8')
-        .toLowerCase()
-        .split(/\n/)
-        .map(word => word.trim())
-        .filter(string => string.length > 0)
-        .sort();
 
-    return allWords;
-  }
   return new Promise((resolve, reject) => {
     //TODO<backend> buffer size should be bigger for paying users
     const options = {
@@ -254,10 +254,10 @@ const __extractWordsFromBuffer = async (
         logger.error(`Error while extracting text from a ${fileType}`, error);
         reject(error);
       } else {
-        
+
         const allWords = text
           .toLowerCase()
-          .split(/\s+/)
+          .split(oneWordPerLine ? /\n/ : /\s+/)
           .map(word => word.trim())
           .filter(string => string.length > 0)
           .sort();

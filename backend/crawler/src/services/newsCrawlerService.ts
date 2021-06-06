@@ -14,7 +14,7 @@ const mapping: Mapping = {
   HITHER_AND_THITHER: {
     url: (word: string) =>
       `https://hitherandthither.net/?s=${encodeURIComponent(word)}`,
-    searchResultItemSelector: "li.grid-element a",
+    searchResultItemSelector: ".category-posts-grid li.grid-element a",
     contentSelector: "div.post-body p",
   },
 
@@ -74,32 +74,28 @@ const onRequestInterceptor = (request: any) => {
 };
 
 export default class NewsCrawlerService {
-  static browser: Browser;
 
   constructor(private logger: Logger) { }
 
   async *getLatestNewsForWord(word: string, newsOutlet: EnglishNewsSource): AsyncGenerator<NewsArticle> {
-    if (!NewsCrawlerService.browser?.isConnected) {
 
-      NewsCrawlerService.browser = await puppeteer.launch({
-        executablePath: process.env.CHROMIUM_PATH,
-        headless: true,
-        args: [
-          "--disable-dev-shm-usage",
-          "--no-sandbox",
-          "--disable-setuid-sandbox",
-        ],
-      });
-    }
+    const browser = await puppeteer.launch({
+      executablePath: process.env.CHROMIUM_PATH,
+      headless: true,
+      args: [
+        "--disable-dev-shm-usage",
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+      ],
+    });
 
 
-    const page = await NewsCrawlerService.browser.newPage();
+    const page = await browser.newPage();
     await page.setRequestInterception(true);
     page.on("request", onRequestInterceptor);
     page.setViewport({ width: 1800, height: 800, isMobile: false });
 
     let searchUrl;
-    const newsOutletName = EnglishNewsSource[newsOutlet]
 
     try {
       const { url, searchResultItemSelector, contentSelector } = mapping[
@@ -107,7 +103,7 @@ export default class NewsCrawlerService {
       ];
 
       searchUrl = url(`"${word}"`);
-      this.logger.debug(`Searching for ${word} at ${newsOutletName} ...`, {
+      this.logger.debug(`Searching for ${word} at ${newsOutlet} ...`, {
         searchUrl,
       });
       await page.goto(searchUrl, { waitUntil: 'domcontentloaded' });
@@ -122,7 +118,7 @@ export default class NewsCrawlerService {
       }
 
       this.logger.debug(
-        `Found ${links.length} results for ${word} at ${newsOutletName} ...`
+        `Found ${links.length} results for ${word} at ${newsOutlet} ...`
       );
 
       for (const link of links) {
@@ -137,18 +133,18 @@ export default class NewsCrawlerService {
         yield { content: textPieces.join("\n"), link };
       }
 
-      this.logger.debug(`Finshed fetching ${newsOutletName} ...`);
+      this.logger.debug(`Finshed fetching ${newsOutlet} ...`);
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
         await page.screenshot({ path: "/tmp/screenshot.png" });
       }
       this.logger.error(
-        `Error while searching for ${word} at ${newsOutletName} ...`,
+        `Error while searching for ${word} at ${newsOutlet} ...`,
         { searchUrl, error }
       );
     } finally {
       page?.close()
     }
-    // browser.close();
+    browser.close();
   }
 }

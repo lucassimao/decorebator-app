@@ -1,3 +1,6 @@
+@crawlerProductionUrl = https://decorebator-crawler-6bzynn6uxa-uc.a.run.app
+@crawlerDevUrl = http://localhost:3005
+
 ### Auth
 curl "https://decorebator-auth-6bzynn6uxa-uc.a.run.app/signin" \
 -H "content-type: application/json" \
@@ -10,13 +13,14 @@ curl "https://decorebator-auth-6bzynn6uxa-uc.a.run.app/signin" \
 
 
 ### Publish 'put through' to oxforddictionaries
-curl -d '{"message":{"data":"eyJsYW5ndWFnZUNvZGUiOiJlbiIsIm5hbWUiOiJwdXQgdGhyb3VnaCIsImlkIjogMTI3MTV9Cg=="}}' 
+
+curl -d '{"message":{"data":"eyJsYW5ndWFnZUNvZGUiOiJlbiIsIm5hbWUiOiJ0ZWFyIGRvd24iLCJpZCI6IDEyNzI1LCJzb3VyY2UiOiJISVRIRVJfQU5EX1RISVRIRVIifQo="}}' 
     -H "content-type: application/json" 
     http://localhost:3005/words/oxforddictionaries
 
 
-### Push 'put through' to news crawler
+### Push 'weight in' to news crawler
 
-curl "http://localhost:3004/words/news" -H 'Content-Type: application/json' 
--d'{"message":{"data":"eyJsYW5ndWFnZUNvZGUiOiJlbiIsIm5hbWUiOiJzbG93IGRvd24ifQo="}}'
+curl {{crawlerDevUrl}}/words/news -H 'Content-Type: application/json' 
+-d'{"message":{"data":"eyJsYW5ndWFnZUNvZGUiOiJlbiIsIm5hbWUiOiJyZW1vdGUiLCJpZCI6IDEyNzI1LCJzb3VyY2UiOiJISVRIRVJfQU5EX1RISVRIRVIifQo="}}'
 
