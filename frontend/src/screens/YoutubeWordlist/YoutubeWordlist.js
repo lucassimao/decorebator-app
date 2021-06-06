@@ -172,18 +172,18 @@ function Screen(props) {
               InputProps={
                 state.url
                   ? {
-                      classes: { adornedEnd: classes.urlInputEndAdornment },
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            aria-label="clear youtube video's url"
-                            onClick={clearVideoUrl}
-                          >
-                            <ClearIcon />
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }
+                    classes: { adornedEnd: classes.urlInputEndAdornment },
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="clear youtube video's url"
+                          onClick={clearVideoUrl}
+                        >
+                          <ClearIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }
                   : null
               }
               inputRef={urlTextFieldRef}

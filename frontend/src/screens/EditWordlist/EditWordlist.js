@@ -5,7 +5,6 @@ import PropTypes from "proptypes";
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
-import AppBreadcrumb from "../../components/ui/AppBreadcrumb";
 import {
   HIDE_PROGRESS_MODAL,
   SHOW_PROGRESS_MODAL,

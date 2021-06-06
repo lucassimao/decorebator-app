@@ -7,9 +7,10 @@ import Typography from "@material-ui/core/Typography";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import ClearIcon from "@material-ui/icons/Clear";
 import PropTypes from "proptypes";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
+import { useLazyQuery } from "@apollo/client";
 import isUrl from "validator/es/lib/isURL";
 import WordlistForm from "../../components/core/WordlistForm";
 import {
@@ -21,6 +22,7 @@ import {
   SET_SUCCESS_SNACKBAR,
 } from "../../redux/deprecated/snackbar";
 import wordlistService from "../../services/wordlist.service";
+import { GET_URL_METADATA } from "./graphql";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -64,11 +66,26 @@ function Screen(props) {
   const [showForm, setShowForm] = useState(false);
   const [url, setUrl] = useState("");
 
+  const [fetchUrlMetadata, { called, loading, data }] = useLazyQuery(GET_URL_METADATA);
+
+  useEffect(() => {
+    if (!called) return
+
+    if (loading) {
+      showProgressModal("Wait ...", "Fetching metadata...");
+    } else {
+      hideProgressModal();
+    }
+
+  }, [called, loading, showProgressModal, hideProgressModal])
+
+
   const onSubmit = async () => {
     if (showForm) {
       return createNewWordlist();
     } else {
       if (isUrl(url)) {
+        fetchUrlMetadata({ variables: { url } })
         setShowForm(true);
       } else {
         onError("Use a valid URL");
@@ -115,6 +132,31 @@ function Screen(props) {
     setShowForm(false);
   };
 
+  const getBody = () => {
+    if (loading) return null
+
+    if (showForm && data) {
+      return (<WordlistForm
+        onSubmit={createNewWordlist}
+        allowMinWordLength
+        allowOnlyNewWords
+        name={data?.urlMetaData?.title}
+        description={data?.urlMetaData?.description}
+      />)
+    }
+
+    return (<Fab
+      size="large"
+      className={classes.mainButton}
+      onClick={onSubmit}
+      variant="extended"
+      color="primary"
+    >
+      Get url
+    </Fab>)
+
+  }
+
   return (
     <Container className={classes.container}>
       <header className={classes.header}>
@@ -148,46 +190,27 @@ function Screen(props) {
           InputProps={
             url
               ? {
-                  classes: { adornedEnd: classes.urlInputEndAdornment },
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="clear url"
-                        onClick={clearVideoUrl}
-                      >
-                        <ClearIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }
+                classes: { adornedEnd: classes.urlInputEndAdornment },
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="clear url"
+                      onClick={clearVideoUrl}
+                    >
+                      <ClearIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }
               : null
           }
           inputRef={urlTextFieldRef}
           label="Url"
           variant="outlined"
         />
-
-        {showForm && (
-          <WordlistForm
-            onSubmit={createNewWordlist}
-            allowMinWordLength
-            allowOnlyNewWords
-          />
-        )}
-
-        {!showForm && (
-          <Fab
-            size="large"
-            className={classes.mainButton}
-            onClick={onSubmit}
-            variant="extended"
-            color="primary"
-          >
-            Get url
-          </Fab>
-        )}
+        {getBody()}
       </div>
-    </Container>
+    </Container >
   );
 }
 
