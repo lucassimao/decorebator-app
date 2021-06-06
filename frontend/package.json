@@ -10,7 +10,7 @@
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.57",
     "graphql": "^15.4.0",
-    "immer": "^1.10.0",
+    "immer": "^8.0.1",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "react-hook-form": "^7.8.1",
