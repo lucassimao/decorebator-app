@@ -9,7 +9,6 @@ import { LanguageCode } from "../types/languageCode";
 import { WordDTO } from "../types/word.dto";
 import { SuccessfulReponse } from "../types/wordApiResponse";
 import moment from "moment";
-import LemmaService from "./lemma.service";
 
 const apiKey = process.env.WORDS_API_KEY;
 if (!apiKey) {
@@ -32,6 +31,7 @@ const axiosConfig: AxiosRequestConfig = {
 
 export const PROVIDER = "wordsApi";
 
+// supports only the english language
 export default class WordApiService {
   private logger: winston.Logger;
 
@@ -157,9 +157,8 @@ export default class WordApiService {
 
   async search(
     word: string,
-    language: LanguageCode
   ): Promise<SuccessfulReponse | undefined> {
-    const tag = `${word}(${language})`;
+    const tag = `${word}(${LanguageCode.EN})`;
 
     try {
       const response = await axios(encodeURIComponent(word), axiosConfig);

@@ -10,7 +10,7 @@ if (!elasticSearchHost) {
 const MINIMUM_EXPECTED_RESULTS = 50;
 
 export default class ElasticSearchService {
-  constructor(private logger: Logger) {}
+  constructor(private logger: Logger) { }
 
   async hasEnough(lemma: string, languageCode: string): Promise<boolean> {
     const client = new Client({ node: elasticSearchHost });
@@ -52,6 +52,8 @@ export default class ElasticSearchService {
     articles: NewsArticle[],
     languageCode: string
   ): Promise<void> {
+    if (!articles?.length) return;
+
     const client = new Client({ node: elasticSearchHost });
     this.logger.debug(`Bulk indexing ${articles.length} articles`);
 

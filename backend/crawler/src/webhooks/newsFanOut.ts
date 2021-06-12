@@ -1,10 +1,9 @@
+import { PubSub } from "@google-cloud/pubsub";
 import { Request, Response } from "express";
 import { createHttpRequestLogger } from "../logger";
+import { LanguageToNewsSourceMapping } from "../types/newsSource";
 import NewsTopicPayload from "../types/newsTopicPayload";
-import { PubSubMessage } from "../types/pubSubMessage";
 import { WordDTO } from "../types/word.dto";
-import { PubSub } from "@google-cloud/pubsub";
-import EnglishNewsSource from "../types/englishNewsSource";
 
 const topic: string = process.env.PUB_SUB_NEWS_FAN_OUT_TOPIC ?? "";
 if (!topic) {
@@ -29,32 +28,16 @@ export const newsFanOut = async (
     response: Response
 ): Promise<void> => {
     const logger = await createHttpRequestLogger(req);
-    const pubSubMessage: PubSubMessage = req.body?.message;
-
-    if (!pubSubMessage) {
-        response.sendStatus(204);
-        return;
-    }
-
-    let word: WordDTO;
-    try {
-        word = JSON.parse(Buffer.from(pubSubMessage.data, "base64").toString());
-        word = { ...word, name: word.name.toLowerCase() };
-    } catch (error) {
-        logger.error("Error while decoding body", error);
-        response.sendStatus(204);
-        return;
-    }
-
+    const word: WordDTO = (<any>req).payload;
     const pubSubClient = new PubSub();
 
     const tag = `${word.name}(${word.languageCode})`;
     logger.debug(`[${tag}] fanning out to Pub/Sub ...`);
 
-    for (const key of enumKeys(EnglishNewsSource)) {
+    for (const source of enumKeys(LanguageToNewsSourceMapping[word.languageCode])) {
         const data: NewsTopicPayload = {
             ...word,
-            source: EnglishNewsSource[key]
+            source
         };
         const dataBuffer = Buffer.from(JSON.stringify(data));
         await pubSubClient.topic(topic).publish(dataBuffer);

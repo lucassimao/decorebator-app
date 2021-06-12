@@ -1,12 +1,12 @@
 import { LanguageCode } from "./languageCode";
-import EnglishNewsSource from "./englishNewsSource";
+import NewsSource from "./newsSource";
 
 
 type NewsTopicPayload = {
     id?: number;
     languageCode: LanguageCode;
     name: string;
-    source: EnglishNewsSource;
+    source: NewsSource;
 }
 
 export default NewsTopicPayload

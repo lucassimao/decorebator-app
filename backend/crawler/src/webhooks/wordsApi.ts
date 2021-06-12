@@ -2,9 +2,8 @@ import { Request, Response } from "express";
 import { Like } from "typeorm";
 import { createHttpRequestLogger } from "../logger";
 import LemmaService from "../services/lemma.service";
-import WordService from "../services/word.service";
 import WordApiService, { PROVIDER } from "../services/wordApi.service";
-import { PubSubMessage } from "../types/pubSubMessage";
+import { LanguageCode } from "../types/languageCode";
 import { WordDTO } from "../types/word.dto";
 
 export const wordsApiCrawler = async (
@@ -12,33 +11,16 @@ export const wordsApiCrawler = async (
   response: Response
 ): Promise<void> => {
   const logger = await createHttpRequestLogger(req);
-  const pubSubMessage: PubSubMessage = req.body?.message;
 
-  if (!pubSubMessage) {
+  let word: WordDTO = (<any>req).payload;
+
+  // wordsApi only supports english
+  if (word.languageCode !== LanguageCode.EN) {
     response.sendStatus(204);
     return;
   }
 
-  let word: WordDTO;
-  try {
-    word = JSON.parse(Buffer.from(pubSubMessage.data, "base64").toString());
-    word = { ...word, name: word.name.toLowerCase() };
-  } catch (error) {
-    logger.error("Error while decoding body", error);
-    response.sendStatus(204);
-    return;
-  }
-
-  if (!(await WordService.exists(word.id))) {
-    response.sendStatus(204);
-    return
-  }
-
-  if (
-    !["en", "en-us", "en-uk"].includes(word.languageCode.toLocaleLowerCase())
-  ) {
-    throw new Error(`Invalid languageCode ${word.languageCode}`);
-  }
+  word = { ...word, name: word.name.toLowerCase() };
 
   const existingLemmas = await LemmaService.findAllBy({
     provider: PROVIDER,
@@ -52,7 +34,7 @@ export const wordsApiCrawler = async (
   try {
     if (isRefreshRequired) {
       const sevice = new WordApiService(logger);
-      const result = await sevice.search(word.name, "en");
+      const result = await sevice.search(word.name);
       if (result?.results?.length) {
         await sevice.mapResultToLemmas(word, result);
       } else {

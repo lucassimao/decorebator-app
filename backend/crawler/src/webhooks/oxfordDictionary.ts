@@ -4,7 +4,6 @@ import { createHttpRequestLogger } from "../logger";
 import LemmaService from "../services/lemma.service";
 import OxfordDictionaryService from "../services/oxfordDictionary.service";
 import WordService from "../services/word.service";
-import { PubSubMessage } from "../types/pubSubMessage";
 import { WordDTO } from "../types/word.dto";
 
 
@@ -13,33 +12,10 @@ export const oxfordDictionaryCrawler = async (
   response: Response
 ): Promise<void> => {
   const logger = await createHttpRequestLogger(req);
-  const pubSubMessage: PubSubMessage = req.body?.message;
 
-  if (!pubSubMessage) {
-    response.sendStatus(204);
-    return;
-  }
+  let word: WordDTO = (<any>req).payload;
+  word = { ...word, name: word.name.toLowerCase() };
 
-  let word: WordDTO;
-  try {
-    word = JSON.parse(Buffer.from(pubSubMessage.data, "base64").toString());
-    word = { ...word, name: word.name.toLowerCase() };
-  } catch (error) {
-    logger.error("Error while decoding body", error);
-    response.sendStatus(204);
-    return;
-  }
-
-  if (!(await WordService.exists(word.id))) {
-    response.sendStatus(204);
-    return
-  }
-
-  if (
-    !["en", "en-us", "en-uk"].includes(word.languageCode.toLocaleLowerCase())
-  ) {
-    throw new Error(`Invalid languageCode ${word.languageCode}`);
-  }
 
   const tag = `${word.name}(${word.languageCode})`;
 
