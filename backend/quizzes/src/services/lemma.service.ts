@@ -6,8 +6,10 @@ const LemmaService = {
   getRandomLemmasForWord: async (
     wordId: number,
     qty: number,
+    languageCode: string,
     lexicalCategory?: string
   ): Promise<Lemma[]> => {
+
     const lemmaRepository = getRepository(Lemma);
 
     const qBuilder = lemmaRepository
@@ -27,6 +29,7 @@ const LemmaService = {
 
         return `lemma.id NOT IN (${subQuery})`;
       })
+      .andWhere("lemma.language ILIKE :languageCode", { languageCode: `${languageCode}%` })
       .limit(qty)
       .setParameters({ wordId, lexicalCategory })
       .orderBy("RANDOM()");

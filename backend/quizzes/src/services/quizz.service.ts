@@ -167,7 +167,7 @@ export default class QuizzService {
     ];
 
     const lastQuizz = await quizzRepository.findOne({
-      order: { updatedAt: "DESC" },
+      order: { id: "DESC" },
       where: { ownerId },
     });
 
@@ -241,10 +241,12 @@ export default class QuizzService {
 
     const lemma = sense.lemma;
     if (!lemma) throw new Error("no lemma");
+    if (!lemma.language) throw new Error(`no language for lemma ${lemma.id}`);
 
     const options = await LemmaService.getRandomLemmasForWord(
       quizz.wordId,
       OPTIONS_LENGTH,
+      lemma.language.split('-')[0],
       lemma.lexicalCategory
     );
     if (!options?.length) {
@@ -273,7 +275,8 @@ export default class QuizzService {
 
     const lemma = sense.lemma;
     if (!lemma) throw new Error("no lemma");
-    if (!lemma?.pronunciations?.length) throw new Error("no pronunciations");
+    if (!lemma.language) throw new Error("no language for lemma ${lemma.id}");
+    if (!lemma?.pronunciations?.length) throw new Error(`no pronunciations for lemma ${lemma.id}`);
 
     const allPronunciations = lemma.pronunciations;
     const pronunciationIdx = Math.floor(
@@ -284,6 +287,7 @@ export default class QuizzService {
     const options = await LemmaService.getRandomLemmasForWord(
       quizz.wordId,
       OPTIONS_LENGTH,
+      lemma.language.split('-')[0],
       lemma.lexicalCategory
     );
     if (!options?.length) {

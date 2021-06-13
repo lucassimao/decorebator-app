@@ -41,7 +41,8 @@ export default class FillSentenceQuizzService {
 
   private static async nextFillNewsSentenceQuizz(
     word: Word,
-    ownerId: number
+    ownerId: number,
+    language: string
   ): Promise<QuizzWithOptions<string>> {
     if (!word?.id) throw new Error("invalid word");
 
@@ -61,7 +62,7 @@ export default class FillSentenceQuizzService {
     try {
       const { example, sort } = await ElasticSearchService.getExample(
         word.name,
-        "en",
+        language,
         quizz.esSearchAfter
       );
       await quizzRepository.update(quizz.id, { esSearchAfter: sort });
@@ -75,7 +76,8 @@ export default class FillSentenceQuizzService {
       return FillSentenceQuizzService.buildQuizzWithOptions(
         quizz,
         rightOption,
-        example.replace(/<em>|<\/em>/gi, "")
+        example.replace(/<em>|<\/em>/gi, ""),
+        language
       );
     } catch (error) {
       if (quizz.esSearchAfter) {
@@ -94,12 +96,13 @@ export default class FillSentenceQuizzService {
       QuizzType.FillSentence,
       wordlistId
     );
-    if (!quizz.word) throw new Error("no sense");
+    if (!quizz.word) throw new Error("no word");
     if (!quizz.sense) throw new Error("no sense");
     if (!quizz.sense.lemma) throw new Error("no lemma");
 
-    const quizzRepository = getRepository(Quizz);
     const lemma = quizz.sense.lemma;
+    if (!lemma.language) throw new Error("no language");
+
     let fetchFromElasticSearch = true;
 
     if (!quizz.senseDetail) {
@@ -107,6 +110,7 @@ export default class FillSentenceQuizzService {
         quizz.sense
       );
       if (senseDetail) {
+        const quizzRepository = getRepository(Quizz);
         await quizzRepository.update(quizz.id, {
           senseDetail,
           esSearchAfter: 0,
@@ -120,7 +124,8 @@ export default class FillSentenceQuizzService {
       try {
         const result = await FillSentenceQuizzService.nextFillNewsSentenceQuizz(
           quizz.word,
-          ownerId
+          ownerId,
+          lemma.language.split('-')[0]
         );
         return result;
       } catch (error) {
@@ -145,6 +150,7 @@ export default class FillSentenceQuizzService {
       quizz,
       rightOption,
       example,
+      lemma.language,
       lemma
     );
   }
@@ -153,11 +159,15 @@ export default class FillSentenceQuizzService {
     quizz: Quizz,
     rightOption: string,
     text: string,
+    language: string,
     lemma?: Lemma
   ): Promise<QuizzWithOptions<string>> {
+
+
     const randomLemmas = await LemmaService.getRandomLemmasForWord(
       quizz.wordId,
       OPTIONS_LENGTH,
+      language.split('-')[0],
       lemma?.lexicalCategory
     );
     const options = randomLemmas.map((lemma) => lemma.name);

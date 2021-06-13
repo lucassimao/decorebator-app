@@ -28,6 +28,7 @@ export default class WordFromMeaningQuizzService {
 
     const lemma = sense.lemma;
     if (!lemma) throw new Error("no lemma");
+    if (!lemma.language) throw new Error("no lemma language");
 
     if (!quizz.senseDetail) {
       const senseDetail = await senseDetailRepository
@@ -59,6 +60,7 @@ export default class WordFromMeaningQuizzService {
     const options = await LemmaService.getRandomLemmasForWord(
       quizz.wordId,
       OPTIONS_LENGTH,
+      lemma.language.split('-')[0],
       lemma.lexicalCategory
     );
     if (!options?.length) {

@@ -79,30 +79,37 @@ export const oxfordDictionaryCrawler = async (
 
     response.sendStatus(200);
   } catch (error) {
-    if (error.isAxiosError) {
-      if (error.response) {
-        const {
-          response: { data, status, headers },
-        } = error;
-        logger.debug(
-          `[${tag}] Request made and server responded with error ...`,
-          { data, status, headers }
-        );
-      } else if (error.request) {
-        logger.error(
-          `[${tag}] request was made but no response was received ...`,
-          { request: error.request }
-        );
-      } else {
-        logger.error(
-          `[${tag}] Something happened in setting up the request that triggered an Error ...`,
-          { message: error.message }
-        );
-      }
-    } else {
+    if (!error.isAxiosError) {
       logger.error(error);
+      response.sendStatus(500);
+      return
     }
-    response.sendStatus(500);
+
+    let responseStatus = 500;
+    if (error.response) {
+      const {
+        response: { data, status, headers },
+      } = error;
+      logger.debug(
+        `[${tag}] Request made and server responded with error ...`,
+        { data, status, headers }
+      );
+      // word not found in oxford dict
+      if (status === 404) responseStatus = 200;
+
+    } else if (error.request) {
+      logger.error(
+        `[${tag}] request was made but no response was received ...`,
+        { request: error.request }
+      );
+    } else {
+      logger.error(
+        `[${tag}] Something happened in setting up the request that triggered an Error ...`,
+        { message: error.message }
+      );
+    }
+
+    response.sendStatus(responseStatus);
     return;
   }
 };
