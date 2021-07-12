@@ -24,7 +24,6 @@ router.post('*', async (req, res, next) => {
 
   try {
     let buffer
-
     if (typeof pubSubMessage.data === 'string') {
       buffer = Buffer.from(pubSubMessage.data, "base64")
     } else {

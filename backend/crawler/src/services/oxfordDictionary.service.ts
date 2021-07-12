@@ -88,6 +88,8 @@ const OxfordDictionaryService = {
     word: string,
     languageCode: LanguageCode
   ): Promise<RetrieveEntry | undefined> {
+
+
     try {
       const path = `/api/v2/entries/${languageCode}/${encodeURIComponent(
         word
@@ -136,6 +138,7 @@ const OxfordDictionaryService = {
       await pubSubClient.topic(topic).publish(dataBuffer);
     }
   },
+
   async mapRetrieveEntryToLemmas(
     searchEntryResponse: RetrieveEntry,
     word: WordDTO,

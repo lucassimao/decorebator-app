@@ -4,7 +4,10 @@ import { createHttpRequestLogger } from "../logger";
 import LemmaService from "../services/lemma.service";
 import OxfordDictionaryService from "../services/oxfordDictionary.service";
 import WordService from "../services/word.service";
+import { LanguageCode } from "../types/languageCode";
 import { WordDTO } from "../types/word.dto";
+
+const ENTRY_SUPPORTED_LANGUAGES = [LanguageCode.EN, LanguageCode.FR, LanguageCode.ES]
 
 
 export const oxfordDictionaryCrawler = async (
@@ -16,8 +19,14 @@ export const oxfordDictionaryCrawler = async (
   let word: WordDTO = (<any>req).payload;
   word = { ...word, name: word.name.toLowerCase() };
 
-
   const tag = `${word.name}(${word.languageCode})`;
+
+  if (!ENTRY_SUPPORTED_LANGUAGES.includes(word.languageCode)) {
+    logger.debug(`[${tag}] Language isn't supported by oxford entries API  ...`);
+    response.sendStatus(200);
+    return
+  }
+
 
   let existingLemmas = await LemmaService.findAllBy({
     name: word.name,
@@ -51,11 +60,16 @@ export const oxfordDictionaryCrawler = async (
           word.name,
           word.languageCode
         );
+
         const lemmas = lemmatron.results
           .flatMap(({ lexicalEntries }) => lexicalEntries)
           .flatMap(({ inflectionOf }) => inflectionOf)
           .map(({ id }) => id);
+
+        logger.debug(`Found ${lemmas?.length || 0} lemmas`)
+
         for (const lemma of lemmas) {
+          logger.debug(lemma)
           const searchEntryResponse = await OxfordDictionaryService.searchEntry(
             lemma,
             word.languageCode

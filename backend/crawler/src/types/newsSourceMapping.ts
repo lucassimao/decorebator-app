@@ -1,9 +1,11 @@
-import NewsSource, { GermanNewsSource, FrenchNewsSource, EnglishNewsSource, ItalianNewsSource, PortugueseNewsSource, SpanishNewsSource } from "./newsSource";
+import { Page } from "puppeteer";
+import NewsSource, { EnglishNewsSource, FrenchNewsSource, SpanishNewsSource } from "./newsSource";
 
 type MappingItem = {
     url: (word: string) => string;
     searchResultItemSelector: string;
     contentSelector: string;
+    setup?: (page: Page) => Promise<void>
 }
 
 type FullMapping = {
@@ -17,9 +19,9 @@ type LanguageMapping<T extends NewsSource> = {
 const FrenchMapping: LanguageMapping<FrenchNewsSource> = {
     LE_FIGARO: {
         url: (word: string) =>
-            `https://www.lemonde.fr/recherche/?search_keywords=${encodeURIComponent(word)}&search_sort=relevance_desc`,
-        searchResultItemSelector: '.teaser .teaser__link',
-        contentSelector: ".article__paragraph",
+            `https://recherche.lefigaro.fr/recherche/${encodeURIComponent(word)}/`,
+        searchResultItemSelector: '.fig-profil  .fig-profil-headline a',
+        contentSelector: "div.fig-body p.fig-paragraph",
     },
     LE_MONDE: {
         url: (word: string) =>
@@ -81,78 +83,35 @@ const EnglishMapping: LanguageMapping<EnglishNewsSource> = {
     },
 }
 
-const GermanMapping: LanguageMapping<GermanNewsSource> = {
-    SPIEGEL: {
-        url: (word: string) =>
-            `https://www.spiegel.de/suche/?suchbegriff=${encodeURIComponent(word)}&seite=1`,
-        searchResultItemSelector: 'section[data-search-results] article h2 a',
-        contentSelector: "main section div.RichText>p",
-    },
-    BILD: {
-        url: (word: string) =>
-            `https://www.bild.de/suche.bild.html?query=${encodeURIComponent(word)}`,
-        searchResultItemSelector: 'section ol li div>a',
-        contentSelector: "main article div.txt p",
-    },
-    ZEIT: {
-        url: (word: string) =>
-            `https://www.zeit.de/suche/index?q=${encodeURIComponent(word)}`,
-        searchResultItemSelector: 'section article a.zon-teaser-standard__combined-link',
-        contentSelector: ".paragraph.article__item",
-    }
-}
-
-const ItalianMapping: LanguageMapping<ItalianNewsSource> = {
-    CORRIERE_DELLA_SERA: {
-        url: (word: string) =>
-            `https://sitesearch.corriere.it/forward.jsp?q=${encodeURIComponent(word)}#`,
-        searchResultItemSelector: 'div.search-page h1>a',
-        contentSelector: "p.chapter-paragraph",
-    },
-    LA_REPUBLICA: {
-        url: (word: string) =>
-            `https://ricerca.repubblica.it/ricerca/repubblica?query=${encodeURIComponent(word)}&view=repubblica&ref=HRHS`,
-        searchResultItemSelector: 'article h1>a',
-        contentSelector: ".story__text p",
-    }
-}
-
-const PortugueseMapping: LanguageMapping<PortugueseNewsSource> = {
-    ESTADAO: {
-        url: (word: string) =>
-            `https://busca.estadao.com.br/?q=${encodeURIComponent(word)}`,
-        searchResultItemSelector: 'a.link-title',
-        contentSelector: "div.content p",
-    },
-    FOLHA_DE_SAO_PAULO: {
-        url: (word: string) =>
-            `https://search.folha.uol.com.br/?q=${encodeURIComponent(word)}&site=todos`,
-        searchResultItemSelector: 'ol li div.c-headline__content>a',
-        contentSelector: "div.c-news__body p",
-    }
-}
 
 const SpanishMapping: LanguageMapping<SpanishNewsSource> = {
     EL_MUNDO: {
         url: (word: string) =>
             `https://ariadna.elmundo.es/buscador/archivo.html?q=${encodeURIComponent(word)}&b_avanzada=`,
-        searchResultItemSelector: 'ul.lista_resultados li a',
-        contentSelector: "div[data-section=articleBody] p",
+        searchResultItemSelector: 'ul.lista_resultados li h3 a',
+        contentSelector: ".news-item p",
+        setup: async (page) => {
+            await page.goto("https://www.elmundo.es/", { waitUntil: 'domcontentloaded' });
+            await page.waitForSelector("#didomi-notice-agree-button");
+            await page.$eval("#didomi-notice-agree-button", el => el.click());
+        }
     },
     EL_PAIS: {
         url: (word: string) =>
             `https://elpais.com/buscador/?qt=${encodeURIComponent(word)}`,
         searchResultItemSelector: 'div.noticia h2>a',
-        contentSelector: "div.articulo-cuerpo p",
+        contentSelector: "#ctn_article_body p",
+        setup: async (page) => {
+            await page.goto("https://elpais.com/", { waitUntil: 'domcontentloaded' });
+            await page.waitForSelector("#didomi-notice-agree-button");
+            await page.$eval("#didomi-notice-agree-button", el => el.click());
+        }
     }
 }
 
 const fullMapping: FullMapping = {
     ...EnglishMapping,
     ...FrenchMapping,
-    ...GermanMapping,
-    ...ItalianMapping,
-    ...PortugueseMapping,
     ...SpanishMapping
 };
 

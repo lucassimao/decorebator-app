@@ -16,21 +16,6 @@ export enum FrenchNewsSource {
     LE_FIGARO = 'LE_FIGARO',
 }
 
-export enum GermanNewsSource {
-    SPIEGEL = 'SPIEGEL',
-    BILD = 'BILD',
-    ZEIT = 'ZEIT'
-}
-
-export enum ItalianNewsSource {
-    LA_REPUBLICA = 'LA_REPUBLICA',
-    CORRIERE_DELLA_SERA = 'CORRIERE_DELLA_SERA'
-}
-
-export enum PortugueseNewsSource {
-    FOLHA_DE_SAO_PAULO = 'FOLHA_DE_SAO_PAULO',
-    ESTADAO = 'ESTADAO',
-}
 
 export enum SpanishNewsSource {
     EL_PAIS = 'EL_PAIS',
@@ -40,11 +25,8 @@ export enum SpanishNewsSource {
 export const LanguageToNewsSourceMapping = {
     [LanguageCode.EN]: EnglishNewsSource,
     [LanguageCode.FR]: FrenchNewsSource,
-    [LanguageCode.DE]: GermanNewsSource,
-    [LanguageCode.IT]: ItalianNewsSource,
-    [LanguageCode.PT]: PortugueseNewsSource,
     [LanguageCode.ES]: SpanishNewsSource,
 }
 
-type NewsSource = `${EnglishNewsSource | FrenchNewsSource | GermanNewsSource | ItalianNewsSource | PortugueseNewsSource | SpanishNewsSource}`
+type NewsSource = `${EnglishNewsSource | FrenchNewsSource | SpanishNewsSource}`
 export default NewsSource

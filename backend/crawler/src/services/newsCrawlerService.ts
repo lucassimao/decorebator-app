@@ -6,8 +6,9 @@ import NewsArticle from "../types/newsArticle";
 
 
 const onRequestInterceptor = (request: any) => {
+
   if (
-    ["image", 'stylesheet', 'font'].includes(request.resourceType())
+    ["xhr", "ping"].includes(request.resourceType())
   ) {
     request.abort();
   } else {
@@ -28,6 +29,8 @@ export default class NewsCrawlerService {
         "--disable-dev-shm-usage",
         "--no-sandbox",
         "--disable-setuid-sandbox",
+        '--disable-web-security',
+        '--disable-features=IsolateOrigins,site-per-process'
       ],
     });
 
@@ -39,28 +42,34 @@ export default class NewsCrawlerService {
 
     let searchUrl;
 
+
     try {
-      const { url, searchResultItemSelector, contentSelector } = fullMapping[
+      const { url, searchResultItemSelector, contentSelector, setup } = fullMapping[
         newsOutlet
       ];
 
+      if (setup) {
+        await setup(page);
+      }
+
       searchUrl = url(`"${word}"`);
+
       this.logger.debug(`[NewsCrawler] Searching for ${word} at ${newsOutlet} ...`, {
         searchUrl,
       });
       await page.goto(searchUrl, { waitUntil: 'domcontentloaded' });
+      await page.waitForSelector(searchResultItemSelector);
       const anchors = await page.$$(searchResultItemSelector);
 
-      const links: string[] = [];
+      const links: Set<string> = new Set()
       for (const anchor of anchors) {
         const property = await anchor.getProperty("href");
         const value = (await property?.jsonValue()) as string;
-        const link = value?.trim();
-        links.push(link);
+        links.add(value?.trim());
       }
 
       this.logger.debug(
-        `[NewsCrawler] Found ${links.length} results for ${word} at ${newsOutlet} ...`
+        `[NewsCrawler] Found ${links.size} results for ${word} at ${newsOutlet} ...`
       );
 
       for (const link of links) {
