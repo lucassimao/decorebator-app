@@ -1,7 +1,7 @@
 @authProductionUrl = https://decorebator-auth-6bzynn6uxa-uc.a.run.app
 @authDevUrl = http://localhost:3001
 
-@authUrl = {{authDevUrl}}
+@authUrl = {{authProductionUrl}}
 
 ### Auth
 curl {{authUrl}}/signin \

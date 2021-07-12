@@ -8,19 +8,22 @@ curl "https://decorebator-auth-6bzynn6uxa-uc.a.run.app/signin" \
     
 
 
-# Use this to create a payload like the pub sub one
-# echo '{"languageCode":"en","name":"tear down","id": 12714}' | base64
 
 
-### Publish 'put through' to oxforddictionaries
+### Publish 'Luft' to oxforddictionaries
 
-curl -d '{"message":{"data":"eyJsYW5ndWFnZUNvZGUiOiJlbiIsIm5hbWUiOiJ0ZWFyIGRvd24iLCJpZCI6IDEyNzI1LCJzb3VyY2UiOiJISVRIRVJfQU5EX1RISVRIRVIifQo="}}' 
+curl -d '{"message":{"data":"eyJsYW5ndWFnZUNvZGUiOiJkZSIsIm5hbWUiOiJsdWZ0IiwiaWQiOiAyMTUyNiwic291cmNlIjoiU1BJRUdFTCJ9Cg=="}}' 
     -H "content-type: application/json" 
     http://localhost:3005/words/oxforddictionaries
 
 
-### Push 'weight in' to news crawler
+# Use this to create a payload like the pub sub one
+# echo '{"languageCode":"en","name":"tycoon","id": 21527,"source":"HITHER_AND_THITHER"}' | base64
+
+### Push 'luft' to news crawler
+
+
 
 curl {{crawlerDevUrl}}/words/news -H 'Content-Type: application/json' 
--d'{"message":{"data":"eyJsYW5ndWFnZUNvZGUiOiJlbiIsIm5hbWUiOiJyZW1vdGUiLCJpZCI6IDEyNzI1LCJzb3VyY2UiOiJISVRIRVJfQU5EX1RISVRIRVIifQo="}}'
+-d'{"message":{"data":"eyJsYW5ndWFnZUNvZGUiOiJlcyIsIm5hbWUiOiJjYW1iaW8iLCJpZCI6IDIxNTI3LCJzb3VyY2UiOiJFTF9NVU5ETyJ9Cg=="}}'
 

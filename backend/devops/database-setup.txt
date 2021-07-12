@@ -1,0 +1,9 @@
+#!/bash/sh
+
+pg_dump  -h <<IP>> -F t -U postgres -d decorebator -p 5432 -f decorebator-prod.tar
+
+>> create database "decorebator-dev" WITH TEMPLATE template0;
+
+pg_restore -h localhost -d decorebator-dev -U postgres  -p 5432 decorebator-prod.tar
+
+

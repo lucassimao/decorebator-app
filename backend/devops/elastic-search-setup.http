@@ -1,0 +1,46 @@
+
+### Creates the index
+
+curl -X PUT "http://localhost:9200/decorebator-es" -H 'Content-Type: application/json' -d'
+{ 
+  "mappings": {
+    "properties": {
+      "content": {
+        "type": "text",
+        "term_vector": "with_positions_offsets",
+        "analyzer":"spanish"
+      },
+      "timestamp": {
+        "type": "date"
+      }      
+    }
+  }
+}
+'
+
+### Create ingest pipeline
+
+curl -X PUT "http://localhost:9200/_ingest/pipeline/decorebator?pretty" -H 'Content-Type: application/json' -d'
+{
+  "description" : "decorebator crawled content",
+  "processors" : [
+    {
+      "gsub": {
+        "field": "_source.content",
+        "pattern": "Skip to content|Sign in|SKIP TO CONTENT|SKIP TO SITE INDEX|SUBSCRIBE NOW|LOG IN|ADVERTISEMENT|[\n\t]",
+        "replacement": ""
+      },
+      "set": {
+        "field": "_source.timestamp",
+        "value": "{{_ingest.timestamp}}"
+      }            
+    }
+  ]
+}
+'
+
+### Deletes index
+curl -XDELETE "http://localhost:9200/decorebator-es"
+
+
+

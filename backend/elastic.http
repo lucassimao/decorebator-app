@@ -1,47 +1,4 @@
 
-### Create singest pipeline
-
-curl -X PUT "http://34.70.12.183:9200/_ingest/pipeline/decorebator?pretty" -H 'Content-Type: application/json' -d'
-{
-  "description" : "decorebator crawled content",
-  "processors" : [
-    {
-      "gsub": {
-        "field": "_source.content",
-        "pattern": "Skip to content|Sign in|SKIP TO CONTENT|SKIP TO SITE INDEX|SUBSCRIBE NOW|LOG IN|ADVERTISEMENT|[\n\t]",
-        "replacement": ""
-      },
-      "set": {
-        "field": "_source.timestamp",
-        "value": "{{_ingest.timestamp}}"
-      }            
-    }
-  ]
-}
-'
-
-### Deletes index
-curl -XDELETE "http://34.67.56.163:9200/decorebator-en"
-
-
-### Creates the index
-
-curl -X PUT "http://localhost:9200/decorebator-en" -H 'Content-Type: application/json' -d'
-{ 
-  "mappings": {
-    "properties": {
-      "content": {
-        "type": "text",
-        "term_vector": "with_positions_offsets",
-        "analyzer":"english"
-      },
-      "timestamp": {
-        "type": "date"
-      }      
-    }
-  }
-}
-'
 
 ### Send data
 curl -d'@went-through4.json' -H"content-type: application/json" http://localhost:9200/my-index-2/_doc?pipeline=attachment
@@ -70,15 +27,15 @@ curl "http://localhost:9200/decorebator-en/_search" -H 'Content-Type: applicatio
 
 ### search query
 
-curl -X GET "http://34.122.90.48:9200/decorebator-en/_search?pretty" -H 'Content-Type: application/json' -d'
+curl -X GET "http://localhost:9200/decorebator-es/_search?pretty" -H 'Content-Type: application/json' -d'
 {
   #  "from":2,
   #  "size":1,
-   # "query": {"match" : { "content" : {"query": "aspirational"}} }, 
-   "query": {"match_phrase" : { "content" : "clock out"} },
+    "query": {"match" : { "content" : {"query": "cambio"}} }, 
+   #"query": {"match_phrase" : { "content" : "Vladimir Poutine"} },
    "highlight": {
      "order": "score",
-     "boundary_scanner_locale":"en-US",
+     "boundary_scanner_locale":"es",
      "boundary_scanner":"sentence",
      "fields": {
        "content": {
@@ -115,8 +72,8 @@ curl -X GET "http://localhost:9200/decorebator-en/_search?pretty" -H 'Content-Ty
 '
 #### test
 
-curl -X GET "http://localhost:9200/decorebator-en/_search?pretty" -H 'Content-Type: application/json' -d'
+curl -X GET "http://localhost:9200/decorebator-es/_search?pretty" -H 'Content-Type: application/json' -d'
 {
-  "size":2
+  "size":20
 }
 '
