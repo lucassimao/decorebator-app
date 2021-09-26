@@ -1,13 +1,12 @@
 import conf from "../conf";
 
+
+const authorization = process.env.NODE_ENV === "production" ? localStorage.getItem('authorization') : process.env.REACT_APP_AUTH_TOKEN
 const DEFAULT_HEADERS = {
   "content-type": "application/json",
+  'authorization': `Bearer ${authorization}`
 };
 
-// TODO remove this when signup and signin become available
-// if (process.env.NODE_ENV === "development") {
-DEFAULT_HEADERS.authorization = `Bearer ${process.env.REACT_APP_AUTH_TOKEN}`;
-// }
 
 /**
  *

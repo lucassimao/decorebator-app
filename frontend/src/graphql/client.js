@@ -11,11 +11,13 @@ import { SchemaLink } from "@apollo/client/link/schema";
 
 async function remoteExecutor(url, { document, variables }) {
   const query = print(document);
+  const authorization = process.env.NODE_ENV === "production" ? localStorage.getItem('authorization') : process.env.REACT_APP_AUTH_TOKEN
+
   const fetchResult = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      authorization: process.env.REACT_APP_AUTH_TOKEN,
+      authorization
     },
     body: JSON.stringify({ query, variables }),
   });
