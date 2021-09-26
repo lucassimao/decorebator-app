@@ -1,0 +1,8 @@
+.borderlessFeature{
+    border: none !important;
+}
+
+.image{
+        max-width: 360;
+        max-height: 500;
+}
