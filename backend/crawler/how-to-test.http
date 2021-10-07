@@ -7,18 +7,22 @@ curl "https://decorebator-auth-6bzynn6uxa-uc.a.run.app/signin" \
 -d '{"login":"lsimaocosta@gmail.com","password":"123"}'
     
 
-
+# Use this to create a payload like the pub sub one
+# echo '{"languageCode":"en","name":"luft","id": 21527,"source":"HITHER_AND_THITHER"}' | base64
 
 
 ### Publish 'Luft' to oxforddictionaries
 
 curl -d '{"message":{"data":"eyJsYW5ndWFnZUNvZGUiOiJkZSIsIm5hbWUiOiJsdWZ0IiwiaWQiOiAyMTUyNiwic291cmNlIjoiU1BJRUdFTCJ9Cg=="}}' 
     -H "content-type: application/json" 
-    http://localhost:3005/words/oxforddictionaries
+    http://localhost:8080/words/oxforddictionaries
 
 
-# Use this to create a payload like the pub sub one
-# echo '{"languageCode":"en","name":"tycoon","id": 21527,"source":"HITHER_AND_THITHER"}' | base64
+### Publish 'unconcernedly' to wordsapi
+
+curl -d '{"message":{"data":"eyJsYW5ndWFnZUNvZGUiOiJlbiIsIm5hbWUiOiJ1bmNvbmNlcm5lZGx5IiwiaWQiOiAyMTUyNywic291cmNlIjoiSElUSEVSX0FORF9USElUSEVSIn0K"}}' 
+    -H "content-type: application/json" 
+    http://localhost:3005/words/wordsApi
 
 ### Push 'luft' to news crawler
 
