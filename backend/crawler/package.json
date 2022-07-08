@@ -31,7 +31,7 @@
     "express": "^4.17.1",
     "gcp-metadata": "^4.2.1",
     "helmet": "^4.1.0",
-    "moment": "^2.29.1",
+    "moment": "^2.29.4",
     "morgan": "^1.10.0",
     "newrelic": "^7.5.0",
     "pg": "^8.5.1",
