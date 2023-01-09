@@ -58,7 +58,7 @@
     "newrelic": "^7.5.0",
     "node-html-parser": "^2.1.0",
     "passport": "^0.4.1",
-    "passport-jwt": "^4.0.0",
+    "passport-jwt": "^4.0.1",
     "pg": "^8.5.1",
     "shortid": "^2.2.15",
     "textract": "^2.4.0",
