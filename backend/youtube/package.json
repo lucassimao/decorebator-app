@@ -23,7 +23,7 @@
   "homepage": "https://github.com/lucassimao/decorebator-app#readme",
   "dependencies": {
     "apollo-server": "^2.25.0",
-    "class-validator": "^0.12.2",
+    "class-validator": "^0.14.0",
     "gcp-metadata": "^4.2.1",
     "graphql": "^15.3.0",
     "jsonwebtoken": "^8.5.1",
